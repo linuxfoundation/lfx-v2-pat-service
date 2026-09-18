@@ -1,0 +1,6 @@
+# Copyright The Linux Foundation and each contributor to LFX.
+---
+site_name: LFX V2 Personal Access Token Service
+site_description: Creating and managing long lived personal access tokens for different audiences
+plugins:
+  - techdocs-core

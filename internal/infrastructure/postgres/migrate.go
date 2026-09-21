@@ -34,7 +34,7 @@ func Migrate(url string) error {
 		var dirty migrate.ErrDirty
 		if !stderrors.As(err, &dirty) {
 			if v, isDirty, verr := m.Version(); verr == nil && isDirty {
-				return fmt.Errorf("apply migrations (schema left dirty): %w", migrate.ErrDirty{Version: int(v)})
+				return fmt.Errorf("apply migrations (schema left dirty at version %d): %w", v, err)
 			}
 		}
 		return fmt.Errorf("apply migrations: %w", err)

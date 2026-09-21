@@ -83,6 +83,8 @@ db-up: ## Start a disposable Postgres 16 in Docker (DB_PORT overrides the host p
 			-e POSTGRES_USER=pat -e POSTGRES_PASSWORD=pat -e POSTGRES_DB=pat \
 			-p 127.0.0.1:$(DB_PORT):5432 postgres:16 >/dev/null; \
 	fi
+	@for i in $$(seq 1 30); do docker exec $(DB_CONTAINER) pg_isready -U pat -q 2>/dev/null && break; sleep 1; done
+	@docker exec $(DB_CONTAINER) pg_isready -U pat -q || { echo "Postgres did not become ready"; exit 1; }
 	@echo "==> Postgres at $(DB_URL)"
 
 .PHONY: db-down

@@ -67,6 +67,9 @@ func TestFromEnvRejectsBadNumbersAndBooleans(t *testing.T) {
 		{"PG_MAX_CONNS": "4294967297"},
 		{"TOKEN_MAX_ACTIVE_PER_AUDIENCE": "-1"},
 		{"DB_MIGRATE_ON_START": "maybe"},
+		{"PGPORT": "abc"},
+		{"PGPORT": "70000"},
+		{"PGPORT": "0"},
 		{"STORE": "redis"},
 	} {
 		_, err := FromEnv(env(m))

@@ -44,6 +44,8 @@ spec:
           {{- fail "database.mode must be external or local" }}
           {{- end }}
           env:
+          - name: PORT
+            value: {{ .Values.service.port | quote }}
           - name: LOG_LEVEL
             value: {{ .Values.app.logLevel | quote }}
           - name: LOG_ADD_SOURCE

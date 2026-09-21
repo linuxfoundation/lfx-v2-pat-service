@@ -32,14 +32,12 @@ spec:
     - ports:
         - port: {{ .Values.networkPolicy.postgresPort }}
           protocol: TCP
-    # Heimdall: the JWKS endpoint the service verifies JWTs against.
+    # Heimdall: only the JWKS endpoint; the ForwardAuth port is used by Traefik, not by this pod.
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: {{ .Values.networkPolicy.heimdallNamespace }}
       ports:
-        - port: {{ .Values.networkPolicy.heimdallPort }}
-          protocol: TCP
         - port: {{ .Values.networkPolicy.heimdallJWKSPort }}
           protocol: TCP
     # OpenTelemetry collector (gRPC and HTTP)

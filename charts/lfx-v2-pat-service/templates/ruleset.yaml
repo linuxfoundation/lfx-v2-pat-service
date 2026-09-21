@@ -12,9 +12,9 @@ metadata:
 spec:
   # Every rule ends in allow_all because there is no OpenFGA type for tokens: ownership is enforced by the
   # service, which scopes every read and revoke to the principal in the JWT. The anonymous fallback still
-  # produces a JWT (principal "_anonymous"), which the service refuses, and machine principals
-  # ("<client_id>@clients") are refused on the token routes and allow-listed on validate. See the service's
-  # JWTAuth for the policy the gateway delegates.
+  # produces a JWT (principal "_anonymous"), which the service refuses on every route except the public OpenAPI
+  # document, and machine principals ("<client_id>@clients") are refused on the token routes and allow-listed
+  # on validate. See the service's JWTAuth for the policy the gateway delegates.
   rules:
     - id: "rule:lfx:lfx-v2-pat-service:openapi:get"
       allow_encoded_slashes: 'off'

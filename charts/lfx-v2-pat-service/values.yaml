@@ -173,12 +173,11 @@ database:
     dbname: pat
 
 # networkPolicy restricts egress to what the service needs: DNS, Postgres (RDS sits outside the cluster, so
-# the port is allowed to any destination), Heimdall for JWKS, and the OpenTelemetry collector.
+# the port is allowed to any destination), Heimdall's JWKS endpoint, and the OpenTelemetry collector.
 networkPolicy:
   enabled: true
   postgresPort: 5432
   heimdallNamespace: lfx
-  heimdallPort: 4456
   heimdallJWKSPort: 4457
   otelGRPCPort: 4317
   otelHTTPPort: 4318

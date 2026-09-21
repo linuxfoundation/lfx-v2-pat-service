@@ -26,6 +26,8 @@ database:
   # The in-memory store needs no database. To exercise Postgres locally, set store: postgres and mode: local,
   # and point database.local at a Postgres reachable from the cluster.
   store: memory
+  # The db-up database speaks plaintext, so the inherited sslmode: require would refuse it.
+  sslmode: disable
 
 networkPolicy:
   enabled: false

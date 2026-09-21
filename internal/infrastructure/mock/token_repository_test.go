@@ -69,3 +69,14 @@ func TestGetEnabledBySlug(t *testing.T) {
 	_, err = audiences.GetEnabledBySlug(context.Background(), "nope")
 	assert.True(t, errors.IsNotFound(err))
 }
+
+func TestSetRejectsDuplicatePrefix(t *testing.T) {
+	audiences := NewAudienceRepository()
+
+	assert.Panics(t, func() {
+		audiences.Set(model.Audience{Slug: "other", DisplayName: "Other", TokenPrefix: SeedAudience.TokenPrefix, Enabled: true})
+	})
+	assert.NotPanics(t, func() {
+		audiences.Set(model.Audience{Slug: "other", DisplayName: "Other", TokenPrefix: "lfo_", Enabled: true})
+	})
+}

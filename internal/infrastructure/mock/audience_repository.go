@@ -40,15 +40,25 @@ func NewAudienceRepository(audiences ...model.Audience) *AudienceRepository {
 	}
 	r := &AudienceRepository{bySlug: make(map[string]model.Audience, len(audiences))}
 	for _, a := range audiences {
-		r.bySlug[a.Slug] = a
+		r.set(a)
 	}
 	return r
 }
 
-// Set inserts or replaces an audience.
+// Set inserts or replaces an audience. It panics on a prefix another audience already uses, mirroring the
+// UNIQUE constraint on audiences.token_prefix, so a test cannot build a state the database forbids.
 func (r *AudienceRepository) Set(a model.Audience) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	r.set(a)
+}
+
+func (r *AudienceRepository) set(a model.Audience) {
+	for slug, other := range r.bySlug {
+		if slug != a.Slug && other.TokenPrefix == a.TokenPrefix {
+			panic(fmt.Sprintf("mock audience %q reuses prefix %q of %q", a.Slug, a.TokenPrefix, slug))
+		}
+	}
 	r.bySlug[a.Slug] = a
 }
 

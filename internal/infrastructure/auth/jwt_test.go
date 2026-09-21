@@ -37,6 +37,10 @@ func TestNewJWTAuthRejectsBadURLs(t *testing.T) {
 	assert.Error(t, err)
 	_, err = NewJWTAuth(Config{JWKSURL: "http://heimdall:4457/.well-known/jwks", Issuer: "://bad", Audience: "svc"})
 	assert.Error(t, err)
+	_, err = NewJWTAuth(Config{JWKSURL: "jwks", Issuer: "heimdall", Audience: "svc"})
+	assert.Error(t, err, "relative JWKS URL")
+	_, err = NewJWTAuth(Config{JWKSURL: "ftp://heimdall/jwks", Issuer: "heimdall", Audience: "svc"})
+	assert.Error(t, err, "non-http JWKS URL")
 }
 
 func TestAuthenticateRejectsMalformedTokenAsUnauthorized(t *testing.T) {

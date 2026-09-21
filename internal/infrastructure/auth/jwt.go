@@ -70,6 +70,9 @@ func NewJWTAuth(config Config) (*JWTAuth, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid JWKS URL: %w", err)
 	}
+	if (jwksURL.Scheme != "http" && jwksURL.Scheme != "https") || jwksURL.Host == "" {
+		return nil, fmt.Errorf("invalid JWKS URL %q: must be an absolute http or https URL", config.JWKSURL)
+	}
 	issuer, err := url.Parse(config.Issuer)
 	if err != nil {
 		return nil, fmt.Errorf("invalid issuer: %w", err)

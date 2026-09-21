@@ -24,8 +24,6 @@ type Deps struct {
 	Auth      domain.Authenticator
 	Manager   *service.Manager
 	Validator *service.Validator
-	// Validators lists the machine principals allowed to call validate-token.
-	Validators service.AllowList
 	// Ready is consulted by the readiness probe on every call.
 	Ready func(context.Context) bool
 }
@@ -46,20 +44,18 @@ func New(deps Deps) *Service {
 	return &Service{deps: deps}
 }
 
-// JWTAuth implements the JWT security scheme. Beyond verifying the token it applies the principal policy:
-// validate-token (the only method requiring the token:validate scope) is open to allow-listed machine
-// principals only, and every other method is open to user principals only.
+// JWTAuth implements the JWT security scheme. Beyond verifying the token it applies one policy: the token
+// routes are for the owner, so a machine principal is refused there. validate-token (the only method carrying the
+// token:validate scope) is the one route machine principals may call; which ones is decided at the gateway by
+// OpenFGA team membership (see the chart's RuleSet), so the service adds no list of its own.
 func (s *Service) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
 	caller, err := s.deps.Auth.Authenticate(ctx, token)
 	if err != nil {
 		return ctx, wrapError(ctx, err)
 	}
 
-	if scheme != nil && slices.Contains(scheme.RequiredScopes, constants.ScopeValidate) {
-		if !s.deps.Validators.Allowed(caller.Principal) {
-			return ctx, svc.MakeForbidden(fmt.Errorf("principal is not allowed to validate secrets"))
-		}
-	} else if strings.HasSuffix(caller.Principal, constants.ClientPrincipalSuffix) {
+	validate := scheme != nil && slices.Contains(scheme.RequiredScopes, constants.ScopeValidate)
+	if !validate && strings.HasSuffix(caller.Principal, constants.ClientPrincipalSuffix) {
 		return ctx, svc.MakeForbidden(fmt.Errorf("machine principals cannot manage personal access tokens"))
 	}
 

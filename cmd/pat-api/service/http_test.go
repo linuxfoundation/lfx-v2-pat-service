@@ -132,7 +132,7 @@ func TestHTTPTokenLifecycle(t *testing.T) {
 	status, _, _ = do(t, ts, "bob", http.MethodDelete, "/tokens/"+uid, "")
 	assert.Equal(t, http.StatusNotFound, status)
 
-	// Validate as the allow-listed machine principal: identity plus recorded use.
+	// Validate as a machine principal: identity plus recorded use.
 	status, body, raw = do(t, ts, "abc123@clients", http.MethodPost, "/_tokens/validate?v=1", `{"secret":"`+secret+`"}`)
 	require.Equal(t, http.StatusOK, status, raw)
 	assert.Equal(t, uid, body["uid"])
@@ -181,8 +181,6 @@ func TestHTTPErrorBodies(t *testing.T) {
 		{"non-uuid uid", "alice", http.MethodGet, "/tokens/not-a-uuid", "", http.StatusBadRequest, ""},
 		{"no bearer", "", http.MethodGet, "/tokens", "", http.StatusUnauthorized, ""},
 		{"machine on user route", "abc123@clients", http.MethodGet, "/tokens", "", http.StatusForbidden, ""},
-		{"user on validate", "alice", http.MethodPost, "/_tokens/validate", `{"secret":"lfi_x"}`, http.StatusForbidden, ""},
-		{"other machine on validate", "zzz@clients", http.MethodPost, "/_tokens/validate", `{"secret":"lfi_x"}`, http.StatusForbidden, ""},
 		{"malformed secret", "abc123@clients", http.MethodPost, "/_tokens/validate", `{"secret":"lfi_x"}`, http.StatusNotFound, constants.ErrCodeInvalidToken},
 		{"empty secret", "abc123@clients", http.MethodPost, "/_tokens/validate", `{"secret":""}`, http.StatusBadRequest, ""},
 	}

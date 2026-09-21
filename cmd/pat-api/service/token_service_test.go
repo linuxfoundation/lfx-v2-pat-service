@@ -37,11 +37,10 @@ func newDeps(ready bool, authenticator domain.Authenticator) (Deps, *mock.TokenR
 	tokens := mock.NewTokenRepository(audiences)
 	tokens.SetReady(ready)
 	return Deps{
-		Auth:       authenticator,
-		Manager:    service.NewManager(tokens, tokens, audiences, 3),
-		Validator:  service.NewValidator(tokens),
-		Validators: service.NewAllowList("abc123@clients"),
-		Ready:      tokens.Ready,
+		Auth:      authenticator,
+		Manager:   service.NewManager(tokens, tokens, audiences, 3),
+		Validator: service.NewValidator(tokens),
+		Ready:     tokens.Ready,
 	}, tokens
 }
 
@@ -92,9 +91,8 @@ func TestJWTAuthPolicy(t *testing.T) {
 		{"user on user route", "alice", userScheme, ""},
 		{"user on nil scheme is a user route", "alice", nil, ""},
 		{"machine on user route", "abc123@clients", userScheme, "Forbidden"},
-		{"allow-listed machine on validate", "abc123@clients", validateScheme, ""},
-		{"other machine on validate", "zzz@clients", validateScheme, "Forbidden"},
-		{"user on validate", "alice", validateScheme, "Forbidden"},
+		{"machine on validate", "abc123@clients", validateScheme, ""},
+		{"user on validate is the gateway's call", "alice", validateScheme, ""},
 		{"missing token", "", userScheme, "Unauthorized"},
 	}
 

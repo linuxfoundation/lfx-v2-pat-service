@@ -52,11 +52,10 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 		Readiness: tokens,
 	}
 	c.Service = patsvc.New(patsvc.Deps{
-		Auth:       c.Auth,
-		Manager:    c.Manager,
-		Validator:  c.Validator,
-		Validators: c.Validators,
-		Ready:      c.Readiness.Ready,
+		Auth:      c.Auth,
+		Manager:   c.Manager,
+		Validator: c.Validator,
+		Ready:     c.Readiness.Ready,
 	})
 
 	slog.Info("dependency container initialized")

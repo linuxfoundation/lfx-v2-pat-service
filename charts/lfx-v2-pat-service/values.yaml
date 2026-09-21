@@ -78,9 +78,6 @@ heimdall:
 app:
   # use_oidc_contextualizer is a boolean to determine if the OIDC contextualizer should be used
   use_oidc_contextualizer: true
-  # audience is the expected "aud" claim of the Heimdall-issued JWT, rendered as the AUDIENCE env var
-  audience: lfx-v2-pat-service
-
   # extraEnv allows injecting additional environment variables into the container.
   # Supports both simple key-value pairs and Kubernetes field references.
   # These are rendered BEFORE OTEL variables, allowing use in OTEL configuration.
@@ -136,6 +133,10 @@ app:
     # JWKS_URL is the URL to the JSON Web Key Set endpoint for JWT validation
     JWKS_URL:
       value: http://lfx-platform-heimdall.lfx.svc.cluster.local:4457/.well-known/jwks
+
+    # AUDIENCE is the expected "aud" claim of the Heimdall-issued JWT
+    AUDIENCE:
+      value: lfx-v2-pat-service
 
     # ISSUER is the expected "iss" claim of the Heimdall-issued JWT
     ISSUER:

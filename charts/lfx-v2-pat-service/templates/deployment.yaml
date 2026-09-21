@@ -47,8 +47,6 @@ spec:
               {{- toYaml $config.valueFrom | nindent 14 }}
             {{- end }}
           {{- end }}
-          - name: AUDIENCE
-            value: {{ .Values.app.audience | quote }}
           {{- with .Values.app.extraEnv }}
           {{- toYaml . | nindent 10 }}
           {{- end }}

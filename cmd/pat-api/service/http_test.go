@@ -14,6 +14,7 @@ import (
 
 	svcsvr "github.com/linuxfoundation/lfx-v2-pat-service/gen/http/lfx_v2_pat_service/server"
 	svc "github.com/linuxfoundation/lfx-v2-pat-service/gen/lfx_v2_pat_service"
+	"github.com/linuxfoundation/lfx-v2-pat-service/pkg/constants"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	goahttp "goa.design/goa/v3/http"
@@ -32,11 +33,14 @@ func newTestServer(t *testing.T, s *Service) *httptest.Server {
 	return ts
 }
 
-func do(t *testing.T, ts *httptest.Server, method, path, body string) (*http.Response, []byte) {
+// do sends a request as the given principal (see bearerAuth) and returns the status and body.
+func do(t *testing.T, ts *httptest.Server, principal, method, path, body string) (int, map[string]any, string) {
 	t.Helper()
 	req, err := http.NewRequestWithContext(context.Background(), method, ts.URL+path, strings.NewReader(body))
 	require.NoError(t, err)
-	req.Header.Set("Authorization", "Bearer test")
+	if principal != "" {
+		req.Header.Set("Authorization", "Bearer "+principal)
+	}
 	if body != "" {
 		req.Header.Set("Content-Type", "application/json")
 	}
@@ -45,19 +49,24 @@ func do(t *testing.T, ts *httptest.Server, method, path, body string) (*http.Res
 	defer func() { _ = resp.Body.Close() }()
 	raw, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
-	return resp, raw
+	var decoded map[string]any
+	if len(raw) > 0 && strings.HasPrefix(resp.Header.Get("Content-Type"), "application/json") {
+		require.NoError(t, json.Unmarshal(raw, &decoded), string(raw))
+	}
+	return resp.StatusCode, decoded, string(raw)
 }
 
 func TestHTTPServesOpenAPI(t *testing.T) {
-	ts := newTestServer(t, New(always(true)))
+	deps, _ := newDeps(true, bearerAuth{})
+	ts := newTestServer(t, New(deps))
 
-	resp, raw := do(t, ts, http.MethodGet, "/_tokens/openapi3.json", "")
+	status, _, raw := do(t, ts, "", http.MethodGet, "/_tokens/openapi3.json", "")
 
-	require.Equal(t, http.StatusOK, resp.StatusCode)
+	require.Equal(t, http.StatusOK, status)
 	var spec struct {
 		Paths map[string]json.RawMessage `json:"paths"`
 	}
-	require.NoError(t, json.Unmarshal(raw, &spec))
+	require.NoError(t, json.Unmarshal([]byte(raw), &spec))
 	for _, p := range []string{"/tokens", "/tokens/{uid}", "/_tokens/validate"} {
 		assert.Contains(t, spec.Paths, p)
 	}
@@ -65,40 +74,130 @@ func TestHTTPServesOpenAPI(t *testing.T) {
 }
 
 func TestHTTPProbes(t *testing.T) {
-	ts := newTestServer(t, New(always(false)))
+	deps, _ := newDeps(false, bearerAuth{})
+	ts := newTestServer(t, New(deps))
 
-	resp, raw := do(t, ts, http.MethodGet, "/livez", "")
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	assert.Equal(t, "OK\n", string(raw))
+	status, _, raw := do(t, ts, "", http.MethodGet, "/livez", "")
+	assert.Equal(t, http.StatusOK, status)
+	assert.Equal(t, "OK\n", raw)
 
-	resp, _ = do(t, ts, http.MethodGet, "/readyz", "")
-	assert.Equal(t, http.StatusServiceUnavailable, resp.StatusCode)
+	status, _, _ = do(t, ts, "", http.MethodGet, "/readyz", "")
+	assert.Equal(t, http.StatusServiceUnavailable, status)
 }
 
-func TestHTTPStubsAndVersionParam(t *testing.T) {
-	ts := newTestServer(t, New(always(true)))
+func TestHTTPTokenLifecycle(t *testing.T) {
+	deps, _ := newDeps(true, bearerAuth{})
+	ts := newTestServer(t, New(deps))
+	createBody := `{"name":"ci","audience":"insights"}`
+
+	// Create: the secret appears here and only here.
+	status, body, raw := do(t, ts, "alice", http.MethodPost, "/tokens?v=1", createBody)
+	require.Equal(t, http.StatusCreated, status, raw)
+	secret, _ := body["secret"].(string)
+	assert.True(t, strings.HasPrefix(secret, "lfi_"), raw)
+	assert.Equal(t, 1, strings.Count(raw, `"secret"`))
+	token, _ := body["token"].(map[string]any)
+	uid, _ := token["uid"].(string)
+	require.NotEmpty(t, uid)
+	assert.Equal(t, "ci", token["name"])
+	assert.Equal(t, "insights", token["audience"])
+	assert.Equal(t, "alice", token["username"])
+	assert.Len(t, token["lookup_id"], 12)
+	assert.Contains(t, token, "created_at")
+	assert.NotContains(t, token, "last_used_at")
+	for _, forbidden := range []string{"salt", "secret_hash", "updated_at", "revoked_at"} {
+		assert.NotContains(t, token, forbidden)
+	}
+
+	// List and get expose the lookup id and never the secret.
+	status, body, raw = do(t, ts, "alice", http.MethodGet, "/tokens?v=1", "")
+	require.Equal(t, http.StatusOK, status, raw)
+	tokens, _ := body["tokens"].([]any)
+	require.Len(t, tokens, 1)
+	assert.NotContains(t, raw, secret)
+	assert.NotContains(t, raw, `"secret"`)
+
+	status, body, raw = do(t, ts, "alice", http.MethodGet, "/tokens/"+uid+"?v=1", "")
+	require.Equal(t, http.StatusOK, status, raw)
+	assert.Equal(t, uid, body["uid"])
+	assert.Equal(t, token["lookup_id"], body["lookup_id"])
+	assert.NotContains(t, raw, secret)
+
+	// Other owners see nothing.
+	status, _, _ = do(t, ts, "bob", http.MethodGet, "/tokens/"+uid, "")
+	assert.Equal(t, http.StatusNotFound, status)
+	status, body, _ = do(t, ts, "bob", http.MethodGet, "/tokens", "")
+	assert.Equal(t, http.StatusOK, status)
+	assert.Equal(t, []any{}, body["tokens"], "an empty list encodes as [] not null")
+	status, _, _ = do(t, ts, "bob", http.MethodDelete, "/tokens/"+uid, "")
+	assert.Equal(t, http.StatusNotFound, status)
+
+	// Validate as the allow-listed machine principal: identity plus recorded use.
+	status, body, raw = do(t, ts, "abc123@clients", http.MethodPost, "/_tokens/validate?v=1", `{"secret":"`+secret+`"}`)
+	require.Equal(t, http.StatusOK, status, raw)
+	assert.Equal(t, uid, body["uid"])
+	assert.Equal(t, "alice", body["username"])
+	assert.Equal(t, "insights", body["audience"])
+	assert.Equal(t, "alice@example.com", body["email"])
+	status, body, _ = do(t, ts, "alice", http.MethodGet, "/tokens/"+uid, "")
+	require.Equal(t, http.StatusOK, status)
+	assert.Contains(t, body, "last_used_at")
+
+	// Revoke: 204 once, 404 after, and the secret stops validating.
+	status, _, _ = do(t, ts, "alice", http.MethodDelete, "/tokens/"+uid+"?v=1", "")
+	assert.Equal(t, http.StatusNoContent, status)
+	status, _, _ = do(t, ts, "alice", http.MethodDelete, "/tokens/"+uid, "")
+	assert.Equal(t, http.StatusNotFound, status)
+	status, _, _ = do(t, ts, "alice", http.MethodGet, "/tokens/"+uid, "")
+	assert.Equal(t, http.StatusNotFound, status)
+	status, body, _ = do(t, ts, "abc123@clients", http.MethodPost, "/_tokens/validate", `{"secret":"`+secret+`"}`)
+	assert.Equal(t, http.StatusNotFound, status)
+	assert.Equal(t, constants.ErrCodeInvalidToken, body["error"])
+}
+
+func TestHTTPErrorBodies(t *testing.T) {
+	deps, _ := newDeps(true, bearerAuth{})
+	ts := newTestServer(t, New(deps))
+	for _, name := range []string{"one", "two", "three"} {
+		status, _, raw := do(t, ts, "alice", http.MethodPost, "/tokens", `{"name":"`+name+`","audience":"insights"}`)
+		require.Equal(t, http.StatusCreated, status, raw)
+	}
 
 	tests := []struct {
-		name   string
-		method string
-		path   string
-		body   string
-		status int
+		name      string
+		principal string
+		method    string
+		path      string
+		body      string
+		status    int
+		code      string
 	}{
-		{"create is 501", http.MethodPost, "/tokens?v=1", `{"name":"ci","audience":"insights"}`, http.StatusNotImplemented},
-		{"list is 501", http.MethodGet, "/tokens?v=1", "", http.StatusNotImplemented},
-		{"get is 501", http.MethodGet, "/tokens/8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f", "", http.StatusNotImplemented},
-		{"delete is 501", http.MethodDelete, "/tokens/8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f", "", http.StatusNotImplemented},
-		{"validate is 501", http.MethodPost, "/_tokens/validate?v=1", `{"secret":"lfi_x"}`, http.StatusNotImplemented},
-		{"unknown version is 400", http.MethodGet, "/tokens?v=2", "", http.StatusBadRequest},
-		{"non-uuid uid is 400", http.MethodGet, "/tokens/not-a-uuid", "", http.StatusBadRequest},
-		{"bad audience shape is 400", http.MethodPost, "/tokens", `{"name":"ci","audience":"Not Valid"}`, http.StatusBadRequest},
+		{"duplicate name", "alice", http.MethodPost, "/tokens", `{"name":"ONE","audience":"insights"}`, http.StatusConflict, constants.ErrCodeTokenNameTaken},
+		{"limit reached", "alice", http.MethodPost, "/tokens", `{"name":"four","audience":"insights"}`, http.StatusConflict, constants.ErrCodeTokenLimitReached},
+		{"unknown audience", "alice", http.MethodPost, "/tokens", `{"name":"x","audience":"nope"}`, http.StatusBadRequest, ""},
+		{"audience shape", "alice", http.MethodPost, "/tokens", `{"name":"x","audience":"Not Valid"}`, http.StatusBadRequest, ""},
+		{"blank name", "alice", http.MethodPost, "/tokens", `{"name":"   ","audience":"insights"}`, http.StatusBadRequest, ""},
+		{"unknown version", "alice", http.MethodGet, "/tokens?v=2", "", http.StatusBadRequest, ""},
+		{"non-uuid uid", "alice", http.MethodGet, "/tokens/not-a-uuid", "", http.StatusBadRequest, ""},
+		{"no bearer", "", http.MethodGet, "/tokens", "", http.StatusUnauthorized, ""},
+		{"machine on user route", "abc123@clients", http.MethodGet, "/tokens", "", http.StatusForbidden, ""},
+		{"user on validate", "alice", http.MethodPost, "/_tokens/validate", `{"secret":"lfi_x"}`, http.StatusForbidden, ""},
+		{"other machine on validate", "zzz@clients", http.MethodPost, "/_tokens/validate", `{"secret":"lfi_x"}`, http.StatusForbidden, ""},
+		{"malformed secret", "abc123@clients", http.MethodPost, "/_tokens/validate", `{"secret":"lfi_x"}`, http.StatusNotFound, constants.ErrCodeInvalidToken},
+		{"empty secret", "abc123@clients", http.MethodPost, "/_tokens/validate", `{"secret":""}`, http.StatusBadRequest, ""},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			resp, _ := do(t, ts, tt.method, tt.path, tt.body)
-			assert.Equal(t, tt.status, resp.StatusCode)
+			status, body, raw := do(t, ts, tt.principal, tt.method, tt.path, tt.body)
+			assert.Equal(t, tt.status, status, raw)
+			if tt.code != "" {
+				assert.Equal(t, tt.code, body["error"], raw)
+				assert.Contains(t, body, "message")
+			}
+			if tt.name == "unknown audience" {
+				assert.Contains(t, raw, constants.ErrCodeUnknownAudience)
+			}
 		})
 	}
 }

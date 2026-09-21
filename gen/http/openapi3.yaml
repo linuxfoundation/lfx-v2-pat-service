@@ -79,12 +79,6 @@ paths:
                         application/vnd.goa.error:
                             schema:
                                 $ref: '#/components/schemas/Error'
-                "501":
-                    description: 'NotImplemented: Endpoint not implemented'
-                    content:
-                        application/vnd.goa.error:
-                            schema:
-                                $ref: '#/components/schemas/Error'
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -177,12 +171,6 @@ paths:
                         application/vnd.goa.error:
                             schema:
                                 $ref: '#/components/schemas/Error'
-                "501":
-                    description: 'NotImplemented: Endpoint not implemented'
-                    content:
-                        application/vnd.goa.error:
-                            schema:
-                                $ref: '#/components/schemas/Error'
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -268,12 +256,6 @@ paths:
                         application/vnd.goa.error:
                             schema:
                                 $ref: '#/components/schemas/Error'
-                "501":
-                    description: 'NotImplemented: Endpoint not implemented'
-                    content:
-                        application/vnd.goa.error:
-                            schema:
-                                $ref: '#/components/schemas/Error'
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -340,12 +322,6 @@ paths:
                                 $ref: '#/components/schemas/Error'
                 "500":
                     description: 'InternalServerError: Internal server error'
-                    content:
-                        application/vnd.goa.error:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                "501":
-                    description: 'NotImplemented: Endpoint not implemented'
                     content:
                         application/vnd.goa.error:
                             schema:
@@ -427,12 +403,6 @@ paths:
                                 $ref: '#/components/schemas/Error'
                 "500":
                     description: 'InternalServerError: Internal server error'
-                    content:
-                        application/vnd.goa.error:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                "501":
-                    description: 'NotImplemented: Endpoint not implemented'
                     content:
                         application/vnd.goa.error:
                             schema:
@@ -532,7 +502,7 @@ components:
                 temporary:
                     type: boolean
                     description: Is the error temporary?
-                    example: true
+                    example: false
                 timeout:
                     type: boolean
                     description: Is the error a timeout?
@@ -602,8 +572,29 @@ components:
                           name: ci-pipeline
                           uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
                           username: jdoe
+                        - audience: insights
+                          created_at: "2026-09-21T12:00:00Z"
+                          last_used_at: "2026-09-22T08:30:00Z"
+                          lookup_id: Ab3kZ9QmT2xL
+                          name: ci-pipeline
+                          uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                          username: jdoe
             example:
                 tokens:
+                    - audience: insights
+                      created_at: "2026-09-21T12:00:00Z"
+                      last_used_at: "2026-09-22T08:30:00Z"
+                      lookup_id: Ab3kZ9QmT2xL
+                      name: ci-pipeline
+                      uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                      username: jdoe
+                    - audience: insights
+                      created_at: "2026-09-21T12:00:00Z"
+                      last_used_at: "2026-09-22T08:30:00Z"
+                      lookup_id: Ab3kZ9QmT2xL
+                      name: ci-pipeline
+                      uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                      username: jdoe
                     - audience: insights
                       created_at: "2026-09-21T12:00:00Z"
                       last_used_at: "2026-09-22T08:30:00Z"

@@ -232,11 +232,6 @@ func MakeBadRequest(err error) *goa.ServiceError {
 	return goa.NewServiceError(err, "BadRequest", false, false, false)
 }
 
-// MakeNotImplemented builds a goa.ServiceError from an error.
-func MakeNotImplemented(err error) *goa.ServiceError {
-	return goa.NewServiceError(err, "NotImplemented", false, false, false)
-}
-
 // MakeInternalServerError builds a goa.ServiceError from an error.
 func MakeInternalServerError(err error) *goa.ServiceError {
 	return goa.NewServiceError(err, "InternalServerError", false, false, true)

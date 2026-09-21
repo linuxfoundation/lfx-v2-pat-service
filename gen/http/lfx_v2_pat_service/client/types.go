@@ -137,25 +137,6 @@ type CreateTokenBadRequestResponseBody struct {
 	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
-// CreateTokenNotImplementedResponseBody is the type of the
-// "lfx_v2_pat_service" service "create-token" endpoint HTTP response body for
-// the "NotImplemented" error.
-type CreateTokenNotImplementedResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
-}
-
 // CreateTokenInternalServerErrorResponseBody is the type of the
 // "lfx_v2_pat_service" service "create-token" endpoint HTTP response body for
 // the "InternalServerError" error.
@@ -243,25 +224,6 @@ type ListTokensForbiddenResponseBody struct {
 // ListTokensBadRequestResponseBody is the type of the "lfx_v2_pat_service"
 // service "list-tokens" endpoint HTTP response body for the "BadRequest" error.
 type ListTokensBadRequestResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
-}
-
-// ListTokensNotImplementedResponseBody is the type of the "lfx_v2_pat_service"
-// service "list-tokens" endpoint HTTP response body for the "NotImplemented"
-// error.
-type ListTokensNotImplementedResponseBody struct {
 	// Name is the name of this class of errors.
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// ID is a unique identifier for this particular occurrence of the problem.
@@ -372,25 +334,6 @@ type GetTokenBadRequestResponseBody struct {
 // GetTokenNotFoundResponseBody is the type of the "lfx_v2_pat_service" service
 // "get-token" endpoint HTTP response body for the "NotFound" error.
 type GetTokenNotFoundResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
-}
-
-// GetTokenNotImplementedResponseBody is the type of the "lfx_v2_pat_service"
-// service "get-token" endpoint HTTP response body for the "NotImplemented"
-// error.
-type GetTokenNotImplementedResponseBody struct {
 	// Name is the name of this class of errors.
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// ID is a unique identifier for this particular occurrence of the problem.
@@ -518,25 +461,6 @@ type DeleteTokenNotFoundResponseBody struct {
 	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
-// DeleteTokenNotImplementedResponseBody is the type of the
-// "lfx_v2_pat_service" service "delete-token" endpoint HTTP response body for
-// the "NotImplemented" error.
-type DeleteTokenNotImplementedResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
-}
-
 // DeleteTokenInternalServerErrorResponseBody is the type of the
 // "lfx_v2_pat_service" service "delete-token" endpoint HTTP response body for
 // the "InternalServerError" error.
@@ -617,25 +541,6 @@ type ValidateTokenForbiddenResponseBody struct {
 // service "validate-token" endpoint HTTP response body for the "BadRequest"
 // error.
 type ValidateTokenBadRequestResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
-}
-
-// ValidateTokenNotImplementedResponseBody is the type of the
-// "lfx_v2_pat_service" service "validate-token" endpoint HTTP response body
-// for the "NotImplemented" error.
-type ValidateTokenNotImplementedResponseBody struct {
 	// Name is the name of this class of errors.
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// ID is a unique identifier for this particular occurrence of the problem.
@@ -812,21 +717,6 @@ func NewCreateTokenBadRequest(body *CreateTokenBadRequestResponseBody) *goa.Serv
 	return v
 }
 
-// NewCreateTokenNotImplemented builds a lfx_v2_pat_service service
-// create-token endpoint NotImplemented error.
-func NewCreateTokenNotImplemented(body *CreateTokenNotImplementedResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
-	}
-
-	return v
-}
-
 // NewCreateTokenInternalServerError builds a lfx_v2_pat_service service
 // create-token endpoint InternalServerError error.
 func NewCreateTokenInternalServerError(body *CreateTokenInternalServerErrorResponseBody) *goa.ServiceError {
@@ -917,21 +807,6 @@ func NewListTokensForbidden(body *ListTokensForbiddenResponseBody) *goa.ServiceE
 // NewListTokensBadRequest builds a lfx_v2_pat_service service list-tokens
 // endpoint BadRequest error.
 func NewListTokensBadRequest(body *ListTokensBadRequestResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
-	}
-
-	return v
-}
-
-// NewListTokensNotImplemented builds a lfx_v2_pat_service service list-tokens
-// endpoint NotImplemented error.
-func NewListTokensNotImplemented(body *ListTokensNotImplementedResponseBody) *goa.ServiceError {
 	v := &goa.ServiceError{
 		Name:      *body.Name,
 		ID:        *body.ID,
@@ -1050,21 +925,6 @@ func NewGetTokenNotFound(body *GetTokenNotFoundResponseBody) *goa.ServiceError {
 	return v
 }
 
-// NewGetTokenNotImplemented builds a lfx_v2_pat_service service get-token
-// endpoint NotImplemented error.
-func NewGetTokenNotImplemented(body *GetTokenNotImplementedResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
-	}
-
-	return v
-}
-
 // NewGetTokenInternalServerError builds a lfx_v2_pat_service service get-token
 // endpoint InternalServerError error.
 func NewGetTokenInternalServerError(body *GetTokenInternalServerErrorResponseBody) *goa.ServiceError {
@@ -1155,21 +1015,6 @@ func NewDeleteTokenNotFound(body *DeleteTokenNotFoundResponseBody) *goa.ServiceE
 	return v
 }
 
-// NewDeleteTokenNotImplemented builds a lfx_v2_pat_service service
-// delete-token endpoint NotImplemented error.
-func NewDeleteTokenNotImplemented(body *DeleteTokenNotImplementedResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
-	}
-
-	return v
-}
-
 // NewDeleteTokenInternalServerError builds a lfx_v2_pat_service service
 // delete-token endpoint InternalServerError error.
 func NewDeleteTokenInternalServerError(body *DeleteTokenInternalServerErrorResponseBody) *goa.ServiceError {
@@ -1246,21 +1091,6 @@ func NewValidateTokenForbidden(body *ValidateTokenForbiddenResponseBody) *goa.Se
 // NewValidateTokenBadRequest builds a lfx_v2_pat_service service
 // validate-token endpoint BadRequest error.
 func NewValidateTokenBadRequest(body *ValidateTokenBadRequestResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
-	}
-
-	return v
-}
-
-// NewValidateTokenNotImplemented builds a lfx_v2_pat_service service
-// validate-token endpoint NotImplemented error.
-func NewValidateTokenNotImplemented(body *ValidateTokenNotImplementedResponseBody) *goa.ServiceError {
 	v := &goa.ServiceError{
 		Name:      *body.Name,
 		ID:        *body.ID,
@@ -1514,30 +1344,6 @@ func ValidateCreateTokenBadRequestResponseBody(body *CreateTokenBadRequestRespon
 	return
 }
 
-// ValidateCreateTokenNotImplementedResponseBody runs the validations defined
-// on create-token_NotImplemented_response_body
-func ValidateCreateTokenNotImplementedResponseBody(body *CreateTokenNotImplementedResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
-	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
-	}
-	return
-}
-
 // ValidateCreateTokenInternalServerErrorResponseBody runs the validations
 // defined on create-token_InternalServerError_response_body
 func ValidateCreateTokenInternalServerErrorResponseBody(body *CreateTokenInternalServerErrorResponseBody) (err error) {
@@ -1654,30 +1460,6 @@ func ValidateListTokensForbiddenResponseBody(body *ListTokensForbiddenResponseBo
 // ValidateListTokensBadRequestResponseBody runs the validations defined on
 // list-tokens_BadRequest_response_body
 func ValidateListTokensBadRequestResponseBody(body *ListTokensBadRequestResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
-	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
-	}
-	return
-}
-
-// ValidateListTokensNotImplementedResponseBody runs the validations defined on
-// list-tokens_NotImplemented_response_body
-func ValidateListTokensNotImplementedResponseBody(body *ListTokensNotImplementedResponseBody) (err error) {
 	if body.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
 	}
@@ -1843,30 +1625,6 @@ func ValidateGetTokenNotFoundResponseBody(body *GetTokenNotFoundResponseBody) (e
 	return
 }
 
-// ValidateGetTokenNotImplementedResponseBody runs the validations defined on
-// get-token_NotImplemented_response_body
-func ValidateGetTokenNotImplementedResponseBody(body *GetTokenNotImplementedResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
-	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
-	}
-	return
-}
-
 // ValidateGetTokenInternalServerErrorResponseBody runs the validations defined
 // on get-token_InternalServerError_response_body
 func ValidateGetTokenInternalServerErrorResponseBody(body *GetTokenInternalServerErrorResponseBody) (err error) {
@@ -2011,30 +1769,6 @@ func ValidateDeleteTokenNotFoundResponseBody(body *DeleteTokenNotFoundResponseBo
 	return
 }
 
-// ValidateDeleteTokenNotImplementedResponseBody runs the validations defined
-// on delete-token_NotImplemented_response_body
-func ValidateDeleteTokenNotImplementedResponseBody(body *DeleteTokenNotImplementedResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
-	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
-	}
-	return
-}
-
 // ValidateDeleteTokenInternalServerErrorResponseBody runs the validations
 // defined on delete-token_InternalServerError_response_body
 func ValidateDeleteTokenInternalServerErrorResponseBody(body *DeleteTokenInternalServerErrorResponseBody) (err error) {
@@ -2134,30 +1868,6 @@ func ValidateValidateTokenForbiddenResponseBody(body *ValidateTokenForbiddenResp
 // ValidateValidateTokenBadRequestResponseBody runs the validations defined on
 // validate-token_BadRequest_response_body
 func ValidateValidateTokenBadRequestResponseBody(body *ValidateTokenBadRequestResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
-	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
-	}
-	return
-}
-
-// ValidateValidateTokenNotImplementedResponseBody runs the validations defined
-// on validate-token_NotImplemented_response_body
-func ValidateValidateTokenNotImplementedResponseBody(body *ValidateTokenNotImplementedResponseBody) (err error) {
 	if body.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
 	}

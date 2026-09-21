@@ -12,6 +12,8 @@ type contextKey int
 const (
 	// RequestIDContextKey carries the X-Request-ID value through a request context.
 	RequestIDContextKey contextKey = iota
+	// CallerContextKey carries the authenticated domain.Caller from the security handler to the methods.
+	CallerContextKey
 )
 
 // HTTP header names and server timeout defaults

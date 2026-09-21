@@ -29,7 +29,7 @@ from `design/`, is served at `/_tokens/openapi3.json` without a token.
 | `GET` | `/tokens?audience=` | user | `200 {tokens: [...]}`, newest first |
 | `GET` | `/tokens/{uid}` | user | `200` token |
 | `DELETE` | `/tokens/{uid}` | user | `204` |
-| `POST` | `/_tokens/validate` `{secret}` | allow-listed machine principal | `200 {uid, username, audience, email?}` |
+| `POST` | `/_tokens/validate` `{secret}` | machine principal in the validator team | `200 {uid, username, audience, email?}` |
 | `GET` | `/livez`, `/readyz` | probes | `200` |
 
 A token is `{uid, name, audience, lookup_id, username, created_at, last_used_at?}`. The plaintext `secret`
@@ -46,7 +46,7 @@ forwards to its UI:
 | `404` | `{"error": "invalid_token", "message": "..."}` | validate: the secret is unknown, malformed, revoked, or its audience is disabled; a missing, empty or over-128-character `secret` is a `400` from body validation instead |
 | `400` | message starts with `unknown_audience` | create: the audience slug is unknown or disabled |
 | `401` | | missing, invalid or anonymous bearer token |
-| `403` | | a machine principal on a token route, or a principal outside `VALIDATOR_PRINCIPALS` on validate |
+| `403` | | a machine principal on a token route; on validate, Heimdall rejects callers outside the validator team before the service sees them |
 
 Owner scoping is enforced here rather than at the gateway: a token another user owns reads as `404`, revoke is
 idempotent (`204` once, `404` after), and every rejected secret on validate is the same `404` so callers cannot
@@ -55,9 +55,11 @@ tell an unknown secret from a revoked one.
 ### Who may call what
 
 Heimdall forwards a JWT whose `principal` claim is the LFID username for a user, or `<client_id>@clients` for an
-OAuth client-credentials token. Token routes accept user principals only. `POST /_tokens/validate` accepts only
-principals listed in `VALIDATOR_PRINCIPALS`, which is the Auth0 Actions client per environment. An empty list
-refuses every validate call, so a misconfigured deployment fails closed.
+OAuth client-credentials token. Token routes accept user principals only. `POST /_tokens/validate` is authorized
+at the gateway: the chart's RuleSet runs an OpenFGA check that the caller is a `member` of the validator team
+(`app.validatorTeamName`, default `pat_validator`), which holds the Auth0 Actions client per environment. Until
+that team's member tuples exist in an environment's OpenFGA store the route denies every caller, so a missing
+grant fails closed.
 
 ### Audiences
 
@@ -115,7 +117,8 @@ PGHOST=localhost PGPORT=5433 PGUSER=pat PGPASSWORD=pat PGDATABASE=pat PGSSLMODE=
 JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=alice ./bin/lfx-v2-pat-service
 ```
 
-Then walk the lifecycle (the bearer value is ignored while the mock principal is set):
+Then walk the lifecycle (the bearer value is ignored while the mock principal is set; outside the cluster there is
+no Heimdall, so the validate call is open to the mock principal too):
 
 ```bash
 curl -s -XPOST localhost:8080/tokens -H 'Authorization: Bearer x' -H 'Content-Type: application/json' \
@@ -137,7 +140,7 @@ design/                         Goa design; make apigen regenerates gen/
 gen/                            generated transport, committed
 cmd/pat-api/                    main, HTTP server, and the Goa adapter (cmd/pat-api/service)
 internal/domain/                caller identity, models, and one port per capability
-internal/service/               use-cases: Manager (issue/list/get/revoke), Validator, AllowList
+internal/service/               use-cases: Manager (issue/list/get/revoke) and Validator
 internal/infrastructure/auth/   Heimdall JWT verification
 internal/infrastructure/postgres/  pool, migrations, repositories
 internal/infrastructure/mock/   in-memory repositories (tests and STORE=memory)
@@ -148,6 +151,6 @@ charts/lfx-v2-pat-service/      Helm chart with the Heimdall RuleSet and HTTPRou
 ## Deployment
 
 The chart reads the Postgres credential from the Secret the ArgoCD ExternalSecret materialises
-(`database.external.secretName`, five keys) and takes the validator allow-list from
-`app.validatorPrincipals`, which each environment sets to the Auth0 Actions client's `<client_id>@clients`.
-See `charts/lfx-v2-pat-service/values.yaml`.
+(`database.external.secretName`, five keys). The validate route is gated by OpenFGA team membership: platform
+DevOps writes `user:<Auth0 Actions client_id>@clients member team:pat_validator` into each environment's store
+(the name comes from `app.validatorTeamName`). See `charts/lfx-v2-pat-service/values.yaml`.

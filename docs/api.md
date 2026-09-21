@@ -15,7 +15,7 @@ on each of them. The OpenAPI document at `/_tokens/openapi3.json` is served with
 | `GET` | `/tokens?audience=` | user | `200 {tokens: [...]}`, newest first |
 | `GET` | `/tokens/{uid}` | user | `200` token |
 | `DELETE` | `/tokens/{uid}` | user | `204` |
-| `POST` | `/_tokens/validate` `{secret}` | allow-listed machine principal | `200 {uid, username, audience, email?}` |
+| `POST` | `/_tokens/validate` `{secret}` | machine principal in the validator team | `200 {uid, username, audience, email?}` |
 
 A token is `{uid, name, audience, lookup_id, username, created_at, last_used_at?}`. The plaintext `secret`
 appears once, in the create response. List and get address a token by `uid`, expose its public `lookup_id`, and
@@ -41,7 +41,7 @@ forwards to its UI as `upstreamCode`:
 | `400` | message starts with `unknown_audience` | create: unknown or disabled audience slug |
 | `400` | | invalid body, unknown `v`, a `uid` that is not a UUID, or a `secret` that is missing, empty or longer than 128 characters (rejected before the credential check) |
 | `401` | | missing, invalid or anonymous bearer token |
-| `403` | | a machine principal on a token route, or a principal outside the allow-list on validate |
+| `403` | | a machine principal on a token route; on validate, Heimdall rejects callers outside the validator team |
 | `503` | | the database is unreachable |
 
 Owner scoping is enforced by the service: a token another user owns reads as `404`, and revoke is idempotent
@@ -53,12 +53,14 @@ unknown secret from a revoked one.
 Heimdall's `create_jwt` finalizer emits a `principal` claim: the LFID username for a user, `<client_id>@clients`
 for an OAuth client-credentials token, and `_anonymous` when the anonymous authenticator applies. The service
 refuses `_anonymous` outright. Token routes accept user principals only. `POST /_tokens/validate` is declared with the
-`token:validate` scope in the design, which the service uses only to select the machine policy for that method
-(Heimdall's JWT carries no scope claim); at runtime the check is a principal listed in `VALIDATOR_PRINCIPALS`,
-which each environment sets to the Auth0 Actions client. An empty list refuses every validate call.
+`token:validate` scope in the design, which the service uses only to recognise that method (Heimdall's JWT
+carries no scope claim); the authorization for it happens at the gateway, where the RuleSet runs an OpenFGA
+check that the caller is a `member` of the validator team (`app.validatorTeamName`, default `pat_validator`).
+That team holds the Auth0 Actions client per environment, and until its member tuples exist the route denies
+every caller.
 
-The Heimdall RuleSet ends every rule in `allow_all` because there is no OpenFGA type for tokens; the policy
-above is what the gateway delegates to the service.
+The token routes end in `allow_all` in the Heimdall RuleSet because there is no OpenFGA type for tokens; the
+ownership policy above is what the gateway delegates to the service for those routes.
 
 ## Validation flow
 

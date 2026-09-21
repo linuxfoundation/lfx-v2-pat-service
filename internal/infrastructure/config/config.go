@@ -87,6 +87,11 @@ func FromEnv(getenv func(string) string) (*Config, error) {
 		return nil, fmt.Errorf("%s must be a boolean: %w", constants.EnvMigrateOnStart, err)
 	}
 
+	pgPort := get(constants.EnvPGPort, constants.DefaultPGPort)
+	if n, err := strconv.Atoi(pgPort); err != nil || n < 1 || n > 65535 {
+		return nil, fmt.Errorf("%s must be a TCP port, got %q", constants.EnvPGPort, pgPort)
+	}
+
 	return &Config{
 		Host:  get(constants.EnvHost, constants.DefaultHost),
 		Port:  get(constants.EnvPort, constants.DefaultHTTPPort),
@@ -98,7 +103,7 @@ func FromEnv(getenv func(string) string) (*Config, error) {
 		MockLocalPrincipal: strings.TrimSpace(getenv(constants.EnvMockLocalPrincipal)),
 
 		PGHost:     get(constants.EnvPGHost, ""),
-		PGPort:     get(constants.EnvPGPort, constants.DefaultPGPort),
+		PGPort:     pgPort,
 		PGUser:     get(constants.EnvPGUser, ""),
 		PGPassword: getenv(constants.EnvPGPassword),
 		PGDatabase: get(constants.EnvPGDatabase, ""),

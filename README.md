@@ -18,9 +18,10 @@ and ADR-0020 (this service on the platform cluster).
 
 ## API
 
-Every endpoint sits behind Heimdall and expects `Authorization: Bearer <Heimdall-issued JWT>`. Bodies and
-responses are JSON in snake_case. The optional `?v=1` query parameter that LFX One appends is accepted on every
-method. The OpenAPI document is served at `/_tokens/openapi3.json` and generated from `design/`.
+The token and validate endpoints sit behind Heimdall and expect `Authorization: Bearer <Heimdall-issued JWT>`;
+their bodies and responses are JSON in snake_case, and the optional `?v=1` query parameter that LFX One appends
+is accepted on each of them. The probes answer plain text to the kubelet, and the OpenAPI document, generated
+from `design/`, is served at `/_tokens/openapi3.json` without a token.
 
 | Method | Path | Caller | Success |
 |---|---|---|---|
@@ -32,17 +33,17 @@ method. The OpenAPI document is served at `/_tokens/openapi3.json` and generated
 | `GET` | `/livez`, `/readyz` | probes | `200` |
 
 A token is `{uid, name, audience, lookup_id, username, created_at, last_used_at?}`. The plaintext `secret`
-appears once, in the create response; list and get identify a token by its public `lookup_id` and never carry
-the secret, the salt or the hash.
+appears once, in the create response; list and get address a token by `uid`, expose its public `lookup_id`, and
+never carry the secret, the salt or the hash.
 
-Errors use Goa's default body (`name`, `message`) except two that carry a stable `error` code, which LFX One
+Errors use Goa's default body (`name`, `message`) except two that carry a stable `error` code next to `message`, which LFX One
 forwards to its UI:
 
 | Status | Body | When |
 |---|---|---|
-| `409` | `{"error": "token_name_taken"}` | the caller already has an active token with that name for the audience (case-insensitive) |
-| `409` | `{"error": "token_limit_reached"}` | the caller already holds `TOKEN_MAX_ACTIVE_PER_AUDIENCE` active tokens for the audience |
-| `404` | `{"error": "invalid_token"}` | validate: the secret is unknown, malformed, revoked, or its audience is disabled |
+| `409` | `{"error": "token_name_taken", "message": "..."}` | the caller already has an active token with that name for the audience (case-insensitive) |
+| `409` | `{"error": "token_limit_reached", "message": "..."}` | the caller already holds `TOKEN_MAX_ACTIVE_PER_AUDIENCE` active tokens for the audience |
+| `404` | `{"error": "invalid_token", "message": "..."}` | validate: the secret is unknown, malformed, revoked, or its audience is disabled; a missing, empty or over-128-character `secret` is a `400` from body validation instead |
 | `400` | message starts with `unknown_audience` | create: the audience slug is unknown or disabled |
 | `401` | | missing, invalid or anonymous bearer token |
 | `403` | | a machine principal on a token route, or a principal outside `VALIDATOR_PRINCIPALS` on validate |
@@ -121,7 +122,7 @@ curl -s -XPOST localhost:8080/tokens -H 'Authorization: Bearer x' -H 'Content-Ty
   -d '{"name":"ci","audience":"insights"}'                       # 201: note the secret and the uid
 curl -s localhost:8080/tokens -H 'Authorization: Bearer x'      # 200: lookup_id, never the secret
 curl -s -XPOST localhost:8080/_tokens/validate -H 'Authorization: Bearer x' -H 'Content-Type: application/json' \
-  -d '{"secret":"lfi_..."}'                                      # 200: {uid, username, audience, email}
+  -d '{"secret":"lfi_..."}'                                      # 200: {uid, username, audience}; email only when the JWT carried one
 curl -s -XDELETE localhost:8080/tokens/<uid> -H 'Authorization: Bearer x' -o /dev/null -w '%{http_code}\n'  # 204
 ```
 

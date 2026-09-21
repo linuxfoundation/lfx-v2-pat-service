@@ -22,8 +22,10 @@ lfi_    Ab3kZ9QmT2xL 32 base62 characters
 Per token: `lookup_id`, a 16-byte random `salt`, and `secret_hash = SHA-256(salt || random part)`.
 
 Validation parses the presented secret, runs one indexed query on `lookup_id` joined on an enabled audience whose
-prefix matches, recomputes the hash with the stored salt, and compares in constant time. Every failure
-(malformed, unknown, wrong random part, revoked, disabled audience) is reported identically.
+prefix matches, recomputes the hash with the stored salt, and compares in constant time. Every failure of that
+check (malformed, unknown, wrong random part, revoked, disabled audience) is reported identically. The one earlier
+rejection is the request body itself: a missing, empty or over-128-character `secret` is a `400` from Goa before
+the secret is parsed.
 
 ## Why SHA-256 and not a slow hash
 

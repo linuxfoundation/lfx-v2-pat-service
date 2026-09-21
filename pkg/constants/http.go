@@ -22,4 +22,8 @@ const (
 	DefaultReadHeaderTimeout = 60 * time.Second
 	DefaultWriteTimeout      = 60 * time.Second
 	DefaultIdleTimeout       = 90 * time.Second
+
+	// The largest legitimate body is a create request of a few hundred bytes; the cap stops a client from
+	// making the decoder allocate freely.
+	DefaultMaxRequestBodyBytes = 64 << 10
 )

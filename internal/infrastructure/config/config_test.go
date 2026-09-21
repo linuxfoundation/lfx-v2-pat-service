@@ -64,6 +64,7 @@ func TestFromEnvRejectsBadNumbersAndBooleans(t *testing.T) {
 	for _, m := range []map[string]string{
 		{"PG_MAX_CONNS": "0"},
 		{"PG_MAX_CONNS": "ten"},
+		{"PG_MAX_CONNS": "4294967297"},
 		{"TOKEN_MAX_ACTIVE_PER_AUDIENCE": "-1"},
 		{"DB_MIGRATE_ON_START": "maybe"},
 		{"STORE": "redis"},

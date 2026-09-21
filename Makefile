@@ -74,10 +74,15 @@ DB_PORT ?= 5433
 DB_URL := postgres://pat:pat@localhost:$(DB_PORT)/pat?sslmode=disable
 
 .PHONY: db-up
-db-up: ## Start a disposable Postgres 16 in Docker (DB_PORT overrides the host port)
-	@docker start $(DB_CONTAINER) >/dev/null 2>&1 || docker run -d --name $(DB_CONTAINER) \
-		-e POSTGRES_USER=pat -e POSTGRES_PASSWORD=pat -e POSTGRES_DB=pat \
-		-p 127.0.0.1:$(DB_PORT):5432 postgres:16 >/dev/null
+db-up: ## Start a disposable Postgres 16 in Docker (DB_PORT overrides the host port; a container on another port is recreated)
+	@if [ "$$(docker inspect -f '{{(index (index .HostConfig.PortBindings "5432/tcp") 0).HostPort}}' $(DB_CONTAINER) 2>/dev/null)" = "$(DB_PORT)" ]; then \
+		docker start $(DB_CONTAINER) >/dev/null; \
+	else \
+		docker rm -f $(DB_CONTAINER) >/dev/null 2>&1 || true; \
+		docker run -d --name $(DB_CONTAINER) \
+			-e POSTGRES_USER=pat -e POSTGRES_PASSWORD=pat -e POSTGRES_DB=pat \
+			-p 127.0.0.1:$(DB_PORT):5432 postgres:16 >/dev/null; \
+	fi
 	@echo "==> Postgres at $(DB_URL)"
 
 .PHONY: db-down

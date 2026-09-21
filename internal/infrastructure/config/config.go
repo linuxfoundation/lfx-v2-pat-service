@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
+	"math"
 	"net"
 	"net/url"
 	"os"
@@ -151,8 +152,8 @@ func (c *Config) PostgresURL(scheme string) string {
 
 func positiveInt(raw, key string) (int, error) {
 	n, err := strconv.Atoi(raw)
-	if err != nil || n <= 0 {
-		return 0, fmt.Errorf("%s must be a positive integer, got %q", key, raw)
+	if err != nil || n <= 0 || n > math.MaxInt32 {
+		return 0, fmt.Errorf("%s must be a positive integer up to %d, got %q", key, math.MaxInt32, raw)
 	}
 	return n, nil
 }

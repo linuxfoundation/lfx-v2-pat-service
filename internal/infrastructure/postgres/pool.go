@@ -18,8 +18,12 @@ import (
 	"github.com/linuxfoundation/lfx-v2-pat-service/pkg/errors"
 )
 
-// readyTimeout bounds the readiness ping so a hung database cannot wedge the probe.
-const readyTimeout = time.Second
+// readyTimeout bounds the readiness ping so a hung database cannot wedge the probe; startupPingTimeout bounds
+// the connectivity check in NewPool so an unroutable database fails startup instead of waiting on the OS.
+const (
+	readyTimeout       = time.Second
+	startupPingTimeout = 5 * time.Second
+)
 
 // Pool wraps a pgx pool and reports readiness.
 type Pool struct {
@@ -42,7 +46,9 @@ func NewPool(ctx context.Context, url string, maxConns int) (*Pool, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open pool: %w", err)
 	}
-	if err := pool.Ping(ctx); err != nil {
+	pingCtx, cancel := context.WithTimeout(ctx, startupPingTimeout)
+	defer cancel()
+	if err := pool.Ping(pingCtx); err != nil {
 		// Close in the background so a failed ping returns immediately rather than waiting for the pool to
 		// drain; an unreachable database must not wedge startup past the liveness probe.
 		go pool.Close()

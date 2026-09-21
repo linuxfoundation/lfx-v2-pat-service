@@ -38,7 +38,8 @@ The service reads its configuration from environment variables (CLI flags `-p`, 
 | `ISSUER` | `heimdall` | Expected `iss` claim of the Heimdall-issued JWT |
 | `JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL` | | Local development only: skip JWT verification and attribute every request to this principal |
 | `STORE` | `postgres` | `postgres`, or `memory` for a local run without a database (nothing persists) |
-| `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` | `PGPORT=5432` | Postgres connection, read from the RDS secret in the chart; required when `STORE=postgres` |
+| `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` | | Postgres connection, read from the RDS secret in the chart; all four required when `STORE=postgres` |
+| `PGPORT` | `5432` | Postgres port; optional |
 | `PGSSLMODE` | `require` | libpq SSL mode; `disable` for a local database |
 | `PG_MAX_CONNS` | `10` | Connection pool size |
 | `DB_MIGRATE_ON_START` | `true` | Apply pending migrations before listening |

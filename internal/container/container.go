@@ -22,11 +22,10 @@ import (
 type Container struct {
 	Config *config.Config
 
-	Auth       domain.Authenticator
-	Manager    *service.Manager
-	Validator  *service.Validator
-	Validators service.AllowList
-	Readiness  port.Readiness
+	Auth      domain.Authenticator
+	Manager   *service.Manager
+	Validator *service.Validator
+	Readiness port.Readiness
 
 	Service *patsvc.Service
 }
@@ -45,19 +44,12 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 	tokens := mock.NewTokenRepository(audiences)
 	slog.Warn("using the in-memory token store: nothing persists across restarts")
 
-	validators := service.NewAllowList(cfg.ValidatorPrincipals)
-	if validators.Len() == 0 {
-		slog.Warn("no validator principals configured: every validate call will be refused",
-			"env", "VALIDATOR_PRINCIPALS")
-	}
-
 	c := &Container{
-		Config:     cfg,
-		Auth:       authenticator,
-		Manager:    service.NewManager(tokens, tokens, audiences, cfg.MaxActivePerAudience),
-		Validator:  service.NewValidator(tokens),
-		Validators: validators,
-		Readiness:  tokens,
+		Config:    cfg,
+		Auth:      authenticator,
+		Manager:   service.NewManager(tokens, tokens, audiences, cfg.MaxActivePerAudience),
+		Validator: service.NewValidator(tokens),
+		Readiness: tokens,
 	}
 	c.Service = patsvc.New(c.Readiness.Ready)
 

@@ -37,9 +37,7 @@ type Config struct {
 	PGSSLMode  string
 	PGMaxConns int
 
-	MigrateOnStart bool
-	// ValidatorPrincipals is the comma-separated allow-list for the validate endpoint. Empty allows nobody.
-	ValidatorPrincipals  string
+	MigrateOnStart       bool
 	MaxActivePerAudience int
 }
 
@@ -111,7 +109,6 @@ func FromEnv(getenv func(string) string) (*Config, error) {
 		PGMaxConns: maxConns,
 
 		MigrateOnStart:       migrate,
-		ValidatorPrincipals:  getenv(constants.EnvValidatorPrincipals),
 		MaxActivePerAudience: maxActive,
 	}, nil
 }

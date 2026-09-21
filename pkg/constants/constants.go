@@ -25,7 +25,6 @@ const (
 	EnvPGMaxConns = "PG_MAX_CONNS"
 
 	EnvMigrateOnStart       = "DB_MIGRATE_ON_START"
-	EnvValidatorPrincipals  = "VALIDATOR_PRINCIPALS"
 	EnvMaxActivePerAudience = "TOKEN_MAX_ACTIVE_PER_AUDIENCE"
 
 	EnvKoDataPath = "KO_DATA_PATH"

@@ -17,7 +17,6 @@ func TestNewContainerWithMockPrincipal(t *testing.T) {
 	cfg, err := config.FromEnv(func(k string) string {
 		return map[string]string{
 			"JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL": "alice",
-			"VALIDATOR_PRINCIPALS":                   "alice",
 		}[k]
 	})
 	require.NoError(t, err)
@@ -30,7 +29,6 @@ func TestNewContainerWithMockPrincipal(t *testing.T) {
 	caller, err := c.Auth.Authenticate(context.Background(), "ignored")
 	require.NoError(t, err)
 	assert.Equal(t, "alice", caller.Principal)
-	assert.True(t, c.Validators.Allowed("alice"))
 	assert.True(t, c.Ready(context.Background()))
 	require.NotNil(t, c.Service)
 	out, err := c.Service.Readyz(context.Background())
@@ -46,7 +44,6 @@ func TestNewContainerWithJWTAuth(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.IsType(t, &auth.JWTAuth{}, c.Auth)
-	assert.False(t, c.Validators.Allowed("anyone"))
 }
 
 func TestNewContainerRejectsBadJWKSURL(t *testing.T) {

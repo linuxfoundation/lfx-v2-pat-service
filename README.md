@@ -41,7 +41,6 @@ The service reads its configuration from environment variables (CLI flags `-p`, 
 | `PGSSLMODE` | `require` | libpq SSL mode; `disable` for a local database |
 | `PG_MAX_CONNS` | `10` | Connection pool size |
 | `DB_MIGRATE_ON_START` | `true` | Apply pending migrations before listening |
-| `VALIDATOR_PRINCIPALS` | | Comma-separated Heimdall principals (`<client_id>@clients`) allowed to call `POST /_tokens/validate`; empty refuses every call |
 | `TOKEN_MAX_ACTIVE_PER_AUDIENCE` | `25` | Active tokens one user may hold per audience |
 | `OTEL_*` | | OpenTelemetry exporter settings, see `pkg/telemetry` |
 

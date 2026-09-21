@@ -29,7 +29,6 @@ func TestFromEnvDefaults(t *testing.T) {
 	assert.Equal(t, "require", cfg.PGSSLMode)
 	assert.Equal(t, 10, cfg.PGMaxConns)
 	assert.True(t, cfg.MigrateOnStart)
-	assert.Empty(t, cfg.ValidatorPrincipals)
 	assert.Equal(t, 25, cfg.MaxActivePerAudience)
 	assert.False(t, cfg.DatabaseConfigured())
 }
@@ -41,7 +40,7 @@ func TestFromEnvReadsEverything(t *testing.T) {
 		"JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL": " alice ",
 		"PGHOST":                                 "db", "PGPORT": "5433", "PGUSER": "u", "PGPASSWORD": "p", "PGDATABASE": "d", "PGSSLMODE": "disable",
 		"PG_MAX_CONNS": "3", "DB_MIGRATE_ON_START": "false",
-		"VALIDATOR_PRINCIPALS": "a@clients,b@clients", "TOKEN_MAX_ACTIVE_PER_AUDIENCE": "7",
+		"TOKEN_MAX_ACTIVE_PER_AUDIENCE": "7",
 	}))
 	require.NoError(t, err)
 
@@ -54,7 +53,6 @@ func TestFromEnvReadsEverything(t *testing.T) {
 	assert.True(t, cfg.DatabaseConfigured())
 	assert.Equal(t, 3, cfg.PGMaxConns)
 	assert.False(t, cfg.MigrateOnStart)
-	assert.Equal(t, "a@clients,b@clients", cfg.ValidatorPrincipals)
 	assert.Equal(t, 7, cfg.MaxActivePerAudience)
 }
 

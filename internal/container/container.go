@@ -24,11 +24,10 @@ import (
 type Container struct {
 	Config *config.Config
 
-	Auth       domain.Authenticator
-	Manager    *service.Manager
-	Validator  *service.Validator
-	Validators service.AllowList
-	Readiness  port.Readiness
+	Auth      domain.Authenticator
+	Manager   *service.Manager
+	Validator *service.Validator
+	Readiness port.Readiness
 
 	Service *patsvc.Service
 
@@ -61,22 +60,14 @@ func NewContainer(ctx context.Context, cfg *config.Config) (*Container, error) {
 		return nil, err
 	}
 
-	validators := service.NewAllowList(cfg.ValidatorPrincipals)
-	if validators.Len() == 0 {
-		slog.Warn("no validator principals configured: every validate call will be refused",
-			"env", constants.EnvValidatorPrincipals)
-	}
-
 	c.Manager = service.NewManager(st.tokens, st.tokens, st.audiences, cfg.MaxActivePerAudience)
 	c.Validator = service.NewValidator(st.tokens)
-	c.Validators = validators
 	c.Readiness = st.readiness
 	c.Service = patsvc.New(patsvc.Deps{
-		Auth:       c.Auth,
-		Manager:    c.Manager,
-		Validator:  c.Validator,
-		Validators: c.Validators,
-		Ready:      c.Readiness.Ready,
+		Auth:      c.Auth,
+		Manager:   c.Manager,
+		Validator: c.Validator,
+		Ready:     c.Readiness.Ready,
 	})
 
 	slog.Info("dependency container initialized", "store", cfg.Store)

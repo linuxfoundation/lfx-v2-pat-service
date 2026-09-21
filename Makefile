@@ -122,7 +122,7 @@ docker-run: ## Run Docker container locally against the db-up database
 		--name $(APP_NAME) \
 		-p 8080:8080 \
 		-e PGHOST=host.docker.internal -e PGPORT=$(DB_PORT) -e PGUSER=pat -e PGPASSWORD=pat -e PGDATABASE=pat -e PGSSLMODE=disable \
-		-e JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=alice -e VALIDATOR_PRINCIPALS=alice \
+		-e JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=alice \
 		$(DOCKER_IMAGE):$(DOCKER_TAG)
 
 ##@ Helm/Kubernetes

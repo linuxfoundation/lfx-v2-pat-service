@@ -39,10 +39,8 @@ type Config struct {
 	PGMaxConns int
 
 	// Store is constants.StorePostgres or constants.StoreMemory.
-	Store          string
-	MigrateOnStart bool
-	// ValidatorPrincipals is the comma-separated allow-list for the validate endpoint. Empty allows nobody.
-	ValidatorPrincipals  string
+	Store                string
+	MigrateOnStart       bool
 	MaxActivePerAudience int
 }
 
@@ -119,7 +117,6 @@ func FromEnv(getenv func(string) string) (*Config, error) {
 
 		Store:                store,
 		MigrateOnStart:       migrate,
-		ValidatorPrincipals:  getenv(constants.EnvValidatorPrincipals),
 		MaxActivePerAudience: maxActive,
 	}, nil
 }

@@ -62,7 +62,7 @@ Run the service against the local database with JWT verification disabled:
 
 ```bash
 PGHOST=localhost PGPORT=5433 PGUSER=pat PGPASSWORD=pat PGDATABASE=pat PGSSLMODE=disable \
-JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=alice VALIDATOR_PRINCIPALS=alice ./bin/lfx-v2-pat-service
+JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=alice ./bin/lfx-v2-pat-service
 ```
 
 Migrations live in `internal/infrastructure/postgres/migrations` and are applied at startup (`DB_MIGRATE_ON_START`).

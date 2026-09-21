@@ -8,10 +8,11 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"os"
 	"sync"
 
-	svc "github.com/linuxfoundation/lfx-v2-pat-service/gen/lfx_v2_pat_service"
 	svcsvr "github.com/linuxfoundation/lfx-v2-pat-service/gen/http/lfx_v2_pat_service/server"
+	svc "github.com/linuxfoundation/lfx-v2-pat-service/gen/lfx_v2_pat_service"
 	"github.com/linuxfoundation/lfx-v2-pat-service/internal/container"
 	"github.com/linuxfoundation/lfx-v2-pat-service/internal/infrastructure/config"
 	"github.com/linuxfoundation/lfx-v2-pat-service/internal/middleware"
@@ -30,10 +31,9 @@ func StartServer(ctx context.Context, cfg *config.Config) error {
 		return err
 	}
 
+	// Payload logging stays off even in debug mode: the create response and the validate request carry
+	// plaintext secrets.
 	endpoints := svc.NewEndpoints(cont.Service)
-	if cfg.Debug {
-		endpoints.Use(debug.LogPayloads())
-	}
 
 	return handleHTTPServer(ctx, cfg, endpoints, cont)
 }
@@ -53,6 +53,7 @@ func handleHTTPServer(ctx context.Context, cfg *config.Config, endpoints *svc.En
 		goahttp.ResponseEncoder,
 		eh,
 		nil,
+		http.Dir(koDataPath()),
 	)
 	svcsvr.Mount(mux, server)
 
@@ -72,6 +73,15 @@ func handleHTTPServer(ctx context.Context, cfg *config.Config, endpoints *svc.En
 	}
 
 	return runServerWithContext(ctx, srv, cont)
+}
+
+// koDataPath is the directory holding gen/http/openapi3.json. ko and the Dockerfile place it under
+// KO_DATA_PATH; a local run serves it from the repository root.
+func koDataPath() string {
+	if p := os.Getenv(constants.EnvKoDataPath); p != "" {
+		return p
+	}
+	return constants.DefaultKoDataPath
 }
 
 func errorHandler(logCtx context.Context) func(context.Context, http.ResponseWriter, error) {

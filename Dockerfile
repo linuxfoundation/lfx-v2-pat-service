@@ -33,6 +33,10 @@ FROM cgr.dev/chainguard/static:latest
 # Implicit with base image; setting explicitly for linters.
 USER nonroot
 
+# Location for runtime data such as the OpenAPI spec served at /_tokens/openapi3.json.
+ENV KO_DATA_PATH=/var/run
+
 COPY --from=builder /go/bin/lfx-v2-pat-service /cmd/lfx-v2-pat-service
+COPY --from=builder /build/gen/http ${KO_DATA_PATH}/gen/http
 
 ENTRYPOINT ["/cmd/lfx-v2-pat-service"]

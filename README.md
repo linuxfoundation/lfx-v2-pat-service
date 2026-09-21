@@ -123,7 +123,8 @@ curl -s -XPOST localhost:8080/tokens -H 'Authorization: Bearer x' -H 'Content-Ty
 curl -s localhost:8080/tokens -H 'Authorization: Bearer x'      # 200: lookup_id, never the secret
 curl -s -XPOST localhost:8080/_tokens/validate -H 'Authorization: Bearer x' -H 'Content-Type: application/json' \
   -d '{"secret":"lfi_..."}'                                      # 200: {uid, username, audience}; email only when the JWT carried one
-curl -s -XDELETE localhost:8080/tokens/<uid> -H 'Authorization: Bearer x' -o /dev/null -w '%{http_code}\n'  # 204
+TOKEN_UID=...   # the uid from the create response
+curl -s -XDELETE "localhost:8080/tokens/$TOKEN_UID" -H 'Authorization: Bearer x' -o /dev/null -w '%{http_code}\n'  # 204
 ```
 
 Migrations live in `internal/infrastructure/postgres/migrations` and are applied at startup (`DB_MIGRATE_ON_START`).

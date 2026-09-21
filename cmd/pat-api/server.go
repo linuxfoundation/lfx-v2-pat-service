@@ -40,9 +40,10 @@ func StartServer(ctx context.Context, cfg *config.Config) error {
 
 func handleHTTPServer(ctx context.Context, cfg *config.Config, endpoints *svc.Endpoints, cont *container.Container) error {
 	mux := goahttp.NewMuxer()
+	// pprof only; clue's runtime debug-log toggle and its HTTP middleware drive clue's logger, which this service
+	// does not use, and the toggle is an unauthenticated endpoint.
 	if cfg.Debug {
 		debug.MountPprofHandlers(debug.Adapt(mux))
-		debug.MountDebugLogEnabler(debug.Adapt(mux))
 	}
 
 	eh := errorHandler(ctx)
@@ -59,9 +60,6 @@ func handleHTTPServer(ctx context.Context, cfg *config.Config, endpoints *svc.En
 
 	handler := http.MaxBytesHandler(mux, constants.DefaultMaxRequestBodyBytes)
 	handler = middleware.RequestIDMiddleware()(handler)
-	if cfg.Debug {
-		handler = debug.HTTP()(handler)
-	}
 	handler = otelhttp.NewHandler(handler, "lfx-v2-pat-service")
 
 	srv := &http.Server{

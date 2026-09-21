@@ -57,7 +57,7 @@ func handleHTTPServer(ctx context.Context, cfg *config.Config, endpoints *svc.En
 	)
 	svcsvr.Mount(mux, server)
 
-	var handler http.Handler = mux
+	handler := http.MaxBytesHandler(mux, constants.DefaultMaxRequestBodyBytes)
 	handler = middleware.RequestIDMiddleware()(handler)
 	if cfg.Debug {
 		handler = debug.HTTP()(handler)

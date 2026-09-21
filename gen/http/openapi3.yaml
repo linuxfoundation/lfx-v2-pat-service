@@ -461,6 +461,7 @@ components:
                     type: string
                     description: Human-readable explanation
                     example: a token named "ci-pipeline" already exists for audience insights
+            description: Name already used, or active-token limit reached, for this audience
             example:
                 error: token_name_taken
                 message: a token named "ci-pipeline" already exists for audience insights
@@ -564,6 +565,7 @@ components:
                     type: string
                     description: Human-readable explanation
                     example: secret is invalid or revoked
+            description: Secret is invalid or revoked
             example:
                 error: invalid_token
                 message: secret is invalid or revoked

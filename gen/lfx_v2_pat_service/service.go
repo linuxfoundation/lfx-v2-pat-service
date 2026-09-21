@@ -59,6 +59,7 @@ const ServiceName = "lfx_v2_pat_service"
 // MethodKey key.
 var MethodNames = [7]string{"create-token", "list-tokens", "get-token", "delete-token", "validate-token", "livez", "readyz"}
 
+// Name already used, or active-token limit reached, for this audience
 type ConflictError struct {
 	// Stable machine-readable code
 	Code string
@@ -111,6 +112,7 @@ type GetTokenPayload struct {
 	UID string
 }
 
+// Secret is invalid or revoked
 type InvalidTokenError struct {
 	// Stable machine-readable code
 	Code string
@@ -183,7 +185,7 @@ type ValidateTokenPayload struct {
 
 // Error returns an error description.
 func (e *ConflictError) Error() string {
-	return ""
+	return "Name already used, or active-token limit reached, for this audience"
 }
 
 // ErrorName returns "ConflictError".
@@ -200,7 +202,7 @@ func (e *ConflictError) GoaErrorName() string {
 
 // Error returns an error description.
 func (e *InvalidTokenError) Error() string {
-	return ""
+	return "Secret is invalid or revoked"
 }
 
 // ErrorName returns "InvalidTokenError".

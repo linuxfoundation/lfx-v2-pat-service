@@ -96,6 +96,7 @@ var TokenIdentity = dsl.Type("token-identity", func() {
 // ConflictError carries a stable code so lfx-one can tell the two 409 causes apart. The attribute is named
 // "error" on the wire but "Code" in Go, because the generated type must also implement error.
 var ConflictError = dsl.Type("ConflictError", func() {
+	dsl.Description("Name already used, or active-token limit reached, for this audience")
 	dsl.Attribute("error", dsl.String, "Stable machine-readable code", func() {
 		dsl.Meta("struct:field:name", "Code")
 		dsl.Enum(constants.ErrCodeTokenNameTaken, constants.ErrCodeTokenLimitReached)
@@ -110,6 +111,7 @@ var ConflictError = dsl.Type("ConflictError", func() {
 // InvalidTokenError is the single 404 body the validate endpoint returns for every rejected secret, so callers
 // cannot tell an unknown secret from a revoked one.
 var InvalidTokenError = dsl.Type("InvalidTokenError", func() {
+	dsl.Description("Secret is invalid or revoked")
 	dsl.Attribute("error", dsl.String, "Stable machine-readable code", func() {
 		dsl.Meta("struct:field:name", "Code")
 		dsl.Enum(constants.ErrCodeInvalidToken)

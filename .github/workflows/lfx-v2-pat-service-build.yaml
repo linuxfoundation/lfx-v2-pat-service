@@ -15,6 +15,22 @@ jobs:
     name: Build and Test
     runs-on: ubuntu-latest
 
+    # The live database tests run against this service; they fail (not skip) on CI when it is missing.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pat
+          POSTGRES_PASSWORD: pat
+          POSTGRES_DB: pat
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pat"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
 
@@ -33,4 +49,6 @@ jobs:
         run: make build
 
       - name: Test
+        env:
+          TEST_DATABASE_URL: postgres://pat:pat@localhost:5432/pat?sslmode=disable
         run: make test

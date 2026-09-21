@@ -64,9 +64,29 @@ lint: ## Run golangci-lint (local Go linting)
 	@golangci-lint run ./... && echo "==> Lint OK"
 
 .PHONY: test
-test: ## Run tests
+test: ## Run tests (live database tests skip unless TEST_DATABASE_URL is set)
 	@echo "Running tests..."
 	go test -v -race -coverprofile=coverage.out ./...
+
+# Local database for the live tests and for running the service with STORE=postgres.
+DB_CONTAINER := pat-pg
+DB_PORT ?= 5433
+DB_URL := postgres://pat:pat@localhost:$(DB_PORT)/pat?sslmode=disable
+
+.PHONY: db-up
+db-up: ## Start a disposable Postgres 16 in Docker (DB_PORT overrides the host port)
+	@docker start $(DB_CONTAINER) >/dev/null 2>&1 || docker run -d --name $(DB_CONTAINER) \
+		-e POSTGRES_USER=pat -e POSTGRES_PASSWORD=pat -e POSTGRES_DB=pat \
+		-p 127.0.0.1:$(DB_PORT):5432 postgres:16 >/dev/null
+	@echo "==> Postgres at $(DB_URL)"
+
+.PHONY: db-down
+db-down: ## Stop and remove the disposable Postgres
+	@docker rm -f $(DB_CONTAINER) >/dev/null 2>&1 || true
+
+.PHONY: test-live
+test-live: ## Run every test, including the live database tests, against the db-up database
+	TEST_DATABASE_URL='$(DB_URL)' go test -v -race -count=1 ./...
 
 .PHONY: build
 build: ## Build the application for local OS
@@ -89,11 +109,13 @@ docker-build: ## Build Docker image
 	docker tag $(DOCKER_IMAGE):$(DOCKER_TAG) $(DOCKER_IMAGE):latest
 
 .PHONY: docker-run
-docker-run: ## Run Docker container locally
+docker-run: ## Run Docker container locally against the db-up database
 	@echo "Running Docker container..."
 	docker run \
 		--name $(APP_NAME) \
 		-p 8080:8080 \
+		-e PGHOST=host.docker.internal -e PGPORT=$(DB_PORT) -e PGUSER=pat -e PGPASSWORD=pat -e PGDATABASE=pat -e PGSSLMODE=disable \
+		-e JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=alice -e VALIDATOR_PRINCIPALS=alice \
 		$(DOCKER_IMAGE):$(DOCKER_TAG)
 
 ##@ Helm/Kubernetes

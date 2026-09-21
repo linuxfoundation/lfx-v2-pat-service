@@ -21,8 +21,6 @@ type Config struct {
 	JWKSUrl  string
 	Audience string
 	Issuer   string
-
-	NATSUrl string
 }
 
 // LoadConfig loads configuration from CLI flags, then environment variables, then defaults.
@@ -51,7 +49,6 @@ func LoadConfig() *Config {
 		JWKSUrl:  envOrDefault(constants.EnvJWKSURL, constants.DefaultJWKSURL),
 		Audience: envOrDefault(constants.EnvAudience, constants.DefaultAudience),
 		Issuer:   envOrDefault(constants.EnvIssuer, constants.DefaultIssuer),
-		NATSUrl:  envOrDefault(constants.EnvNATSURL, constants.DefaultNATSURL),
 	}
 
 	if os.Getenv(constants.EnvDebug) == "true" {

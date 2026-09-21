@@ -23,15 +23,14 @@ type Container struct {
 func NewContainer(cfg *config.Config) (*Container, error) {
 	slog.Info("initializing dependency container")
 
-	// TODO: initialize your infrastructure clients (auth, NATS, database, etc.)
+	// TODO: initialize your infrastructure clients (auth, database, etc.)
 	// and pass them to your service implementation.
 	//
 	// Example:
 	//   authRepo, err := auth.NewAuthRepository(cfg.JWKSUrl, cfg.Issuer, cfg.Audience)
 	//   if err != nil { return nil, err }
-	//   natsConn, err := nats.Connect(cfg.NATSUrl)
 	//   if err != nil { return nil, err }
-	//   svc := service.NewService(authRepo, natsConn)
+	//   svc := service.NewService(authRepo)
 
 	slog.Info("dependency container initialized")
 	return &Container{
@@ -40,7 +39,7 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 	}, nil
 }
 
-// Close releases any resources held by the container (e.g., drain NATS connections).
+// Close releases any resources held by the container (e.g., database pools).
 func (c *Container) Close() error {
 	// TODO: close any open connections here.
 	return nil

@@ -15,18 +15,18 @@ spec:
   hostnames:
     - "lfx-api.{{ .Values.lfx.domain }}"
   rules:
-  # Main application endpoints (with authentication)
-  # TODO: Adjust paths as needed for your service
+  # Owner-facing token endpoints, the machine-to-machine validate endpoint and the OpenAPI document. Every path
+  # is authenticated by Heimdall; the RuleSet decides what each one requires.
   - matches:
     - path:
         type: Exact
-        value: /pats
+        value: /tokens
     - path:
         type: PathPrefix
-        value: /pats/
+        value: /tokens/
     - path:
         type: PathPrefix
-        value: /_pats/
+        value: /_tokens/
     {{- if .Values.heimdall.enabled }}
     filters:
       - type: ExtensionRef

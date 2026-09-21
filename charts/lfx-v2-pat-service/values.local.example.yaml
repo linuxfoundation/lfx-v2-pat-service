@@ -15,3 +15,17 @@ image:
   repository: ghcr.io/linuxfoundation/lfx-v2-pat-service/pat-api
   tag: "latest"  # Overrides appVersion from Chart.yaml
   pullPolicy: Never
+
+app:
+  # Skip JWT verification and act as this user.
+  jwtAuthDisabledMockLocalPrincipal: alice
+  # Let the same mock principal call POST /_tokens/validate.
+  validatorPrincipals: alice
+
+database:
+  # The in-memory store needs no database. To exercise Postgres locally, set store: postgres and mode: local,
+  # and point database.local at a Postgres reachable from the cluster.
+  store: memory
+
+networkPolicy:
+  enabled: false

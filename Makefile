@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: MIT
 
 APP_NAME := lfx-v2-pat-service
-VERSION := $(shell git describe --tags --always)
+VERSION := $(shell git describe --tags --always 2>/dev/null || echo "dev")
 BUILD_TIME := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
-GIT_COMMIT := $(shell git rev-parse HEAD)
+GIT_COMMIT := $(shell git rev-parse HEAD 2>/dev/null || echo "unknown")
 
 # Docker
-DOCKER_REGISTRY := linuxfoundation
-DOCKER_IMAGE := $(DOCKER_REGISTRY)/$(APP_NAME)
+DOCKER_REGISTRY := ghcr.io/linuxfoundation
+DOCKER_IMAGE := $(DOCKER_REGISTRY)/$(APP_NAME)/pat-api
 DOCKER_TAG := $(VERSION)
 
 # Helm variables
@@ -21,13 +21,13 @@ HELM_VALUES_FILE=$(HELM_CHART_PATH)/values.local.yaml
 GO_VERSION := 1.24.2
 GOOS := linux
 GOARCH := amd64
+GOA_VERSION := v3.25.3
+GO_FILES=$(shell find . -name '*.go' -not -path './gen/*' -not -path './vendor/*')
 
 # Linting
 GOLANGCI_LINT_VERSION := v2.2.2
 LINT_TIMEOUT := 10m
 LINT_TOOL=$(shell go env GOPATH)/bin/golangci-lint
-
-GOA_VERSION := v3.25.3
 
 ##@ Development
 
@@ -49,8 +49,13 @@ deps: ## Install dependencies
 	go install goa.design/goa/v3/cmd/goa@$(GOA_VERSION)
 
 .PHONY: apigen
-apigen: deps #@ Generate API code using Goa
+apigen: deps ## Generate API code using Goa
 	goa gen github.com/linuxfoundation/lfx-v2-pat-service/design
+
+.PHONY: fmt
+fmt: ## Format Go source (generated code excluded)
+	@echo "==> Formatting code..."
+	@gofmt -s -w $(GO_FILES)
 
 .PHONY: lint
 lint: ## Run golangci-lint (local Go linting)
@@ -83,15 +88,12 @@ docker-build: ## Build Docker image
 	docker build -t $(DOCKER_IMAGE):$(DOCKER_TAG) .
 	docker tag $(DOCKER_IMAGE):$(DOCKER_TAG) $(DOCKER_IMAGE):latest
 
-
 .PHONY: docker-run
 docker-run: ## Run Docker container locally
 	@echo "Running Docker container..."
 	docker run \
 		--name $(APP_NAME) \
 		-p 8080:8080 \
-		-e OPENSEARCH_URL=http://opensearch-cluster-master.lfx.svc.cluster.local:9200 \
-		-e NATS_URL=nats://lfx-platform-nats.lfx.svc.cluster.local:4222 \
 		$(DOCKER_IMAGE):$(DOCKER_TAG)
 
 ##@ Helm/Kubernetes

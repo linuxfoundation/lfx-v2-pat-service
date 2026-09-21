@@ -35,7 +35,7 @@ func NewService() *Service {
 //
 // With no external dependencies wired, this returns true once the service is
 // constructed. Future dependency checks should be combined here with logical
-// AND (e.g., return s.ready && s.natsConn.IsConnected()).
+// AND (e.g., return s.ready && s.db.Ping(ctx) == nil).
 func (s *Service) ServiceReady() bool {
 	return s.ready
 }

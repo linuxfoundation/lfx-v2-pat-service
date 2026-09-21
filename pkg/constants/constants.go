@@ -13,8 +13,6 @@ const (
 	EnvJWKSURL  = "JWKS_URL"
 	EnvAudience = "AUDIENCE"
 	EnvIssuer   = "ISSUER"
-
-	EnvNATSURL = "NATS_URL"
 )
 
 // Default values
@@ -25,6 +23,4 @@ const (
 	DefaultJWKSURL  = "http://heimdall:4457/.well-known/jwks"
 	DefaultAudience = "lfx-v2-pat-service"
 	DefaultIssuer   = "heimdall"
-
-	DefaultNATSURL = "nats://nats:4222"
 )

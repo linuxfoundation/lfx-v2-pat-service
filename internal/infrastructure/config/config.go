@@ -21,8 +21,6 @@ type Config struct {
 	JWKSUrl  string
 	Audience string
 	Issuer   string
-
-	NATSUrl string
 }
 
 // LoadConfig loads configuration from CLI flags, then environment variables, then defaults.
@@ -41,7 +39,7 @@ func LoadConfig() *Config {
 
 	portF := flag.String("p", defaultPort, "listen port")
 	hostF := flag.String("bind", defaultHost, "interface to bind on")
-	dbgF := flag.Bool("d", false, "enable debug logging")
+	dbgF := flag.Bool("d", os.Getenv(constants.EnvDebug) == "true", "enable debug logging")
 	flag.Parse()
 
 	cfg := &Config{
@@ -51,11 +49,6 @@ func LoadConfig() *Config {
 		JWKSUrl:  envOrDefault(constants.EnvJWKSURL, constants.DefaultJWKSURL),
 		Audience: envOrDefault(constants.EnvAudience, constants.DefaultAudience),
 		Issuer:   envOrDefault(constants.EnvIssuer, constants.DefaultIssuer),
-		NATSUrl:  envOrDefault(constants.EnvNATSURL, constants.DefaultNATSURL),
-	}
-
-	if os.Getenv(constants.EnvDebug) == "true" {
-		cfg.Debug = true
 	}
 
 	return cfg

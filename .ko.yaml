@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 builds:
   - id: pat-api
-    dir: ./cmd
+    dir: ./cmd/pat-api
     ldflags:
       - -X=main.version={{.Env.VERSION}}
       - -X=main.buildTime={{.Env.BUILD_TIME}}

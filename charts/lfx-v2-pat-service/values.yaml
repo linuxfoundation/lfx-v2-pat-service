@@ -64,13 +64,6 @@ service:
   # port is the service port
   port: 8080
 
-# openfga is the configuration for the OpenFGA server
-openfga:
-  # enabled is a boolean to determine if the OpenFGA server should be enabled for authorization
-  # Note: If it is disabled, then the service will allow all requests
-  # (Disabling OpenFGA should only be used for local development).
-  enabled: true
-
 # heimdall is the configuration for the heimdall middleware
 heimdall:
   enabled: true
@@ -81,29 +74,10 @@ heimdall:
   # by another service or helm chart then it is needed.
   add_middleware: false
 
-# authelia is the configuration for the Authelia server
-authelia:
-  # enabled is a boolean to determine if the Authelia authenticator is enabled
-  # Note: Disabling Authelia should only be used for local development
-  enabled: true
-
-# nats is the configuration for the NATS server
-nats:
-  # url is the URL of the NATS server
-  url: nats://lfx-platform-nats.lfx.svc.cluster.local:4222
-
 # app is the configuration for the application
 app:
-  # logLevel is the log level (debug, info, warn, error)
-  logLevel: debug
-  # logAddSource is a boolean to determine if the log source should be added
-  logAddSource: true
   # use_oidc_contextualizer is a boolean to determine if the OIDC contextualizer should be used
   use_oidc_contextualizer: true
-  # jwt is the configuration for JWT authentication
-  # audience is the intended audience for the JWT token
-  audience: lfx-v2-pat-service
-
   # extraEnv allows injecting additional environment variables into the container.
   # Supports both simple key-value pairs and Kubernetes field references.
   # These are rendered BEFORE OTEL variables, allowing use in OTEL configuration.
@@ -148,10 +122,6 @@ app:
   # environment contains all application environment variables
   # Each variable can have either a 'value' (for direct values) or 'valueFrom' (for secret references)
   environment:
-    # NATS_URL is the URL of the NATS server (required)
-    NATS_URL:
-      value: nats://lfx-platform-nats.lfx.svc.cluster.local:4222
-
     # LOG_LEVEL is the log level (debug, info, warn, error) - optional, defaults to info
     LOG_LEVEL:
       value: info
@@ -161,48 +131,16 @@ app:
       value: true
 
     # JWKS_URL is the URL to the JSON Web Key Set endpoint for JWT validation
-    # Required unless JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL is set
     JWKS_URL:
       value: http://lfx-platform-heimdall.lfx.svc.cluster.local:4457/.well-known/jwks
 
-    # JWT_AUDIENCE is the intended audience for the JWT token (required)
-    JWT_AUDIENCE:
+    # AUDIENCE is the expected "aud" claim of the Heimdall-issued JWT
+    AUDIENCE:
       value: lfx-v2-pat-service
 
-    # JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL is used for local development to bypass JWT validation
-    # Optional, local dev only. Set to a principal name to enable mock authentication
-    JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL:
-      value: ''
-
-    # AUTH_SOURCE is the authentication source: 'jwt' for production, 'mock' for local dev (optional, defaults to jwt)
-    AUTH_SOURCE:
-      value: jwt
-
-    # REPOSITORY_SOURCE is the repository implementation: 'nats' for production, 'mock' for local dev
-    # Optional, defaults to nats. Production should use 'nats', local development should use 'mock'
-    REPOSITORY_SOURCE:
-      value: nats
-
-    # ITX Proxy Configuration
-    ITX_BASE_URL:
-      value: ""
-
-    ITX_CLIENT_ID:
-      value: ""
-
-    # ITX_CLIENT_PRIVATE_KEY is the private key for ITX proxy authentication
-    # WARNING: Do not commit actual credentials to this file - should be set via Kubernetes secrets using valueFrom
-    ITX_CLIENT_PRIVATE_KEY:
-      value: ""
-
-    ITX_AUTH0_DOMAIN:
-      value: ""
-
-    ITX_AUDIENCE:
-      value: ""
-
-    EVENTING_ENABLED:
-      value: "true"
+    # ISSUER is the expected "iss" claim of the Heimdall-issued JWT
+    ISSUER:
+      value: heimdall
 
 # serviceAccount is the configuration for the Kubernetes service account (used by multiple components)
 serviceAccount:

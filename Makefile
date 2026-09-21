@@ -55,7 +55,6 @@ apigen: deps ## Generate API code using Goa
 .PHONY: fmt
 fmt: ## Format Go source (generated code excluded)
 	@echo "==> Formatting code..."
-	@go fmt ./...
 	@gofmt -s -w $(GO_FILES)
 
 .PHONY: lint

@@ -47,7 +47,7 @@ func AppendCtx(parent context.Context, attr slog.Attr) context.Context {
 	return context.WithValue(parent, slogFields, []slog.Attr{attr})
 }
 
-// InitStructureLogConfig sets up JSON structured logging, level from LOG_LEVEL env var,
+// InitStructureLogConfig sets up JSON structured logging, level from LOG_LEVEL env var (info unless set),
 // and wraps the handler with the slog-otel bridge so trace/span IDs appear in every log line.
 func InitStructureLogConfig() {
 	opts := &slog.HandlerOptions{}
@@ -59,11 +59,13 @@ func InitStructureLogConfig() {
 		opts.Level = slog.LevelWarn
 	case "info":
 		opts.Level = slog.LevelInfo
+	case "error":
+		opts.Level = slog.LevelError
 	default:
-		opts.Level = slog.LevelDebug
+		opts.Level = slog.LevelInfo
 	}
 
-	opts.AddSource = os.Getenv("LOG_ADD_SOURCE") == "true"
+	opts.AddSource = os.Getenv("LOG_ADD_SOURCE") != "false"
 
 	log.SetFlags(log.Llongfile)
 	h := slog.NewJSONHandler(os.Stdout, opts)

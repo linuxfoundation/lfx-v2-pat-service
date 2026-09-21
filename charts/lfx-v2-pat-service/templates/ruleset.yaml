@@ -10,11 +10,11 @@ metadata:
   labels:
     app: {{ .Chart.Name }}
 spec:
-  # Every rule ends in allow_all because there is no OpenFGA type for tokens: ownership is enforced by the
-  # service, which scopes every read and revoke to the principal in the JWT. The anonymous fallback still
-  # produces a JWT (principal "_anonymous"), which the service refuses on every route except the public OpenAPI
-  # document, and machine principals ("<client_id>@clients") are refused on the token routes and allow-listed
-  # on validate. See the service's JWTAuth for the policy the gateway delegates.
+  # The token routes end in allow_all because there is no OpenFGA type for tokens: ownership is enforced by the
+  # service, which scopes every read and revoke to the principal in the JWT, and refuses machine principals
+  # ("<client_id>@clients") there. The anonymous fallback still produces a JWT (principal "_anonymous"), which
+  # the service refuses on every route except the public OpenAPI document. The validate route is the one place
+  # the gateway authorizes: only members of the validator team (app.validatorTeamName) may call it.
   rules:
     - id: "rule:lfx:lfx-v2-pat-service:openapi:get"
       allow_encoded_slashes: 'off'
@@ -126,7 +126,24 @@ spec:
         - contextualizer: oidc_contextualizer
         {{- end }}
         - authorizer: json_content_type
+        {{- if .Values.openfga.enabled }}
+        {{/*
+          Machine-to-machine endpoint (the Auth0 Custom Token Exchange action): callers must be members of
+          the validator team (least privilege; the team's member tuples must exist in the environment's
+          OpenFGA store, otherwise every caller is denied).
+        */}}
+        - authorizer: openfga_check
+          config:
+            values:
+              relation: member
+              object: "team:{{ required "app.validatorTeamName must be set when openfga.enabled is true" (.Values.app.validatorTeamName | trim) }}"
+        {{- else }}
+        {{/*
+          When OpenFGA is disabled, allow all requests.
+          (Only meant for *local development* because OpenFGA should be enabled when deployed.)
+        */}}
         - authorizer: allow_all
+        {{- end }}
         - finalizer: create_jwt
           config:
             values:

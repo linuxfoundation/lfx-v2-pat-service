@@ -60,8 +60,6 @@ spec:
           - name: JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL
             value: {{ . | quote }}
           {{- end }}
-          - name: VALIDATOR_PRINCIPALS
-            value: {{ .Values.app.validatorPrincipals | quote }}
           - name: TOKEN_MAX_ACTIVE_PER_AUDIENCE
             value: {{ .Values.app.maxActivePerAudience | quote }}
           - name: STORE

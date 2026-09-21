@@ -19,8 +19,10 @@ image:
 app:
   # Skip JWT verification and act as this user.
   jwtAuthDisabledMockLocalPrincipal: alice
-  # Let the same mock principal call POST /_tokens/validate.
-  validatorPrincipals: alice
+
+# Without OpenFGA the validate route accepts every authenticated caller, so the mock principal can validate too.
+openfga:
+  enabled: false
 
 database:
   # The in-memory store needs no database. To exercise Postgres locally, set store: postgres and mode: local,

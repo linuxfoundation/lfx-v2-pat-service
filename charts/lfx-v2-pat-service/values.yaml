@@ -64,6 +64,13 @@ service:
   # port is the service port
   port: 8080
 
+# openfga is the configuration for the OpenFGA server
+openfga:
+  # enabled is a boolean to determine if the OpenFGA server should be enabled for authorization
+  # Note: If it is disabled, then the validate route allows every authenticated caller
+  # (Disabling OpenFGA should only be used for local development).
+  enabled: true
+
 # heimdall is the configuration for the heimdall middleware
 heimdall:
   enabled: true
@@ -87,10 +94,10 @@ app:
   # jwtAuthDisabledMockLocalPrincipal disables JWT verification and attributes every request to this principal.
   # Local development only; leave empty everywhere else.
   jwtAuthDisabledMockLocalPrincipal: ""
-  # validatorPrincipals is the comma-separated list of Heimdall principals allowed to call
-  # POST /_tokens/validate. The Auth0 Actions client's client-credentials token introspects to
-  # "<client_id>@clients". Empty refuses every validate call; set it per environment in the ArgoCD values.
-  validatorPrincipals: ""
+  # validatorTeamName is the OpenFGA team whose members may call POST /_tokens/validate (the Auth0 Actions
+  # client per environment, as "user:<client_id>@clients"). The name is env-invariant; the team exists once its
+  # member tuples are written in the environment's OpenFGA store, and until then the route denies every caller.
+  validatorTeamName: "pat_validator"
   # maxActivePerAudience bounds the active tokens one user may hold per audience.
   maxActivePerAudience: 25
   # logLevel is debug, info, warn or error.

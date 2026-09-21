@@ -33,9 +33,9 @@ const (
 	acceptBelow = 248
 )
 
-// PrefixPattern is the shape of an audience prefix. It ends with the only underscore in a secret, which is what
+// prefixPattern is the shape of an audience prefix. It ends with the only underscore in a secret, which is what
 // Parse splits on, and it mirrors the audiences_prefix_fmt check constraint.
-var PrefixPattern = regexp.MustCompile(`^[a-z0-9]{2,8}_$`)
+var prefixPattern = regexp.MustCompile(`^[a-z0-9]{2,8}_$`)
 
 // ErrMalformed is returned by Parse for anything that is not a well-formed secret. Callers report it exactly
 // like an unknown secret so the two are indistinguishable.
@@ -55,7 +55,7 @@ func (p Parts) String() string {
 
 // ValidPrefix reports whether prefix can start a secret.
 func ValidPrefix(prefix string) bool {
-	return PrefixPattern.MatchString(prefix)
+	return prefixPattern.MatchString(prefix)
 }
 
 // Generate mints a new secret for the given audience prefix.

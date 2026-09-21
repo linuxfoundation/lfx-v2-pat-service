@@ -36,6 +36,13 @@ The service reads its configuration from environment variables (CLI flags `-p`, 
 | `JWKS_URL` | `http://heimdall:4457/.well-known/jwks` | JWKS endpoint used to verify Heimdall-issued JWTs |
 | `AUDIENCE` | `lfx-v2-pat-service` | Expected `aud` claim of the Heimdall-issued JWT |
 | `ISSUER` | `heimdall` | Expected `iss` claim of the Heimdall-issued JWT |
+| `JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL` | | Local development only: skip JWT verification and attribute every request to this principal |
+| `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` | `PGPORT=5432` | Postgres connection, read from the RDS secret in the chart |
+| `PGSSLMODE` | `require` | libpq SSL mode; `disable` for a local database |
+| `PG_MAX_CONNS` | `10` | Connection pool size |
+| `DB_MIGRATE_ON_START` | `true` | Apply pending migrations before listening |
+| `VALIDATOR_PRINCIPALS` | | Comma-separated Heimdall principals (`<client_id>@clients`) allowed to call `POST /_tokens/validate`; empty refuses every call |
+| `TOKEN_MAX_ACTIVE_PER_AUDIENCE` | `25` | Active tokens one user may hold per audience |
 | `OTEL_*` | | OpenTelemetry exporter settings, see `pkg/telemetry` |
 
 ## Local development

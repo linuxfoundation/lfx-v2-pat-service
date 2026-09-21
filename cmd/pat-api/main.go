@@ -31,7 +31,11 @@ func init() {
 }
 
 func main() {
-	cfg := config.LoadConfig()
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		slog.With(log.ErrKey, err).Error("invalid configuration")
+		os.Exit(1)
+	}
 
 	ctx := context.Background()
 	otelConfig := telemetry.OTelConfigFromEnv()

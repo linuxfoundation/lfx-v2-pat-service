@@ -10,9 +10,23 @@ const (
 	EnvHost  = "HOST"
 	EnvDebug = "DEBUG"
 
-	EnvJWKSURL  = "JWKS_URL"
-	EnvAudience = "AUDIENCE"
-	EnvIssuer   = "ISSUER"
+	EnvJWKSURL            = "JWKS_URL"
+	EnvAudience           = "AUDIENCE"
+	EnvIssuer             = "ISSUER"
+	EnvMockLocalPrincipal = "JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL"
+
+	// Database credentials arrive as the five libpq-standard variables the chart reads from the RDS secret.
+	EnvPGHost     = "PGHOST"
+	EnvPGPort     = "PGPORT"
+	EnvPGUser     = "PGUSER"
+	EnvPGPassword = "PGPASSWORD"
+	EnvPGDatabase = "PGDATABASE"
+	EnvPGSSLMode  = "PGSSLMODE"
+	EnvPGMaxConns = "PG_MAX_CONNS"
+
+	EnvMigrateOnStart       = "DB_MIGRATE_ON_START"
+	EnvValidatorPrincipals  = "VALIDATOR_PRINCIPALS"
+	EnvMaxActivePerAudience = "TOKEN_MAX_ACTIVE_PER_AUDIENCE"
 
 	EnvKoDataPath = "KO_DATA_PATH"
 )
@@ -25,6 +39,13 @@ const (
 	DefaultJWKSURL  = "http://heimdall:4457/.well-known/jwks"
 	DefaultAudience = "lfx-v2-pat-service"
 	DefaultIssuer   = "heimdall"
+
+	DefaultPGPort     = "5432"
+	DefaultPGSSLMode  = "require"
+	DefaultPGMaxConns = 10
+
+	DefaultMigrateOnStart       = true
+	DefaultMaxActivePerAudience = 25
 
 	DefaultKoDataPath = "."
 )

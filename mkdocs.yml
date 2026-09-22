@@ -2,5 +2,9 @@
 ---
 site_name: LFX V2 Personal Access Token Service
 site_description: Creating and managing long lived personal access tokens for different audiences
+nav:
+  - Overview: index.md
+  - API: api.md
+  - Secret format: secret-format.md
 plugins:
   - techdocs-core

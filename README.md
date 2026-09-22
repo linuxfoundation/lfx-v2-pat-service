@@ -51,9 +51,8 @@ The service reads its configuration from environment variables (CLI flags `-p`, 
 ```bash
 make apigen     # regenerate gen/ after changing design/
 make build      # bin/lfx-v2-pat-service
-make test       # unit tests; live database tests skip without TEST_DATABASE_URL
+make test
 make db-up      # disposable Postgres 16 in Docker on 127.0.0.1:5433 (DB_PORT=... to change)
-make test-live  # every test, including the live database tests, against db-up
 make lint
 make fmt
 ```

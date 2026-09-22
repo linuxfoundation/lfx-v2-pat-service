@@ -25,7 +25,7 @@ GOA_VERSION := v3.25.3
 GO_FILES=$(shell find . -name '*.go' -not -path './gen/*' -not -path './vendor/*')
 
 # Linting
-GOLANGCI_LINT_VERSION := v2.2.2
+GOLANGCI_LINT_VERSION := v2.13.2
 LINT_TIMEOUT := 10m
 LINT_TOOL=$(shell go env GOPATH)/bin/golangci-lint
 
@@ -64,11 +64,11 @@ lint: ## Run golangci-lint (local Go linting)
 	@golangci-lint run ./... && echo "==> Lint OK"
 
 .PHONY: test
-test: ## Run tests (live database tests skip unless TEST_DATABASE_URL is set)
+test: ## Run tests
 	@echo "Running tests..."
 	go test -v -race -coverprofile=coverage.out ./...
 
-# Local database for the live tests and for running the service with STORE=postgres.
+# Local database for running the service with STORE=postgres.
 DB_CONTAINER := pat-pg
 DB_PORT ?= 5433
 DB_URL := postgres://pat:pat@localhost:$(DB_PORT)/pat?sslmode=disable
@@ -90,10 +90,6 @@ db-up: ## Start a disposable Postgres 16 in Docker (DB_PORT overrides the host p
 .PHONY: db-down
 db-down: ## Stop and remove the disposable Postgres
 	@docker rm -f $(DB_CONTAINER) >/dev/null 2>&1 || true
-
-.PHONY: test-live
-test-live: ## Run every test, including the live database tests, against the db-up database
-	TEST_DATABASE_URL='$(DB_URL)' go test -v -race -count=1 ./...
 
 .PHONY: build
 build: ## Build the application for local OS

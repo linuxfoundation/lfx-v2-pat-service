@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -25,6 +26,10 @@ const (
 	signatureAlgorithm = validator.PS256
 	jwksCacheTTL       = 5 * time.Minute
 	allowedClockSkew   = 5 * time.Second
+	// jwksFetchTimeout bounds a key-set fetch. The provider holds its refresh lock while fetching, so a Heimdall
+	// that accepts the connection and stalls would otherwise queue every other validation behind it. It stays well
+	// under the server's write timeout.
+	jwksFetchTimeout = 10 * time.Second
 )
 
 // Config holds the parameters for verifying Heimdall JWTs.
@@ -77,7 +82,10 @@ func NewJWTAuth(config Config) (*JWTAuth, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid issuer: %w", err)
 	}
-	provider := jwks.NewCachingProvider(issuer, jwksCacheTTL, jwks.WithCustomJWKSURI(jwksURL))
+	provider := jwks.NewCachingProvider(issuer, jwksCacheTTL,
+		jwks.WithCustomJWKSURI(jwksURL),
+		jwks.WithCustomClient(&http.Client{Timeout: jwksFetchTimeout}),
+	)
 
 	jwtValidator, err := validator.New(
 		provider.KeyFunc,

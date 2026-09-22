@@ -62,10 +62,6 @@ const (
 // this seed, for examples and tests.
 const AudienceInsights = "insights"
 
-// ScopeValidate is the JWT scope the validate endpoint requires. JWTAuth uses its presence to switch from the
-// user-principal policy to the allow-listed machine-principal policy.
-const ScopeValidate = "token:validate"
-
 // Error codes carried in the "error" field of custom error bodies. lfx-one forwards them to its UI as upstreamCode,
 // which is the only way a 409 or 404 keeps a distinguishable cause.
 const (

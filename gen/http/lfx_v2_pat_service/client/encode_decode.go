@@ -70,7 +70,6 @@ func EncodeCreateTokenRequest(encoder func(*http.Request) goahttp.Encoder) func(
 //   - "Unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
 //   - "Forbidden" (type *goa.ServiceError): http.StatusForbidden
 //   - "BadRequest" (type *goa.ServiceError): http.StatusBadRequest
-//   - "NotImplemented" (type *goa.ServiceError): http.StatusNotImplemented
 //   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
 //   - "ServiceUnavailable" (type *goa.ServiceError): http.StatusServiceUnavailable
 //   - "Conflict" (type *lfxv2patservice.ConflictError): http.StatusConflict
@@ -147,20 +146,6 @@ func DecodeCreateTokenResponse(decoder func(*http.Response) goahttp.Decoder, res
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "create-token", err)
 			}
 			return nil, NewCreateTokenBadRequest(&body)
-		case http.StatusNotImplemented:
-			var (
-				body CreateTokenNotImplementedResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "create-token", err)
-			}
-			err = ValidateCreateTokenNotImplementedResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "create-token", err)
-			}
-			return nil, NewCreateTokenNotImplemented(&body)
 		case http.StatusInternalServerError:
 			var (
 				body CreateTokenInternalServerErrorResponseBody
@@ -260,7 +245,6 @@ func EncodeListTokensRequest(encoder func(*http.Request) goahttp.Encoder) func(*
 //   - "Unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
 //   - "Forbidden" (type *goa.ServiceError): http.StatusForbidden
 //   - "BadRequest" (type *goa.ServiceError): http.StatusBadRequest
-//   - "NotImplemented" (type *goa.ServiceError): http.StatusNotImplemented
 //   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
 //   - "ServiceUnavailable" (type *goa.ServiceError): http.StatusServiceUnavailable
 //   - error: internal error
@@ -336,20 +320,6 @@ func DecodeListTokensResponse(decoder func(*http.Response) goahttp.Decoder, rest
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "list-tokens", err)
 			}
 			return nil, NewListTokensBadRequest(&body)
-		case http.StatusNotImplemented:
-			var (
-				body ListTokensNotImplementedResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "list-tokens", err)
-			}
-			err = ValidateListTokensNotImplementedResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "list-tokens", err)
-			}
-			return nil, NewListTokensNotImplemented(&body)
 		case http.StatusInternalServerError:
 			var (
 				body ListTokensInternalServerErrorResponseBody
@@ -443,7 +413,6 @@ func EncodeGetTokenRequest(encoder func(*http.Request) goahttp.Encoder) func(*ht
 //   - "Forbidden" (type *goa.ServiceError): http.StatusForbidden
 //   - "BadRequest" (type *goa.ServiceError): http.StatusBadRequest
 //   - "NotFound" (type *goa.ServiceError): http.StatusNotFound
-//   - "NotImplemented" (type *goa.ServiceError): http.StatusNotImplemented
 //   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
 //   - "ServiceUnavailable" (type *goa.ServiceError): http.StatusServiceUnavailable
 //   - error: internal error
@@ -533,20 +502,6 @@ func DecodeGetTokenResponse(decoder func(*http.Response) goahttp.Decoder, restor
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "get-token", err)
 			}
 			return nil, NewGetTokenNotFound(&body)
-		case http.StatusNotImplemented:
-			var (
-				body GetTokenNotImplementedResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "get-token", err)
-			}
-			err = ValidateGetTokenNotImplementedResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "get-token", err)
-			}
-			return nil, NewGetTokenNotImplemented(&body)
 		case http.StatusInternalServerError:
 			var (
 				body GetTokenInternalServerErrorResponseBody
@@ -640,7 +595,6 @@ func EncodeDeleteTokenRequest(encoder func(*http.Request) goahttp.Encoder) func(
 //   - "Forbidden" (type *goa.ServiceError): http.StatusForbidden
 //   - "BadRequest" (type *goa.ServiceError): http.StatusBadRequest
 //   - "NotFound" (type *goa.ServiceError): http.StatusNotFound
-//   - "NotImplemented" (type *goa.ServiceError): http.StatusNotImplemented
 //   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
 //   - "ServiceUnavailable" (type *goa.ServiceError): http.StatusServiceUnavailable
 //   - error: internal error
@@ -717,20 +671,6 @@ func DecodeDeleteTokenResponse(decoder func(*http.Response) goahttp.Decoder, res
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "delete-token", err)
 			}
 			return nil, NewDeleteTokenNotFound(&body)
-		case http.StatusNotImplemented:
-			var (
-				body DeleteTokenNotImplementedResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "delete-token", err)
-			}
-			err = ValidateDeleteTokenNotImplementedResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "delete-token", err)
-			}
-			return nil, NewDeleteTokenNotImplemented(&body)
 		case http.StatusInternalServerError:
 			var (
 				body DeleteTokenInternalServerErrorResponseBody
@@ -817,7 +757,6 @@ func EncodeValidateTokenRequest(encoder func(*http.Request) goahttp.Encoder) fun
 //   - "Unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
 //   - "Forbidden" (type *goa.ServiceError): http.StatusForbidden
 //   - "BadRequest" (type *goa.ServiceError): http.StatusBadRequest
-//   - "NotImplemented" (type *goa.ServiceError): http.StatusNotImplemented
 //   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
 //   - "ServiceUnavailable" (type *goa.ServiceError): http.StatusServiceUnavailable
 //   - "InvalidToken" (type *lfxv2patservice.InvalidTokenError): http.StatusNotFound
@@ -894,20 +833,6 @@ func DecodeValidateTokenResponse(decoder func(*http.Response) goahttp.Decoder, r
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "validate-token", err)
 			}
 			return nil, NewValidateTokenBadRequest(&body)
-		case http.StatusNotImplemented:
-			var (
-				body ValidateTokenNotImplementedResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "validate-token", err)
-			}
-			err = ValidateValidateTokenNotImplementedResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "validate-token", err)
-			}
-			return nil, NewValidateTokenNotImplemented(&body)
 		case http.StatusInternalServerError:
 			var (
 				body ValidateTokenInternalServerErrorResponseBody

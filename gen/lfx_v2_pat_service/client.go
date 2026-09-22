@@ -45,7 +45,6 @@ func NewClient(createToken, listTokens, getToken, deleteToken, validateToken, li
 //   - "Forbidden" (type *goa.ServiceError): Principal is not allowed to call this endpoint
 //   - "BadRequest" (type *goa.ServiceError): Invalid name, or unknown or disabled audience
 //   - "Conflict" (type *ConflictError): Name already used, or active-token limit reached, for this audience
-//   - "NotImplemented" (type *goa.ServiceError): Endpoint not implemented
 //   - "InternalServerError" (type *goa.ServiceError): Internal server error
 //   - "ServiceUnavailable" (type *goa.ServiceError): Service unavailable
 //   - error: internal error
@@ -64,7 +63,6 @@ func (c *Client) CreateToken(ctx context.Context, p *CreateTokenPayload) (res *C
 //   - "Unauthorized" (type *goa.ServiceError): Missing, invalid or anonymous bearer token
 //   - "Forbidden" (type *goa.ServiceError): Principal is not allowed to call this endpoint
 //   - "BadRequest" (type *goa.ServiceError): Invalid filter
-//   - "NotImplemented" (type *goa.ServiceError): Endpoint not implemented
 //   - "InternalServerError" (type *goa.ServiceError): Internal server error
 //   - "ServiceUnavailable" (type *goa.ServiceError): Service unavailable
 //   - error: internal error
@@ -83,7 +81,6 @@ func (c *Client) ListTokens(ctx context.Context, p *ListTokensPayload) (res *Lis
 //   - "Forbidden" (type *goa.ServiceError): Principal is not allowed to call this endpoint
 //   - "BadRequest" (type *goa.ServiceError): uid is not a UUID
 //   - "NotFound" (type *goa.ServiceError): No active token with this uid is owned by the caller
-//   - "NotImplemented" (type *goa.ServiceError): Endpoint not implemented
 //   - "InternalServerError" (type *goa.ServiceError): Internal server error
 //   - "ServiceUnavailable" (type *goa.ServiceError): Service unavailable
 //   - error: internal error
@@ -103,7 +100,6 @@ func (c *Client) GetToken(ctx context.Context, p *GetTokenPayload) (res *TokenRe
 //   - "Forbidden" (type *goa.ServiceError): Principal is not allowed to call this endpoint
 //   - "BadRequest" (type *goa.ServiceError): uid is not a UUID
 //   - "NotFound" (type *goa.ServiceError): No active token with this uid is owned by the caller
-//   - "NotImplemented" (type *goa.ServiceError): Endpoint not implemented
 //   - "InternalServerError" (type *goa.ServiceError): Internal server error
 //   - "ServiceUnavailable" (type *goa.ServiceError): Service unavailable
 //   - error: internal error
@@ -119,7 +115,6 @@ func (c *Client) DeleteToken(ctx context.Context, p *DeleteTokenPayload) (err er
 //   - "Forbidden" (type *goa.ServiceError): Principal is not allowed to call this endpoint
 //   - "BadRequest" (type *goa.ServiceError): Malformed request body
 //   - "InvalidToken" (type *InvalidTokenError): Unknown, malformed, revoked, or disabled-audience secret
-//   - "NotImplemented" (type *goa.ServiceError): Endpoint not implemented
 //   - "InternalServerError" (type *goa.ServiceError): Internal server error
 //   - "ServiceUnavailable" (type *goa.ServiceError): Service unavailable
 //   - error: internal error

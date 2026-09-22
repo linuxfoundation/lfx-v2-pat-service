@@ -5,81 +5,184 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	svc "github.com/linuxfoundation/lfx-v2-pat-service/gen/lfx_v2_pat_service"
+	"github.com/linuxfoundation/lfx-v2-pat-service/internal/domain"
+	"github.com/linuxfoundation/lfx-v2-pat-service/internal/infrastructure/auth"
+	"github.com/linuxfoundation/lfx-v2-pat-service/internal/infrastructure/mock"
+	"github.com/linuxfoundation/lfx-v2-pat-service/internal/service"
+	"github.com/linuxfoundation/lfx-v2-pat-service/pkg/constants"
+	pkgerrors "github.com/linuxfoundation/lfx-v2-pat-service/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	goa "goa.design/goa/v3/pkg"
 )
 
-func always(v bool) func(context.Context) bool {
-	return func(context.Context) bool { return v }
+// bearerAuth resolves the bearer token itself as the principal, so a request chooses its caller by sending
+// "Authorization: Bearer <principal>". An empty token is unauthenticated.
+type bearerAuth struct{}
+
+func (bearerAuth) Authenticate(_ context.Context, token string) (domain.Caller, error) {
+	if token == "" {
+		return domain.Caller{}, pkgerrors.NewUnauthorized("missing bearer token")
+	}
+	return domain.Caller{Principal: token, Email: token + "@example.com"}, nil
+}
+
+func newDeps(ready bool, authenticator domain.Authenticator) (Deps, *mock.TokenRepository) {
+	audiences := mock.NewAudienceRepository()
+	tokens := mock.NewTokenRepository(audiences)
+	tokens.SetReady(ready)
+	return Deps{
+		Auth:      authenticator,
+		Manager:   service.NewManager(tokens, tokens, audiences, 3),
+		Validator: service.NewValidator(tokens),
+		Ready:     tokens.Ready,
+	}, tokens
+}
+
+func serviceErrorName(t *testing.T, err error) string {
+	t.Helper()
+	var serr *goa.ServiceError
+	require.ErrorAs(t, err, &serr)
+	return serr.Name
 }
 
 func TestLivez(t *testing.T) {
-	result, err := New(always(false)).Livez(context.Background())
+	deps, _ := newDeps(false, bearerAuth{})
+
+	result, err := New(deps).Livez(context.Background())
 
 	require.NoError(t, err)
 	assert.Equal(t, "OK\n", string(result))
 }
 
 func TestReadyz(t *testing.T) {
-	tests := []struct {
-		name  string
-		ready bool
-	}{
-		{name: "ready returns OK", ready: true},
-		{name: "not ready returns ServiceUnavailable", ready: false},
-	}
+	for _, ready := range []bool{true, false} {
+		t.Run(fmt.Sprintf("ready=%v", ready), func(t *testing.T) {
+			deps, _ := newDeps(ready, bearerAuth{})
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result, err := New(always(tt.ready)).Readyz(context.Background())
+			result, err := New(deps).Readyz(context.Background())
 
-			if tt.ready {
+			if ready {
 				require.NoError(t, err)
 				assert.Equal(t, "OK\n", string(result))
 				return
 			}
 			assert.Nil(t, result)
-			var serr *goa.ServiceError
-			require.ErrorAs(t, err, &serr)
-			assert.Equal(t, "ServiceUnavailable", serr.Name)
-			assert.True(t, serr.Temporary)
+			assert.Equal(t, "ServiceUnavailable", serviceErrorName(t, err))
 		})
 	}
 }
 
-func TestJWTAuthPassesContextThrough(t *testing.T) {
-	ctx := context.Background()
+func TestJWTAuthStoresCaller(t *testing.T) {
+	tests := []struct {
+		name      string
+		token     string
+		wantError string
+	}{
+		{"user", "alice", ""},
+		{"machine", "abc123@clients", ""},
+		{"missing token", "", "Unauthorized"},
+	}
 
-	got, err := New(always(true)).JWTAuth(ctx, "any", nil)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			deps, _ := newDeps(true, bearerAuth{})
 
-	require.NoError(t, err)
-	assert.Equal(t, ctx, got)
+			ctx, err := New(deps).JWTAuth(context.Background(), tt.token, nil)
+
+			if tt.wantError != "" {
+				assert.Equal(t, tt.wantError, serviceErrorName(t, err))
+				return
+			}
+			require.NoError(t, err)
+			caller, ok := ctx.Value(constants.CallerContextKey).(domain.Caller)
+			require.True(t, ok)
+			assert.Equal(t, tt.token, caller.Principal)
+		})
+	}
 }
 
-func TestTokenMethodsAreNotImplemented(t *testing.T) {
-	s := New(always(true))
+func TestTokenRoutesRefuseMachinePrincipals(t *testing.T) {
+	deps, _ := newDeps(true, bearerAuth{})
+	s := New(deps)
+	ctx := context.WithValue(context.Background(), constants.CallerContextKey, domain.Caller{Principal: "abc123@clients"})
+
+	_, err := s.CreateToken(ctx, &svc.CreateTokenPayload{Name: "ci", Audience: constants.AudienceInsights})
+	assert.Equal(t, "Forbidden", serviceErrorName(t, err))
+	_, err = s.ListTokens(ctx, &svc.ListTokensPayload{})
+	assert.Equal(t, "Forbidden", serviceErrorName(t, err))
+	_, err = s.GetToken(ctx, &svc.GetTokenPayload{UID: "x"})
+	assert.Equal(t, "Forbidden", serviceErrorName(t, err))
+	assert.Equal(t, "Forbidden", serviceErrorName(t, s.DeleteToken(ctx, &svc.DeleteTokenPayload{UID: "x"})))
+
+	// validate-token is the machine route: the same caller reaches the credential check.
+	_, err = s.ValidateToken(ctx, &svc.ValidateTokenPayload{Secret: "lfi_x"})
+	var invalid *svc.InvalidTokenError
+	assert.ErrorAs(t, err, &invalid)
+}
+
+func TestJWTAuthMapsAuthenticatorFailures(t *testing.T) {
+	deps, _ := newDeps(true, auth.Static{Err: pkgerrors.NewUnexpected("jwks down")})
+
+	_, err := New(deps).JWTAuth(context.Background(), "x", nil)
+
+	assert.Equal(t, "InternalServerError", serviceErrorName(t, err))
+}
+
+func TestMethodsRequireCallerInContext(t *testing.T) {
+	deps, _ := newDeps(true, bearerAuth{})
+	s := New(deps)
 	ctx := context.Background()
 
+	_, err := s.CreateToken(ctx, &svc.CreateTokenPayload{Name: "ci", Audience: constants.AudienceInsights})
+	assert.Equal(t, "Unauthorized", serviceErrorName(t, err))
+	_, err = s.ListTokens(ctx, &svc.ListTokensPayload{})
+	assert.Equal(t, "Unauthorized", serviceErrorName(t, err))
+	_, err = s.GetToken(ctx, &svc.GetTokenPayload{UID: "x"})
+	assert.Equal(t, "Unauthorized", serviceErrorName(t, err))
+	assert.Equal(t, "Unauthorized", serviceErrorName(t, s.DeleteToken(ctx, &svc.DeleteTokenPayload{UID: "x"})))
+	_, err = s.ValidateToken(ctx, &svc.ValidateTokenPayload{Secret: "x"})
+	assert.Equal(t, "Unauthorized", serviceErrorName(t, err))
+}
+
+func TestWrapError(t *testing.T) {
+	cause := fmt.Errorf("db exploded")
 	tests := []struct {
-		name string
-		call func() error
+		name    string
+		err     error
+		want    string
+		message string
 	}{
-		{"create-token", func() error { _, err := s.CreateToken(ctx, &svc.CreateTokenPayload{}); return err }},
-		{"list-tokens", func() error { _, err := s.ListTokens(ctx, &svc.ListTokensPayload{}); return err }},
-		{"get-token", func() error { _, err := s.GetToken(ctx, &svc.GetTokenPayload{}); return err }},
-		{"delete-token", func() error { return s.DeleteToken(ctx, &svc.DeleteTokenPayload{}) }},
-		{"validate-token", func() error { _, err := s.ValidateToken(ctx, &svc.ValidateTokenPayload{}); return err }},
+		{"not found", pkgerrors.NewNotFound("no token", cause), "NotFound", "no token"},
+		{"validation", pkgerrors.NewValidation("bad name"), "BadRequest", "bad name"},
+		{"unauthorized", pkgerrors.NewUnauthorized("expired"), "Unauthorized", "expired"},
+		{"forbidden", pkgerrors.NewForbidden("nope"), "Forbidden", "nope"},
+		{"unavailable hides cause", pkgerrors.NewServiceUnavailable("database unavailable", cause), "ServiceUnavailable", "database unavailable"},
+		{"unexpected is redacted", pkgerrors.NewUnexpected("boom", cause), "InternalServerError", "internal service error"},
+		{"plain error is redacted", cause, "InternalServerError", "internal service error"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var serr *goa.ServiceError
-			require.ErrorAs(t, tt.call(), &serr)
-			assert.Equal(t, "NotImplemented", serr.Name)
+			require.ErrorAs(t, wrapError(context.Background(), tt.err), &serr)
+			assert.Equal(t, tt.want, serr.Name)
+			assert.Equal(t, tt.message, serr.Message)
+			assert.NotContains(t, serr.Message, "exploded")
 		})
 	}
+}
+
+func TestWrapErrorConflictKeepsCode(t *testing.T) {
+	err := wrapError(context.Background(), pkgerrors.NewConflict(constants.ErrCodeTokenLimitReached, "too many"))
+
+	var conflict *svc.ConflictError
+	require.ErrorAs(t, err, &conflict)
+	assert.Equal(t, constants.ErrCodeTokenLimitReached, conflict.Code)
+	assert.Equal(t, "too many", conflict.Message)
+	assert.Equal(t, "Conflict", conflict.GoaErrorName())
 }

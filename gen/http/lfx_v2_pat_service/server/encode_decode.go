@@ -138,19 +138,6 @@ func EncodeCreateTokenError(encoder func(context.Context, http.ResponseWriter) g
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
 			return enc.Encode(body)
-		case "NotImplemented":
-			var res *goa.ServiceError
-			errors.As(v, &res)
-			enc := encoder(ctx, w)
-			var body any
-			if formatter != nil {
-				body = formatter(ctx, res)
-			} else {
-				body = NewCreateTokenNotImplementedResponseBody(res)
-			}
-			w.Header().Set("goa-error", res.GoaErrorName())
-			w.WriteHeader(http.StatusNotImplemented)
-			return enc.Encode(body)
 		case "InternalServerError":
 			var res *goa.ServiceError
 			errors.As(v, &res)
@@ -305,19 +292,6 @@ func EncodeListTokensError(encoder func(context.Context, http.ResponseWriter) go
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
 			return enc.Encode(body)
-		case "NotImplemented":
-			var res *goa.ServiceError
-			errors.As(v, &res)
-			enc := encoder(ctx, w)
-			var body any
-			if formatter != nil {
-				body = formatter(ctx, res)
-			} else {
-				body = NewListTokensNotImplementedResponseBody(res)
-			}
-			w.Header().Set("goa-error", res.GoaErrorName())
-			w.WriteHeader(http.StatusNotImplemented)
-			return enc.Encode(body)
 		case "InternalServerError":
 			var res *goa.ServiceError
 			errors.As(v, &res)
@@ -468,19 +442,6 @@ func EncodeGetTokenError(encoder func(context.Context, http.ResponseWriter) goah
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusNotFound)
 			return enc.Encode(body)
-		case "NotImplemented":
-			var res *goa.ServiceError
-			errors.As(v, &res)
-			enc := encoder(ctx, w)
-			var body any
-			if formatter != nil {
-				body = formatter(ctx, res)
-			} else {
-				body = NewGetTokenNotImplementedResponseBody(res)
-			}
-			w.Header().Set("goa-error", res.GoaErrorName())
-			w.WriteHeader(http.StatusNotImplemented)
-			return enc.Encode(body)
 		case "InternalServerError":
 			var res *goa.ServiceError
 			errors.As(v, &res)
@@ -627,19 +588,6 @@ func EncodeDeleteTokenError(encoder func(context.Context, http.ResponseWriter) g
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusNotFound)
-			return enc.Encode(body)
-		case "NotImplemented":
-			var res *goa.ServiceError
-			errors.As(v, &res)
-			enc := encoder(ctx, w)
-			var body any
-			if formatter != nil {
-				body = formatter(ctx, res)
-			} else {
-				body = NewDeleteTokenNotImplementedResponseBody(res)
-			}
-			w.Header().Set("goa-error", res.GoaErrorName())
-			w.WriteHeader(http.StatusNotImplemented)
 			return enc.Encode(body)
 		case "InternalServerError":
 			var res *goa.ServiceError
@@ -791,19 +739,6 @@ func EncodeValidateTokenError(encoder func(context.Context, http.ResponseWriter)
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
-			return enc.Encode(body)
-		case "NotImplemented":
-			var res *goa.ServiceError
-			errors.As(v, &res)
-			enc := encoder(ctx, w)
-			var body any
-			if formatter != nil {
-				body = formatter(ctx, res)
-			} else {
-				body = NewValidateTokenNotImplementedResponseBody(res)
-			}
-			w.Header().Set("goa-error", res.GoaErrorName())
-			w.WriteHeader(http.StatusNotImplemented)
 			return enc.Encode(body)
 		case "InternalServerError":
 			var res *goa.ServiceError

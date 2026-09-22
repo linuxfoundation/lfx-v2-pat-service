@@ -138,14 +138,12 @@ func AuthResponses() {
 
 // ServerErrors declares the errors every endpoint can produce regardless of input.
 func ServerErrors() {
-	dsl.Error("NotImplemented", dsl.ErrorResult, "Endpoint not implemented")
 	dsl.Error("InternalServerError", dsl.ErrorResult, "Internal server error", func() { dsl.Fault() })
 	dsl.Error("ServiceUnavailable", dsl.ErrorResult, "Service unavailable", func() { dsl.Temporary() })
 }
 
 // ServerResponses maps ServerErrors to HTTP statuses.
 func ServerResponses() {
-	dsl.Response("NotImplemented", dsl.StatusNotImplemented)
 	dsl.Response("InternalServerError", dsl.StatusInternalServerError)
 	dsl.Response("ServiceUnavailable", dsl.StatusServiceUnavailable)
 }

@@ -122,6 +122,15 @@ docker-run: ## Run Docker container locally against the db-up database
 		$(DOCKER_IMAGE):$(DOCKER_TAG)
 
 ##@ Helm/Kubernetes
+
+.PHONY: helm-lint
+helm-lint: ## Lint the chart and render it with the default and the local example values
+	helm lint $(HELM_CHART_PATH)
+	helm template $(HELM_RELEASE_NAME) $(HELM_CHART_PATH) --namespace $(HELM_NAMESPACE) >/dev/null
+	helm template $(HELM_RELEASE_NAME) $(HELM_CHART_PATH) --namespace $(HELM_NAMESPACE) \
+		--values $(HELM_CHART_PATH)/values.local.example.yaml >/dev/null
+	@echo "==> Helm chart OK"
+
 # Install Helm chart
 .PHONY: helm-install
 helm-install:

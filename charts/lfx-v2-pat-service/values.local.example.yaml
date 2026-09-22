@@ -15,3 +15,21 @@ image:
   repository: ghcr.io/linuxfoundation/lfx-v2-pat-service/pat-api
   tag: "latest"  # Overrides appVersion from Chart.yaml
   pullPolicy: Never
+
+app:
+  # Skip JWT verification and act as this user.
+  jwtAuthDisabledMockLocalPrincipal: alice
+
+# Without OpenFGA the validate route accepts every authenticated caller, so the mock principal can validate too.
+openfga:
+  enabled: false
+
+database:
+  # The in-memory store needs no database. To exercise Postgres locally, set store: postgres and mode: local,
+  # and point database.local at a Postgres reachable from the cluster.
+  store: memory
+  # The db-up database speaks plaintext, so the inherited sslmode: require would refuse it.
+  sslmode: disable
+
+networkPolicy:
+  enabled: false

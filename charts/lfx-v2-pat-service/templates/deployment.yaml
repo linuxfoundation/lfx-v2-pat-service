@@ -37,15 +37,82 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if not (has .Values.database.store (list "postgres" "memory")) }}
+          {{- fail "database.store must be postgres or memory" }}
+          {{- end }}
+          {{- if not (has .Values.database.mode (list "external" "local")) }}
+          {{- fail "database.mode must be external or local" }}
+          {{- end }}
           env:
-          {{- range $name, $config := .Values.app.environment }}
-          - name: {{ $name }}
-            {{- if $config.value }}
-            value: {{ $config.value | quote }}
-            {{- else if $config.valueFrom }}
+          - name: PORT
+            value: {{ .Values.service.port | quote }}
+          - name: LOG_LEVEL
+            value: {{ .Values.app.logLevel | quote }}
+          - name: LOG_ADD_SOURCE
+            value: {{ .Values.app.logAddSource | quote }}
+          - name: JWKS_URL
+            value: {{ .Values.app.jwksUrl | quote }}
+          - name: AUDIENCE
+            value: {{ .Values.app.audience | quote }}
+          - name: ISSUER
+            value: {{ .Values.app.issuer | quote }}
+          {{- with .Values.app.jwtAuthDisabledMockLocalPrincipal }}
+          - name: JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL
+            value: {{ . | quote }}
+          {{- end }}
+          - name: TOKEN_MAX_ACTIVE_PER_AUDIENCE
+            value: {{ .Values.app.maxActivePerAudience | quote }}
+          - name: STORE
+            value: {{ .Values.database.store | quote }}
+          {{- if eq .Values.database.store "postgres" }}
+          - name: DB_MIGRATE_ON_START
+            value: {{ .Values.database.migrateOnStart | quote }}
+          - name: PG_MAX_CONNS
+            value: {{ .Values.database.maxConns | quote }}
+          - name: PGSSLMODE
+            value: {{ .Values.database.sslmode | quote }}
+          {{- if eq .Values.database.mode "external" }}
+          # The five credential parts come straight from the Secret; the service composes the URL itself so the
+          # password is never rendered into a manifest.
+          {{- $secret := .Values.database.external.secretName }}
+          {{- $keys := .Values.database.external.keys }}
+          - name: PGHOST
             valueFrom:
-              {{- toYaml $config.valueFrom | nindent 14 }}
-            {{- end }}
+              secretKeyRef:
+                name: {{ $secret }}
+                key: {{ $keys.host }}
+          - name: PGPORT
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secret }}
+                key: {{ $keys.port }}
+          - name: PGUSER
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secret }}
+                key: {{ $keys.username }}
+          - name: PGPASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secret }}
+                key: {{ $keys.password }}
+          - name: PGDATABASE
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secret }}
+                key: {{ $keys.dbname }}
+          {{- else }}
+          - name: PGHOST
+            value: {{ .Values.database.local.host | quote }}
+          - name: PGPORT
+            value: {{ .Values.database.local.port | quote }}
+          - name: PGUSER
+            value: {{ .Values.database.local.user | quote }}
+          - name: PGPASSWORD
+            value: {{ .Values.database.local.password | quote }}
+          - name: PGDATABASE
+            value: {{ .Values.database.local.dbname | quote }}
+          {{- end }}
           {{- end }}
           {{- with .Values.app.extraEnv }}
           {{- toYaml . | nindent 10 }}

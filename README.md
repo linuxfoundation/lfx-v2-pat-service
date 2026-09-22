@@ -80,7 +80,7 @@ The service reads its configuration from environment variables (CLI flags `-p`, 
 |---|---|---|
 | `PORT` | `8080` | HTTP listen port |
 | `HOST` | `0.0.0.0` | Interface to bind on |
-| `DEBUG` | `false` | Mounts the pprof and log-level toggle endpoints; log verbosity itself comes from `LOG_LEVEL` |
+| `DEBUG` | `false` | Mounts the pprof endpoints under `/debug/pprof`; log verbosity itself comes from `LOG_LEVEL` |
 | `LOG_LEVEL` | `info` | `debug`, `info`, `warn` or `error` |
 | `LOG_ADD_SOURCE` | `true` | Add the source location to log lines |
 | `JWKS_URL` | `http://heimdall:4457/.well-known/jwks` | JWKS endpoint used to verify Heimdall-issued JWTs |

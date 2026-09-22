@@ -52,12 +52,10 @@ unknown secret from a revoked one.
 
 Heimdall's `create_jwt` finalizer emits a `principal` claim: the LFID username for a user, `<client_id>@clients`
 for an OAuth client-credentials token, and `_anonymous` when the anonymous authenticator applies. The service
-refuses `_anonymous` outright. Token routes accept user principals only. `POST /_tokens/validate` is declared with the
-`token:validate` scope in the design, which the service uses only to recognise that method (Heimdall's JWT
-carries no scope claim); the authorization for it happens at the gateway, where the RuleSet runs an OpenFGA
-check that the caller is a `member` of the validator team (`app.validatorTeamName`, default `pat_validator`).
-That team holds the Auth0 Actions client per environment, and until its member tuples exist the route denies
-every caller.
+refuses `_anonymous` outright. Token routes accept user principals only. `POST /_tokens/validate` applies no
+principal check in the service; it is authorized at the gateway, where the RuleSet runs an OpenFGA check that the
+caller is a `member` of the validator team (`app.validatorTeamName`, default `pat_validator`). That team holds the
+Auth0 Actions client per environment, and until its member tuples exist the route denies every caller.
 
 The token routes end in `allow_all` in the Heimdall RuleSet because there is no OpenFGA type for tokens; the
 ownership policy above is what the gateway delegates to the service for those routes.

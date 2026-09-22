@@ -29,9 +29,7 @@ type Service interface {
 	DeleteToken(context.Context, *DeleteTokenPayload) (err error)
 	// Resolve a secret to its owner identity and record the use.
 	// Machine-to-machine: the gateway admits only members of the validator OpenFGA
-	// team, and the token:validate scope marks this method rather than being a
-	// claim the caller presents. The caller must check the returned audience
-	// against the one it expects.
+	// team. The caller must check the returned audience against the one it expects.
 	ValidateToken(context.Context, *ValidateTokenPayload) (res *TokenIdentity, err error)
 	// Liveness probe.
 	Livez(context.Context) (res []byte, err error)

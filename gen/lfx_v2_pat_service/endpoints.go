@@ -61,7 +61,7 @@ func NewCreateTokenEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpo
 		var err error
 		sc := security.JWTScheme{
 			Name:           "jwt",
-			Scopes:         []string{"token:validate"},
+			Scopes:         []string{},
 			RequiredScopes: []string{},
 		}
 		var token string
@@ -84,7 +84,7 @@ func NewListTokensEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoi
 		var err error
 		sc := security.JWTScheme{
 			Name:           "jwt",
-			Scopes:         []string{"token:validate"},
+			Scopes:         []string{},
 			RequiredScopes: []string{},
 		}
 		var token string
@@ -107,7 +107,7 @@ func NewGetTokenEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint
 		var err error
 		sc := security.JWTScheme{
 			Name:           "jwt",
-			Scopes:         []string{"token:validate"},
+			Scopes:         []string{},
 			RequiredScopes: []string{},
 		}
 		var token string
@@ -130,7 +130,7 @@ func NewDeleteTokenEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpo
 		var err error
 		sc := security.JWTScheme{
 			Name:           "jwt",
-			Scopes:         []string{"token:validate"},
+			Scopes:         []string{},
 			RequiredScopes: []string{},
 		}
 		var token string
@@ -153,8 +153,8 @@ func NewValidateTokenEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.End
 		var err error
 		sc := security.JWTScheme{
 			Name:           "jwt",
-			Scopes:         []string{"token:validate"},
-			RequiredScopes: []string{"token:validate"},
+			Scopes:         []string{},
+			RequiredScopes: []string{},
 		}
 		var token string
 		if p.BearerToken != nil {

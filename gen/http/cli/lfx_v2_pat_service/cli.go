@@ -202,7 +202,7 @@ func lfxV2PatServiceUsage() {
 	fmt.Fprintln(os.Stderr, `    list-tokens: List the caller's active tokens, newest first. Not paginated: the per-audience limit bounds the size.`)
 	fmt.Fprintln(os.Stderr, `    get-token: Get one of the caller's active tokens.`)
 	fmt.Fprintln(os.Stderr, `    delete-token: Revoke one of the caller's tokens. The row is kept for audit; later reads return 404 and validation fails.`)
-	fmt.Fprintln(os.Stderr, `    validate-token: Resolve a secret to its owner identity and record the use. Machine-to-machine: the gateway admits only members of the validator OpenFGA team, and the token:validate scope marks this method rather than being a claim the caller presents. The caller must check the returned audience against the one it expects.`)
+	fmt.Fprintln(os.Stderr, `    validate-token: Resolve a secret to its owner identity and record the use. Machine-to-machine: the gateway admits only members of the validator OpenFGA team. The caller must check the returned audience against the one it expects.`)
 	fmt.Fprintln(os.Stderr, `    livez: Liveness probe.`)
 	fmt.Fprintln(os.Stderr, `    readyz: Readiness probe.`)
 	fmt.Fprintln(os.Stderr)
@@ -307,7 +307,7 @@ func lfxV2PatServiceValidateTokenUsage() {
 
 	// Description
 	fmt.Fprintln(os.Stderr)
-	fmt.Fprintln(os.Stderr, `Resolve a secret to its owner identity and record the use. Machine-to-machine: the gateway admits only members of the validator OpenFGA team, and the token:validate scope marks this method rather than being a claim the caller presents. The caller must check the returned audience against the one it expects.`)
+	fmt.Fprintln(os.Stderr, `Resolve a secret to its owner identity and record the use. Machine-to-machine: the gateway admits only members of the validator OpenFGA team. The caller must check the returned audience against the one it expects.`)
 
 	// Flags list
 	fmt.Fprintln(os.Stderr, `    -body JSON: `)

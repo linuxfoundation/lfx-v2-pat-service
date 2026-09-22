@@ -5,10 +5,7 @@
 // Run `make apigen` to regenerate the code in gen/ after modifying this file.
 package design
 
-import (
-	"github.com/linuxfoundation/lfx-v2-pat-service/pkg/constants"
-	"goa.design/goa/v3/dsl"
-)
+import "goa.design/goa/v3/dsl"
 
 var _ = dsl.API("lfx-v2-pat-service", func() {
 	dsl.Title("LFX V2 Personal Access Token Service")
@@ -17,11 +14,10 @@ var _ = dsl.API("lfx-v2-pat-service", func() {
 })
 
 // JWTAuth is the Heimdall-issued JWT every endpoint except the health probes requires. Token endpoints need a
-// user principal; validate carries the token:validate scope, which marks it as the machine-to-machine route. Who
-// may call it is decided at the gateway by OpenFGA team membership, not by the service.
+// user principal; validate is the machine-to-machine route, and who may call it is decided at the gateway by
+// OpenFGA team membership, not by the service.
 var JWTAuth = dsl.JWTSecurity("jwt", func() {
 	dsl.Description("Heimdall authorization")
-	dsl.Scope(constants.ScopeValidate, "Marks the validate method. Authorization is an OpenFGA team check at the gateway, not a claim the caller presents")
 })
 
 var _ = dsl.Service("lfx_v2_pat_service", func() {
@@ -141,10 +137,8 @@ var _ = dsl.Service("lfx_v2_pat_service", func() {
 	})
 
 	dsl.Method("validate-token", func() {
-		dsl.Description("Resolve a secret to its owner identity and record the use. Machine-to-machine: the gateway admits only members of the validator OpenFGA team, and the token:validate scope marks this method rather than being a claim the caller presents. The caller must check the returned audience against the one it expects.")
-		dsl.Security(JWTAuth, func() {
-			dsl.Scope(constants.ScopeValidate)
-		})
+		dsl.Description("Resolve a secret to its owner identity and record the use. Machine-to-machine: the gateway admits only members of the validator OpenFGA team. The caller must check the returned audience against the one it expects.")
+		dsl.Security(JWTAuth)
 		dsl.Payload(func() {
 			BearerTokenAttribute()
 			VersionAttribute()

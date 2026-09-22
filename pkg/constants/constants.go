@@ -53,10 +53,6 @@ const (
 // this seed, for examples and tests.
 const AudienceInsights = "insights"
 
-// ScopeValidate marks the validate method in the design. JWTAuth uses it to skip the owner-only rule there; who
-// may call the method is decided at the gateway.
-const ScopeValidate = "token:validate"
-
 // Error codes carried in the "error" field of custom error bodies. lfx-one forwards them to its UI as upstreamCode,
 // which is the only way a 409 or 404 keeps a distinguishable cause.
 const (

@@ -8,7 +8,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"slices"
 	"strings"
 
 	svc "github.com/linuxfoundation/lfx-v2-pat-service/gen/lfx_v2_pat_service"
@@ -44,26 +43,20 @@ func New(deps Deps) *Service {
 	return &Service{deps: deps}
 }
 
-// JWTAuth verifies the token and applies one policy: machine principals are refused on the token routes, which
-// belong to their owner. validate-token (the method carrying the token:validate scope) admits any principal the
-// gateway let through; OpenFGA team membership in the chart's RuleSet decides who, machine or user.
-func (s *Service) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
+// JWTAuth verifies the Heimdall-issued token and stores the caller for the methods. It applies no route policy:
+// the token routes refuse machine principals through ownerFrom, and who may call validate-token is decided at the
+// gateway by OpenFGA team membership.
+func (s *Service) JWTAuth(ctx context.Context, token string, _ *security.JWTScheme) (context.Context, error) {
 	caller, err := s.deps.Auth.Authenticate(ctx, token)
 	if err != nil {
 		return ctx, wrapError(ctx, err)
 	}
-
-	validate := scheme != nil && slices.Contains(scheme.RequiredScopes, constants.ScopeValidate)
-	if !validate && strings.HasSuffix(caller.Principal, constants.ClientPrincipalSuffix) {
-		return ctx, svc.MakeForbidden(fmt.Errorf("machine principals cannot manage personal access tokens"))
-	}
-
 	return context.WithValue(ctx, constants.CallerContextKey, caller), nil
 }
 
 // CreateToken implements create-token.
 func (s *Service) CreateToken(ctx context.Context, p *svc.CreateTokenPayload) (*svc.CreateTokenResult, error) {
-	caller, err := callerFrom(ctx)
+	caller, err := ownerFrom(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +69,7 @@ func (s *Service) CreateToken(ctx context.Context, p *svc.CreateTokenPayload) (*
 
 // ListTokens implements list-tokens.
 func (s *Service) ListTokens(ctx context.Context, p *svc.ListTokensPayload) (*svc.ListTokensResult, error) {
-	caller, err := callerFrom(ctx)
+	caller, err := ownerFrom(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +86,7 @@ func (s *Service) ListTokens(ctx context.Context, p *svc.ListTokensPayload) (*sv
 
 // GetToken implements get-token.
 func (s *Service) GetToken(ctx context.Context, p *svc.GetTokenPayload) (*svc.TokenResponse, error) {
-	caller, err := callerFrom(ctx)
+	caller, err := ownerFrom(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +99,7 @@ func (s *Service) GetToken(ctx context.Context, p *svc.GetTokenPayload) (*svc.To
 
 // DeleteToken implements delete-token.
 func (s *Service) DeleteToken(ctx context.Context, p *svc.DeleteTokenPayload) error {
-	caller, err := callerFrom(ctx)
+	caller, err := ownerFrom(ctx)
 	if err != nil {
 		return err
 	}
@@ -151,6 +144,19 @@ func callerFrom(ctx context.Context) (domain.Caller, error) {
 	caller, ok := ctx.Value(constants.CallerContextKey).(domain.Caller)
 	if !ok || caller.Principal == "" {
 		return domain.Caller{}, svc.MakeUnauthorized(fmt.Errorf("missing caller identity"))
+	}
+	return caller, nil
+}
+
+// ownerFrom returns the caller of a token route. Those routes act on the caller's own tokens, so a machine
+// principal is refused; validate-token uses callerFrom and leaves who may call it to the gateway.
+func ownerFrom(ctx context.Context) (domain.Caller, error) {
+	caller, err := callerFrom(ctx)
+	if err != nil {
+		return domain.Caller{}, err
+	}
+	if strings.HasSuffix(caller.Principal, constants.ClientPrincipalSuffix) {
+		return domain.Caller{}, svc.MakeForbidden(fmt.Errorf("machine principals cannot manage personal access tokens"))
 	}
 	return caller, nil
 }

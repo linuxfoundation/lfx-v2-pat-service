@@ -18,11 +18,7 @@ paths:
             tags:
                 - lfx_v2_pat_service
             summary: validate-token lfx_v2_pat_service
-            description: |-
-                Resolve a secret to its owner identity and record the use. Machine-to-machine: the gateway admits only members of the validator OpenFGA team, and the token:validate scope marks this method rather than being a claim the caller presents. The caller must check the returned audience against the one it expects.
-
-                **Required security scopes for jwt**:
-                  * `token:validate`
+            description: 'Resolve a secret to its owner identity and record the use. Machine-to-machine: the gateway admits only members of the validator OpenFGA team. The caller must check the returned audience against the one it expects.'
             operationId: lfx_v2_pat_service#validate-token
             parameters:
                 - name: v
@@ -1732,10 +1728,6 @@ definitions:
 securityDefinitions:
     jwt_header_Authorization:
         type: apiKey
-        description: |-
-            Heimdall authorization
-
-            **Security Scopes**:
-              * `token:validate`: Marks the validate method. Authorization is an OpenFGA team check at the gateway, not a claim the caller presents
+        description: Heimdall authorization
         name: Authorization
         in: header

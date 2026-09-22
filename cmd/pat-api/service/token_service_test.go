@@ -18,7 +18,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	goa "goa.design/goa/v3/pkg"
-	"goa.design/goa/v3/security"
 )
 
 // bearerAuth resolves the bearer token itself as the principal, so a request chooses its caller by sending
@@ -78,29 +77,22 @@ func TestReadyz(t *testing.T) {
 	}
 }
 
-func TestJWTAuthPolicy(t *testing.T) {
-	userScheme := &security.JWTScheme{Name: "jwt"}
-	validateScheme := &security.JWTScheme{Name: "jwt", RequiredScopes: []string{constants.ScopeValidate}}
-
+func TestJWTAuthStoresCaller(t *testing.T) {
 	tests := []struct {
 		name      string
 		token     string
-		scheme    *security.JWTScheme
 		wantError string
 	}{
-		{"user on user route", "alice", userScheme, ""},
-		{"user on nil scheme is a user route", "alice", nil, ""},
-		{"machine on user route", "abc123@clients", userScheme, "Forbidden"},
-		{"machine on validate", "abc123@clients", validateScheme, ""},
-		{"user on validate is the gateway's call", "alice", validateScheme, ""},
-		{"missing token", "", userScheme, "Unauthorized"},
+		{"user", "alice", ""},
+		{"machine", "abc123@clients", ""},
+		{"missing token", "", "Unauthorized"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			deps, _ := newDeps(true, bearerAuth{})
 
-			ctx, err := New(deps).JWTAuth(context.Background(), tt.token, tt.scheme)
+			ctx, err := New(deps).JWTAuth(context.Background(), tt.token, nil)
 
 			if tt.wantError != "" {
 				assert.Equal(t, tt.wantError, serviceErrorName(t, err))
@@ -112,6 +104,25 @@ func TestJWTAuthPolicy(t *testing.T) {
 			assert.Equal(t, tt.token, caller.Principal)
 		})
 	}
+}
+
+func TestTokenRoutesRefuseMachinePrincipals(t *testing.T) {
+	deps, _ := newDeps(true, bearerAuth{})
+	s := New(deps)
+	ctx := context.WithValue(context.Background(), constants.CallerContextKey, domain.Caller{Principal: "abc123@clients"})
+
+	_, err := s.CreateToken(ctx, &svc.CreateTokenPayload{Name: "ci", Audience: constants.AudienceInsights})
+	assert.Equal(t, "Forbidden", serviceErrorName(t, err))
+	_, err = s.ListTokens(ctx, &svc.ListTokensPayload{})
+	assert.Equal(t, "Forbidden", serviceErrorName(t, err))
+	_, err = s.GetToken(ctx, &svc.GetTokenPayload{UID: "x"})
+	assert.Equal(t, "Forbidden", serviceErrorName(t, err))
+	assert.Equal(t, "Forbidden", serviceErrorName(t, s.DeleteToken(ctx, &svc.DeleteTokenPayload{UID: "x"})))
+
+	// validate-token is the machine route: the same caller reaches the credential check.
+	_, err = s.ValidateToken(ctx, &svc.ValidateTokenPayload{Secret: "lfi_x"})
+	var invalid *svc.InvalidTokenError
+	assert.ErrorAs(t, err, &invalid)
 }
 
 func TestJWTAuthMapsAuthenticatorFailures(t *testing.T) {

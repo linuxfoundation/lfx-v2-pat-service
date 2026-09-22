@@ -17,8 +17,8 @@ var _ = dsl.API("lfx-v2-pat-service", func() {
 })
 
 // JWTAuth is the Heimdall-issued JWT every endpoint except the health probes requires. Token endpoints need a
-// user principal; validate needs the token:validate scope, which the service grants only to allow-listed machine
-// principals.
+// user principal; validate carries the token:validate scope, which marks it as the machine-to-machine route. Who
+// may call it is decided at the gateway by OpenFGA team membership, not by the service.
 var JWTAuth = dsl.JWTSecurity("jwt", func() {
 	dsl.Description("Heimdall authorization")
 	dsl.Scope(constants.ScopeValidate, "Marks the validate method. Authorization is an OpenFGA team check at the gateway, not a claim the caller presents")

@@ -12,7 +12,7 @@ paths:
             tags:
                 - lfx_v2_pat_service
             summary: validate-token lfx_v2_pat_service
-            description: 'Resolve a secret to its owner identity and record the use. Machine-to-machine: the caller must hold the token:validate scope. The caller must check the returned audience against the one it expects.'
+            description: 'Resolve a secret to its owner identity and record the use. Machine-to-machine: the gateway admits only members of the validator OpenFGA team, and the token:validate scope marks this method rather than being a claim the caller presents. The caller must check the returned audience against the one it expects.'
             operationId: lfx_v2_pat_service#validate-token
             parameters:
                 - name: v

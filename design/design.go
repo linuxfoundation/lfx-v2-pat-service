@@ -21,7 +21,7 @@ var _ = dsl.API("lfx-v2-pat-service", func() {
 // principals.
 var JWTAuth = dsl.JWTSecurity("jwt", func() {
 	dsl.Description("Heimdall authorization")
-	dsl.Scope(constants.ScopeValidate, "Validate a secret on behalf of the Auth0 Custom Token Exchange action")
+	dsl.Scope(constants.ScopeValidate, "Marks the validate method. Authorization is an OpenFGA team check at the gateway, not a claim the caller presents")
 })
 
 var _ = dsl.Service("lfx_v2_pat_service", func() {
@@ -141,7 +141,7 @@ var _ = dsl.Service("lfx_v2_pat_service", func() {
 	})
 
 	dsl.Method("validate-token", func() {
-		dsl.Description("Resolve a secret to its owner identity and record the use. Machine-to-machine: the caller must hold the token:validate scope. The caller must check the returned audience against the one it expects.")
+		dsl.Description("Resolve a secret to its owner identity and record the use. Machine-to-machine: the gateway admits only members of the validator OpenFGA team, and the token:validate scope marks this method rather than being a claim the caller presents. The caller must check the returned audience against the one it expects.")
 		dsl.Security(JWTAuth, func() {
 			dsl.Scope(constants.ScopeValidate)
 		})

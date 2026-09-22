@@ -9,7 +9,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"sync"
 
 	svcsvr "github.com/linuxfoundation/lfx-v2-pat-service/gen/http/lfx_v2_pat_service/server"
 	svc "github.com/linuxfoundation/lfx-v2-pat-service/gen/lfx_v2_pat_service"
@@ -105,25 +104,14 @@ func runServerWithContext(ctx context.Context, srv *http.Server, cont *container
 		slog.InfoContext(ctx, "shutdown initiated")
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	go func() {
-		defer wg.Done()
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), constants.DefaultShutdownTimeout)
-		defer cancel()
-		if err := srv.Shutdown(shutdownCtx); err != nil {
-			slog.ErrorContext(ctx, "HTTP server shutdown error", log.ErrKey, err)
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-		if err := cont.Close(); err != nil {
-			slog.ErrorContext(ctx, "container close error", log.ErrKey, err)
-		}
-	}()
-
-	wg.Wait()
+	// Drain HTTP first: requests still in flight need the database pool the container closes.
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), constants.DefaultShutdownTimeout)
+	defer cancel()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		slog.ErrorContext(ctx, "HTTP server shutdown error", log.ErrKey, err)
+	}
+	if err := cont.Close(); err != nil {
+		slog.ErrorContext(ctx, "container close error", log.ErrKey, err)
+	}
 	return nil
 }

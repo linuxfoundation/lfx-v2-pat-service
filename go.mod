@@ -5,6 +5,9 @@ module github.com/linuxfoundation/lfx-v2-pat-service
 
 go 1.25.11
 
+// pgx needs 1.25 as the language floor; builds use a supported toolchain.
+toolchain go1.27.1
+
 require (
 	github.com/auth0/go-jwt-middleware/v2 v2.3.1
 	github.com/google/uuid v1.6.0

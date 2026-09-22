@@ -10,7 +10,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/linuxfoundation/lfx-v2-pat-service/internal/domain"
 	"github.com/linuxfoundation/lfx-v2-pat-service/internal/infrastructure/auth"
 	"github.com/linuxfoundation/lfx-v2-pat-service/internal/infrastructure/config"
 	"github.com/stretchr/testify/assert"
@@ -100,7 +99,9 @@ func TestNewContainerWithPostgres(t *testing.T) {
 	t.Cleanup(func() { _ = c.Close() })
 
 	assert.True(t, c.Ready(context.Background()))
-	created, err := c.Manager.Create(context.Background(), domain.Caller{Principal: "alice"}, "container-test", "insights")
+	// Read-only on purpose: the postgres package's live tests run in parallel against the same database and reset
+	// tokens and audiences, so this only proves the migrations ran and the pool answers queries.
+	tokens, err := c.Manager.List(context.Background(), "container-test", "")
 	require.NoError(t, err)
-	require.NoError(t, c.Manager.Revoke(context.Background(), created.Token.UID, "alice"))
+	assert.Empty(t, tokens)
 }

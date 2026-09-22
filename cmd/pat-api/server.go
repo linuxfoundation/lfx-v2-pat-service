@@ -26,7 +26,7 @@ import (
 
 // StartServer initializes and starts the HTTP server.
 func StartServer(ctx context.Context, cfg *config.Config) error {
-	cont, err := container.NewContainer(cfg)
+	cont, err := container.NewContainer(ctx, cfg)
 	if err != nil {
 		return err
 	}

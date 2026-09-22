@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
+	"math"
 	"net"
 	"net/url"
 	"os"
@@ -37,6 +38,8 @@ type Config struct {
 	PGSSLMode  string
 	PGMaxConns int
 
+	// Store is constants.StorePostgres or constants.StoreMemory.
+	Store                string
 	MigrateOnStart       bool
 	MaxActivePerAudience int
 }
@@ -84,6 +87,10 @@ func FromEnv(getenv func(string) string) (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s must be a boolean: %w", constants.EnvMigrateOnStart, err)
 	}
+	store := get(constants.EnvStore, constants.DefaultStore)
+	if store != constants.StorePostgres && store != constants.StoreMemory {
+		return nil, fmt.Errorf("%s must be %q or %q, got %q", constants.EnvStore, constants.StorePostgres, constants.StoreMemory, store)
+	}
 
 	pgPort := get(constants.EnvPGPort, constants.DefaultPGPort)
 	if n, err := strconv.Atoi(pgPort); err != nil || n < 1 || n > 65535 {
@@ -108,6 +115,7 @@ func FromEnv(getenv func(string) string) (*Config, error) {
 		PGSSLMode:  get(constants.EnvPGSSLMode, constants.DefaultPGSSLMode),
 		PGMaxConns: maxConns,
 
+		Store:                store,
 		MigrateOnStart:       migrate,
 		MaxActivePerAudience: maxActive,
 	}, nil
@@ -141,8 +149,8 @@ func (c *Config) PostgresURL(scheme string) string {
 
 func positiveInt(raw, key string) (int, error) {
 	n, err := strconv.Atoi(raw)
-	if err != nil || n <= 0 {
-		return 0, fmt.Errorf("%s must be a positive integer, got %q", key, raw)
+	if err != nil || n <= 0 || n > math.MaxInt32 {
+		return 0, fmt.Errorf("%s must be a positive integer up to %d, got %q", key, math.MaxInt32, raw)
 	}
 	return n, nil
 }

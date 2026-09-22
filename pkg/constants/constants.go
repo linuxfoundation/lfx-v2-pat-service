@@ -24,6 +24,7 @@ const (
 	EnvPGSSLMode  = "PGSSLMODE"
 	EnvPGMaxConns = "PG_MAX_CONNS"
 
+	EnvStore                = "STORE"
 	EnvMigrateOnStart       = "DB_MIGRATE_ON_START"
 	EnvMaxActivePerAudience = "TOKEN_MAX_ACTIVE_PER_AUDIENCE"
 
@@ -43,10 +44,18 @@ const (
 	DefaultPGSSLMode  = "require"
 	DefaultPGMaxConns = 10
 
+	DefaultStore                = StorePostgres
 	DefaultMigrateOnStart       = true
 	DefaultMaxActivePerAudience = 25
 
 	DefaultKoDataPath = "."
+)
+
+// Store selects the token store. Postgres is the default; the in-memory store is an explicit opt-in for local
+// runs without a database and never persists anything.
+const (
+	StorePostgres = "postgres"
+	StoreMemory   = "memory"
 )
 
 // AudienceInsights is the audience slug seeded by the first migration. Audiences are data; Go references only

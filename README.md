@@ -37,7 +37,9 @@ The service reads its configuration from environment variables (CLI flags `-p`, 
 | `AUDIENCE` | `lfx-v2-pat-service` | Expected `aud` claim of the Heimdall-issued JWT |
 | `ISSUER` | `heimdall` | Expected `iss` claim of the Heimdall-issued JWT |
 | `JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL` | | Local development only: skip JWT verification and attribute every request to this principal |
-| `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` | `PGPORT=5432` | Postgres connection, read from the RDS secret in the chart |
+| `STORE` | `postgres` | `postgres`, or `memory` for a local run without a database (nothing persists) |
+| `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` | | Postgres connection, read from the RDS secret in the chart; all four required when `STORE=postgres` |
+| `PGPORT` | `5432` | Postgres port; optional |
 | `PGSSLMODE` | `require` | libpq SSL mode; `disable` for a local database |
 | `PG_MAX_CONNS` | `10` | Connection pool size |
 | `DB_MIGRATE_ON_START` | `true` | Apply pending migrations before listening |
@@ -47,9 +49,19 @@ The service reads its configuration from environment variables (CLI flags `-p`, 
 ## Local development
 
 ```bash
-make apigen   # regenerate gen/ after changing design/
-make build    # bin/lfx-v2-pat-service
+make apigen     # regenerate gen/ after changing design/
+make build      # bin/lfx-v2-pat-service
 make test
+make db-up      # disposable Postgres 16 in Docker on 127.0.0.1:5433 (DB_PORT=... to change)
 make lint
 make fmt
 ```
+
+Run the service against the local database with JWT verification disabled:
+
+```bash
+PGHOST=localhost PGPORT=5433 PGUSER=pat PGPASSWORD=pat PGDATABASE=pat PGSSLMODE=disable \
+JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=alice ./bin/lfx-v2-pat-service
+```
+
+Migrations live in `internal/infrastructure/postgres/migrations` and are applied at startup (`DB_MIGRATE_ON_START`).

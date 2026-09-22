@@ -25,7 +25,7 @@ GOA_VERSION := v3.25.3
 GO_FILES=$(shell find . -name '*.go' -not -path './gen/*' -not -path './vendor/*')
 
 # Linting
-GOLANGCI_LINT_VERSION := v2.2.2
+GOLANGCI_LINT_VERSION := v2.13.2
 LINT_TIMEOUT := 10m
 LINT_TOOL=$(shell go env GOPATH)/bin/golangci-lint
 
@@ -68,6 +68,29 @@ test: ## Run tests
 	@echo "Running tests..."
 	go test -v -race -coverprofile=coverage.out ./...
 
+# Local database for running the service with STORE=postgres.
+DB_CONTAINER := pat-pg
+DB_PORT ?= 5433
+DB_URL := postgres://pat:pat@localhost:$(DB_PORT)/pat?sslmode=disable
+
+.PHONY: db-up
+db-up: ## Start a disposable Postgres 16 in Docker (DB_PORT overrides the host port; a container on another port is recreated)
+	@if [ "$$(docker inspect -f '{{(index (index .HostConfig.PortBindings "5432/tcp") 0).HostPort}}' $(DB_CONTAINER) 2>/dev/null)" = "$(DB_PORT)" ]; then \
+		docker start $(DB_CONTAINER) >/dev/null; \
+	else \
+		docker rm -f $(DB_CONTAINER) >/dev/null 2>&1 || true; \
+		docker run -d --name $(DB_CONTAINER) \
+			-e POSTGRES_USER=pat -e POSTGRES_PASSWORD=pat -e POSTGRES_DB=pat \
+			-p 127.0.0.1:$(DB_PORT):5432 postgres:16 >/dev/null; \
+	fi
+	@for i in $$(seq 1 30); do docker exec $(DB_CONTAINER) pg_isready -U pat -q 2>/dev/null && break; sleep 1; done
+	@docker exec $(DB_CONTAINER) pg_isready -U pat -q || { echo "Postgres did not become ready"; exit 1; }
+	@echo "==> Postgres at $(DB_URL)"
+
+.PHONY: db-down
+db-down: ## Stop and remove the disposable Postgres
+	@docker rm -f $(DB_CONTAINER) >/dev/null 2>&1 || true
+
 .PHONY: build
 build: ## Build the application for local OS
 	@echo "Building application for local development..."
@@ -89,11 +112,13 @@ docker-build: ## Build Docker image
 	docker tag $(DOCKER_IMAGE):$(DOCKER_TAG) $(DOCKER_IMAGE):latest
 
 .PHONY: docker-run
-docker-run: ## Run Docker container locally
+docker-run: ## Run Docker container locally against the db-up database
 	@echo "Running Docker container..."
 	docker run \
 		--name $(APP_NAME) \
 		-p 8080:8080 \
+		-e PGHOST=host.docker.internal -e PGPORT=$(DB_PORT) -e PGUSER=pat -e PGPASSWORD=pat -e PGDATABASE=pat -e PGSSLMODE=disable \
+		-e JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=alice \
 		$(DOCKER_IMAGE):$(DOCKER_TAG)
 
 ##@ Helm/Kubernetes

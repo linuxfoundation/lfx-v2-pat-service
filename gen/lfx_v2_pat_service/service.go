@@ -28,8 +28,8 @@ type Service interface {
 	// return 404 and validation fails.
 	DeleteToken(context.Context, *DeleteTokenPayload) (err error)
 	// Resolve a secret to its owner identity and record the use.
-	// Machine-to-machine: the caller must hold the token:validate scope. The
-	// caller must check the returned audience against the one it expects.
+	// Machine-to-machine: the gateway admits only members of the validator OpenFGA
+	// team. The caller must check the returned audience against the one it expects.
 	ValidateToken(context.Context, *ValidateTokenPayload) (res *TokenIdentity, err error)
 	// Liveness probe.
 	Livez(context.Context) (res []byte, err error)

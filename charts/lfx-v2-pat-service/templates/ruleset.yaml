@@ -33,7 +33,7 @@ spec:
         - finalizer: create_jwt
           config:
             values:
-              aud: {{ .Values.app.audience }}
+              aud: {{ .Values.app.audience | quote }}
 
     - id: "rule:lfx:lfx-v2-pat-service:tokens:list"
       allow_encoded_slashes: 'off'
@@ -52,7 +52,7 @@ spec:
         - finalizer: create_jwt
           config:
             values:
-              aud: {{ .Values.app.audience }}
+              aud: {{ .Values.app.audience | quote }}
 
     - id: "rule:lfx:lfx-v2-pat-service:tokens:create"
       allow_encoded_slashes: 'off'
@@ -72,7 +72,7 @@ spec:
         - finalizer: create_jwt
           config:
             values:
-              aud: {{ .Values.app.audience }}
+              aud: {{ .Values.app.audience | quote }}
 
     - id: "rule:lfx:lfx-v2-pat-service:tokens:get"
       allow_encoded_slashes: 'off'
@@ -91,7 +91,7 @@ spec:
         - finalizer: create_jwt
           config:
             values:
-              aud: {{ .Values.app.audience }}
+              aud: {{ .Values.app.audience | quote }}
 
     - id: "rule:lfx:lfx-v2-pat-service:tokens:delete"
       allow_encoded_slashes: 'off'
@@ -110,7 +110,7 @@ spec:
         - finalizer: create_jwt
           config:
             values:
-              aud: {{ .Values.app.audience }}
+              aud: {{ .Values.app.audience | quote }}
 
     - id: "rule:lfx:lfx-v2-pat-service:tokens:validate"
       allow_encoded_slashes: 'off'
@@ -147,5 +147,5 @@ spec:
         - finalizer: create_jwt
           config:
             values:
-              aud: {{ .Values.app.audience }}
+              aud: {{ .Values.app.audience | quote }}
 {{- end }}

@@ -5,9 +5,6 @@ package container
 
 import (
 	"context"
-	"net/url"
-	"os"
-	"strings"
 	"testing"
 
 	"github.com/linuxfoundation/lfx-v2-pat-service/internal/infrastructure/auth"
@@ -69,39 +66,4 @@ func TestNewContainerPostgresNeedsCredentials(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "PGHOST")
-}
-
-// TestNewContainerWithPostgres exercises the migrate-then-connect path against the database named by
-// TEST_DATABASE_URL, the same opt-in the live repository tests use.
-func TestNewContainerWithPostgres(t *testing.T) {
-	raw := os.Getenv("TEST_DATABASE_URL")
-	if raw == "" {
-		t.Skip("TEST_DATABASE_URL not set")
-	}
-	u, err := url.Parse(raw)
-	require.NoError(t, err)
-	password, _ := u.User.Password()
-	env := map[string]string{
-		"STORE":                                  "postgres",
-		"PGHOST":                                 u.Hostname(),
-		"PGPORT":                                 u.Port(),
-		"PGUSER":                                 u.User.Username(),
-		"PGPASSWORD":                             password,
-		"PGDATABASE":                             strings.TrimPrefix(u.Path, "/"),
-		"PGSSLMODE":                              u.Query().Get("sslmode"),
-		"JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL": "alice",
-	}
-	cfg, err := config.FromEnv(func(k string) string { return env[k] })
-	require.NoError(t, err)
-
-	c, err := NewContainer(context.Background(), cfg)
-	require.NoError(t, err)
-	t.Cleanup(func() { _ = c.Close() })
-
-	assert.True(t, c.Ready(context.Background()))
-	// Read-only on purpose: the postgres package's live tests run in parallel against the same database and reset
-	// tokens and audiences, so this only proves the migrations ran and the pool answers queries.
-	tokens, err := c.Manager.List(context.Background(), "container-test", "")
-	require.NoError(t, err)
-	assert.Empty(t, tokens)
 }

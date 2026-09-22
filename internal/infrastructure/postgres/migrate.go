@@ -6,6 +6,7 @@ package postgres
 import (
 	stderrors "errors"
 	"fmt"
+	neturl "net/url"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/pgx/v5" // registers the pgx5:// database driver
@@ -18,6 +19,11 @@ import (
 // advisory lock and skips applied versions. A partially applied migration leaves the schema dirty, which is
 // reported here so the process fails fast instead of retrying into the same wall.
 func Migrate(url string) error {
+	// net/url quotes the whole URL, password included, when it cannot parse it, and main logs startup errors.
+	// Parse first so that failure gets a fixed message; pgx already redacts the errors that follow.
+	if _, err := neturl.Parse(url); err != nil {
+		return fmt.Errorf("init migrator: invalid connection settings (redacted)")
+	}
 	src, err := iofs.New(migrations.FS, ".")
 	if err != nil {
 		return fmt.Errorf("open migration source: %w", err)

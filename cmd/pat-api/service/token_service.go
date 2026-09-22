@@ -44,10 +44,9 @@ func New(deps Deps) *Service {
 	return &Service{deps: deps}
 }
 
-// JWTAuth implements the JWT security scheme. Beyond verifying the token it applies one policy: the token
-// routes are for the owner, so a machine principal is refused there. validate-token (the only method carrying the
-// token:validate scope) is the one route machine principals may call; which ones is decided at the gateway by
-// OpenFGA team membership (see the chart's RuleSet), so the service adds no list of its own.
+// JWTAuth verifies the token and applies one policy: machine principals are refused on the token routes, which
+// belong to their owner. validate-token (the method carrying the token:validate scope) admits any principal the
+// gateway let through; OpenFGA team membership in the chart's RuleSet decides who, machine or user.
 func (s *Service) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
 	caller, err := s.deps.Auth.Authenticate(ctx, token)
 	if err != nil {

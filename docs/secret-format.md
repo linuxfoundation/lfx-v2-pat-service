@@ -13,7 +13,7 @@ lfi_    Ab3kZ9QmT2xL 32 base62 characters
 - **prefix**: the audience's `token_prefix` from the `audiences` table, `[a-z0-9]{2,8}_`. It is the only
   underscore in a secret, which is what the parser splits on.
 - **lookup id**: 12 base62 characters from `crypto/rand`. It is a public locator, stored in plain text under a
-  unique index and returned by list and get as `lookup_id`. Knowing it reveals nothing about the random part.
+  unique index and returned by list as `lookup_id`. Knowing it reveals nothing about the random part.
 - **random part**: 32 base62 characters from `crypto/rand`, about 190 bits of entropy. This is the only
   confidential piece and it is never stored.
 

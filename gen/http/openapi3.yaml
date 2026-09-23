@@ -333,87 +333,6 @@ paths:
                                 $ref: '#/components/schemas/Error'
             security:
                 - jwt_header_Authorization: []
-        get:
-            tags:
-                - lfx_v2_pat_service
-            summary: get-token lfx_v2_pat_service
-            description: Get one of the caller's active tokens.
-            operationId: lfx_v2_pat_service#get-token
-            parameters:
-                - name: v
-                  in: query
-                  description: Version of the API
-                  allowEmptyValue: true
-                  schema:
-                    type: string
-                    description: Version of the API
-                    example: "1"
-                    enum:
-                        - "1"
-                  example: "1"
-                - name: uid
-                  in: path
-                  description: Token UID
-                  required: true
-                  schema:
-                    type: string
-                    description: Token UID
-                    example: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
-                    format: uuid
-                  example: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
-            responses:
-                "200":
-                    description: OK response.
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/TokenResponse'
-                            example:
-                                audience: insights
-                                created_at: "2026-09-21T12:00:00Z"
-                                last_used_at: "2026-09-22T08:30:00Z"
-                                lookup_id: Ab3kZ9QmT2xL
-                                name: ci-pipeline
-                                uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
-                                username: jdoe
-                "400":
-                    description: 'BadRequest: uid is not a UUID'
-                    content:
-                        application/vnd.goa.error:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                "401":
-                    description: 'Unauthorized: Missing, invalid or anonymous bearer token'
-                    content:
-                        application/vnd.goa.error:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                "403":
-                    description: 'Forbidden: Principal is not allowed to call this endpoint'
-                    content:
-                        application/vnd.goa.error:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                "404":
-                    description: 'NotFound: No active token with this uid is owned by the caller'
-                    content:
-                        application/vnd.goa.error:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                "500":
-                    description: 'InternalServerError: Internal server error'
-                    content:
-                        application/vnd.goa.error:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                "503":
-                    description: 'ServiceUnavailable: Service unavailable'
-                    content:
-                        application/vnd.goa.error:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-            security:
-                - jwt_header_Authorization: []
 components:
     schemas:
         ConflictError:
@@ -501,7 +420,7 @@ components:
                 temporary:
                     type: boolean
                     description: Is the error temporary?
-                    example: false
+                    example: true
                 timeout:
                     type: boolean
                     description: Is the error a timeout?
@@ -512,8 +431,8 @@ components:
                 id: 123abc
                 message: parameter 'p' must be an integer
                 name: bad_request
-                temporary: true
-                timeout: false
+                temporary: false
+                timeout: true
             required:
                 - name
                 - id
@@ -564,29 +483,8 @@ components:
                           name: ci-pipeline
                           uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
                           username: jdoe
-                        - audience: insights
-                          created_at: "2026-09-21T12:00:00Z"
-                          last_used_at: "2026-09-22T08:30:00Z"
-                          lookup_id: Ab3kZ9QmT2xL
-                          name: ci-pipeline
-                          uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
-                          username: jdoe
-                        - audience: insights
-                          created_at: "2026-09-21T12:00:00Z"
-                          last_used_at: "2026-09-22T08:30:00Z"
-                          lookup_id: Ab3kZ9QmT2xL
-                          name: ci-pipeline
-                          uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
-                          username: jdoe
             example:
                 tokens:
-                    - audience: insights
-                      created_at: "2026-09-21T12:00:00Z"
-                      last_used_at: "2026-09-22T08:30:00Z"
-                      lookup_id: Ab3kZ9QmT2xL
-                      name: ci-pipeline
-                      uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
-                      username: jdoe
                     - audience: insights
                       created_at: "2026-09-21T12:00:00Z"
                       last_used_at: "2026-09-22T08:30:00Z"

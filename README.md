@@ -27,14 +27,13 @@ from `design/`, is served at `/_tokens/openapi3.json` without a token.
 |---|---|---|---|
 | `POST` | `/tokens` `{name, audience}` | user | `201 {secret, token}` |
 | `GET` | `/tokens?audience=` | user | `200 {tokens: [...]}`, newest first |
-| `GET` | `/tokens/{uid}` | user | `200` token |
 | `DELETE` | `/tokens/{uid}` | user | `204` |
 | `POST` | `/_tokens/validate` `{secret}` | machine principal in the validator team | `200 {uid, username, audience, email?}` |
 | `GET` | `/livez`, `/readyz` | probes | `200` |
 
 A token is `{uid, name, audience, lookup_id, username, created_at, last_used_at?}`. The plaintext `secret`
-appears once, in the create response; list and get address a token by `uid`, expose its public `lookup_id`, and
-never carry the secret, the salt or the hash.
+appears once, in the create response. List returns each token with its public `lookup_id`
+and never the secret, the salt or the hash. Revoke addresses a token by `uid`.
 
 Errors use Goa's default body (`name`, `message`) except two that carry a stable `error` code next to `message`, which LFX One
 forwards to its UI:
@@ -139,7 +138,7 @@ design/                         Goa design; make apigen regenerates gen/
 gen/                            generated transport, committed
 cmd/pat-api/                    main, HTTP server, and the Goa adapter (cmd/pat-api/service)
 internal/domain/                caller identity, models, and one port per capability
-internal/service/               use-cases: Manager (issue/list/get/revoke) and Validator
+internal/service/               use-cases: Manager (issue/list/revoke) and Validator
 internal/infrastructure/auth/   Heimdall JWT verification
 internal/infrastructure/postgres/  pool, migrations, repositories
 internal/infrastructure/mock/   in-memory repositories (tests and STORE=memory)

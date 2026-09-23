@@ -25,7 +25,7 @@ type CreatedToken struct {
 	Token  model.Token
 }
 
-// Manager implements the owner-facing use-cases: issue, list, get and revoke.
+// Manager implements the owner-facing use-cases: issue, list and revoke.
 type Manager struct {
 	reader    port.TokenReader
 	writer    port.TokenWriter
@@ -93,11 +93,6 @@ func (m *Manager) issue(ctx context.Context, caller domain.Caller, name string, 
 // List returns the caller's active tokens, newest first, optionally limited to one audience.
 func (m *Manager) List(ctx context.Context, username, audience string) ([]model.Token, error) {
 	return m.reader.ListActiveByOwner(ctx, username, audience)
-}
-
-// Get returns one of the caller's active tokens.
-func (m *Manager) Get(ctx context.Context, uid, username string) (model.Token, error) {
-	return m.reader.GetActiveByOwner(ctx, uid, username)
 }
 
 // Revoke soft-deletes one of the caller's active tokens.

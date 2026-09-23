@@ -84,19 +84,6 @@ func (s *Service) ListTokens(ctx context.Context, p *svc.ListTokensPayload) (*sv
 	return &svc.ListTokensResult{Tokens: toTokenResponses(tokens)}, nil
 }
 
-// GetToken implements get-token.
-func (s *Service) GetToken(ctx context.Context, p *svc.GetTokenPayload) (*svc.TokenResponse, error) {
-	caller, err := ownerFrom(ctx)
-	if err != nil {
-		return nil, err
-	}
-	token, err := s.deps.Manager.Get(ctx, p.UID, caller.Principal)
-	if err != nil {
-		return nil, wrapError(ctx, err)
-	}
-	return toTokenResponse(token), nil
-}
-
 // DeleteToken implements delete-token.
 func (s *Service) DeleteToken(ctx context.Context, p *svc.DeleteTokenPayload) error {
 	caller, err := ownerFrom(ctx)

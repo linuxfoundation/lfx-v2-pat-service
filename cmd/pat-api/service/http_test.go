@@ -109,7 +109,7 @@ func TestHTTPTokenLifecycle(t *testing.T) {
 		assert.NotContains(t, token, forbidden)
 	}
 
-	// List and get expose the lookup id and never the secret.
+	// List exposes the lookup id and never the secret.
 	status, body, raw = do(t, ts, "alice", http.MethodGet, "/tokens?v=1", "")
 	require.Equal(t, http.StatusOK, status, raw)
 	tokens, _ := body["tokens"].([]any)
@@ -117,15 +117,7 @@ func TestHTTPTokenLifecycle(t *testing.T) {
 	assert.NotContains(t, raw, secret)
 	assert.NotContains(t, raw, `"secret"`)
 
-	status, body, raw = do(t, ts, "alice", http.MethodGet, "/tokens/"+uid+"?v=1", "")
-	require.Equal(t, http.StatusOK, status, raw)
-	assert.Equal(t, uid, body["uid"])
-	assert.Equal(t, token["lookup_id"], body["lookup_id"])
-	assert.NotContains(t, raw, secret)
-
 	// Other owners see nothing.
-	status, _, _ = do(t, ts, "bob", http.MethodGet, "/tokens/"+uid, "")
-	assert.Equal(t, http.StatusNotFound, status)
 	status, body, _ = do(t, ts, "bob", http.MethodGet, "/tokens", "")
 	assert.Equal(t, http.StatusOK, status)
 	assert.Equal(t, []any{}, body["tokens"], "an empty list encodes as [] not null")
@@ -139,17 +131,20 @@ func TestHTTPTokenLifecycle(t *testing.T) {
 	assert.Equal(t, "alice", body["username"])
 	assert.Equal(t, "insights", body["audience"])
 	assert.Equal(t, "alice@example.com", body["email"])
-	status, body, _ = do(t, ts, "alice", http.MethodGet, "/tokens/"+uid, "")
+	status, body, _ = do(t, ts, "alice", http.MethodGet, "/tokens", "")
 	require.Equal(t, http.StatusOK, status)
-	assert.Contains(t, body, "last_used_at")
+	tokens, _ = body["tokens"].([]any)
+	require.Len(t, tokens, 1)
+	assert.Contains(t, tokens[0], "last_used_at")
 
 	// Revoke: 204 once, 404 after, and the secret stops validating.
 	status, _, _ = do(t, ts, "alice", http.MethodDelete, "/tokens/"+uid+"?v=1", "")
 	assert.Equal(t, http.StatusNoContent, status)
 	status, _, _ = do(t, ts, "alice", http.MethodDelete, "/tokens/"+uid, "")
 	assert.Equal(t, http.StatusNotFound, status)
-	status, _, _ = do(t, ts, "alice", http.MethodGet, "/tokens/"+uid, "")
-	assert.Equal(t, http.StatusNotFound, status)
+	status, body, _ = do(t, ts, "alice", http.MethodGet, "/tokens", "")
+	assert.Equal(t, http.StatusOK, status)
+	assert.Equal(t, []any{}, body["tokens"])
 	status, body, _ = do(t, ts, "abc123@clients", http.MethodPost, "/_tokens/validate", `{"secret":"`+secret+`"}`)
 	assert.Equal(t, http.StatusNotFound, status)
 	assert.Equal(t, constants.ErrCodeInvalidToken, body["error"])
@@ -178,7 +173,8 @@ func TestHTTPErrorBodies(t *testing.T) {
 		{"audience shape", "alice", http.MethodPost, "/tokens", `{"name":"x","audience":"Not Valid"}`, http.StatusBadRequest, ""},
 		{"blank name", "alice", http.MethodPost, "/tokens", `{"name":"   ","audience":"insights"}`, http.StatusBadRequest, ""},
 		{"unknown version", "alice", http.MethodGet, "/tokens?v=2", "", http.StatusBadRequest, ""},
-		{"non-uuid uid", "alice", http.MethodGet, "/tokens/not-a-uuid", "", http.StatusBadRequest, ""},
+		{"non-uuid uid", "alice", http.MethodDelete, "/tokens/not-a-uuid", "", http.StatusBadRequest, ""},
+		{"get by uid is not routed", "alice", http.MethodGet, "/tokens/00000000-0000-4000-8000-000000000000", "", http.StatusMethodNotAllowed, ""},
 		{"no bearer", "", http.MethodGet, "/tokens", "", http.StatusUnauthorized, ""},
 		{"machine on user route", "abc123@clients", http.MethodGet, "/tokens", "", http.StatusForbidden, ""},
 		{"malformed secret", "abc123@clients", http.MethodPost, "/_tokens/validate", `{"secret":"lfi_x"}`, http.StatusNotFound, constants.ErrCodeInvalidToken},

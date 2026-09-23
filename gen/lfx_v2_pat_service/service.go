@@ -22,8 +22,6 @@ type Service interface {
 	// List the caller's active tokens, newest first. Not paginated: the
 	// per-audience limit bounds the size.
 	ListTokens(context.Context, *ListTokensPayload) (res *ListTokensResult, err error)
-	// Get one of the caller's active tokens.
-	GetToken(context.Context, *GetTokenPayload) (res *TokenResponse, err error)
 	// Revoke one of the caller's tokens. The row is kept for audit; later reads
 	// return 404 and validation fails.
 	DeleteToken(context.Context, *DeleteTokenPayload) (err error)
@@ -57,7 +55,7 @@ const ServiceName = "lfx_v2_pat_service"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [7]string{"create-token", "list-tokens", "get-token", "delete-token", "validate-token", "livez", "readyz"}
+var MethodNames = [6]string{"create-token", "list-tokens", "delete-token", "validate-token", "livez", "readyz"}
 
 // Name already used, or active-token limit reached, for this audience
 type ConflictError struct {
@@ -93,17 +91,6 @@ type CreateTokenResult struct {
 // DeleteTokenPayload is the payload type of the lfx_v2_pat_service service
 // delete-token method.
 type DeleteTokenPayload struct {
-	// JWT issued by Heimdall
-	BearerToken *string
-	// Version of the API
-	Version *string
-	// Token UID
-	UID string
-}
-
-// GetTokenPayload is the payload type of the lfx_v2_pat_service service
-// get-token method.
-type GetTokenPayload struct {
 	// JWT issued by Heimdall
 	BearerToken *string
 	// Version of the API
@@ -152,8 +139,8 @@ type TokenIdentity struct {
 	Email *string
 }
 
-// TokenResponse is the result type of the lfx_v2_pat_service service get-token
-// method.
+// A personal access token as seen by its owner. The secret is only returned at
+// creation.
 type TokenResponse struct {
 	// Token UID
 	UID string

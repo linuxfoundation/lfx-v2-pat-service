@@ -21,11 +21,6 @@ func ListTokensLfxV2PatServicePath() string {
 	return "/tokens"
 }
 
-// GetTokenLfxV2PatServicePath returns the URL path to the lfx_v2_pat_service service get-token HTTP endpoint.
-func GetTokenLfxV2PatServicePath(uid string) string {
-	return fmt.Sprintf("/tokens/%v", uid)
-}
-
 // DeleteTokenLfxV2PatServicePath returns the URL path to the lfx_v2_pat_service service delete-token HTTP endpoint.
 func DeleteTokenLfxV2PatServicePath(uid string) string {
 	return fmt.Sprintf("/tokens/%v", uid)

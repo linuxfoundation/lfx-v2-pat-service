@@ -19,8 +19,6 @@ var ErrLookupIDTaken = errors.New("lookup id already exists")
 type TokenReader interface {
 	// ListActiveByOwner returns the owner's active tokens, newest first. An empty audience means all audiences.
 	ListActiveByOwner(ctx context.Context, username, audience string) ([]model.Token, error)
-	// GetActiveByOwner returns one active token, or a NotFound error.
-	GetActiveByOwner(ctx context.Context, uid, username string) (model.Token, error)
 }
 
 // TokenWriter issues and revokes tokens.

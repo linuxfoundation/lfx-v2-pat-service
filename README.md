@@ -32,8 +32,8 @@ from `design/`, is served at `/_tokens/openapi3.json` without a token.
 | `GET` | `/livez`, `/readyz` | probes | `200` |
 
 A token is `{uid, name, audience, lookup_id, username, created_at, last_used_at?}`. The plaintext `secret`
-appears once, in the create response; list and revoke address a token by `uid`, expose its public `lookup_id`, and
-never carry the secret, the salt or the hash.
+appears once, in the create response. List returns each token with its public `lookup_id`
+and never the secret, the salt or the hash. Revoke addresses a token by `uid`.
 
 Errors use Goa's default body (`name`, `message`) except two that carry a stable `error` code next to `message`, which LFX One
 forwards to its UI:

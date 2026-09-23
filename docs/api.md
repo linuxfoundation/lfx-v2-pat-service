@@ -17,8 +17,8 @@ on each of them. The OpenAPI document at `/_tokens/openapi3.json` is served with
 | `POST` | `/_tokens/validate` `{secret}` | machine principal in the validator team | `200 {uid, username, audience, email?}` |
 
 A token is `{uid, name, audience, lookup_id, username, created_at, last_used_at?}`. The plaintext `secret`
-appears once, in the create response. List and revoke address a token by `uid`, expose its public `lookup_id`, and
-never carry the secret, the salt or the hash.
+appears once, in the create response. List returns each token with its public `lookup_id`
+and never the secret, the salt or the hash. Revoke addresses a token by `uid`.
 
 `name` is trimmed, 1 to 100 characters, free of control characters, and unique (case-insensitively) among the
 caller's active tokens for the audience. A revoked token's name can be reused. `audience` is a slug from the

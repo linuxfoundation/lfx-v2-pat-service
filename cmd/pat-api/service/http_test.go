@@ -174,6 +174,7 @@ func TestHTTPErrorBodies(t *testing.T) {
 		{"blank name", "alice", http.MethodPost, "/tokens", `{"name":"   ","audience":"insights"}`, http.StatusBadRequest, ""},
 		{"unknown version", "alice", http.MethodGet, "/tokens?v=2", "", http.StatusBadRequest, ""},
 		{"non-uuid uid", "alice", http.MethodDelete, "/tokens/not-a-uuid", "", http.StatusBadRequest, ""},
+		{"get by uid is not routed", "alice", http.MethodGet, "/tokens/00000000-0000-4000-8000-000000000000", "", http.StatusMethodNotAllowed, ""},
 		{"no bearer", "", http.MethodGet, "/tokens", "", http.StatusUnauthorized, ""},
 		{"machine on user route", "abc123@clients", http.MethodGet, "/tokens", "", http.StatusForbidden, ""},
 		{"malformed secret", "abc123@clients", http.MethodPost, "/_tokens/validate", `{"secret":"lfi_x"}`, http.StatusNotFound, constants.ErrCodeInvalidToken},

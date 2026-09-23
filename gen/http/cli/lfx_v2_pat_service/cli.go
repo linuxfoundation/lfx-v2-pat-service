@@ -23,7 +23,7 @@ import (
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() []string {
 	return []string{
-		"lfx-v2-pat-service (create-token|list-tokens|get-token|delete-token|validate-token|livez|readyz)",
+		"lfx-v2-pat-service (create-token|list-tokens|delete-token|validate-token|livez|readyz)",
 	}
 }
 
@@ -55,11 +55,6 @@ func ParseEndpoint(
 		lfxV2PatServiceListTokensAudienceFlag    = lfxV2PatServiceListTokensFlags.String("audience", "", "")
 		lfxV2PatServiceListTokensBearerTokenFlag = lfxV2PatServiceListTokensFlags.String("bearer-token", "", "")
 
-		lfxV2PatServiceGetTokenFlags           = flag.NewFlagSet("get-token", flag.ExitOnError)
-		lfxV2PatServiceGetTokenUIDFlag         = lfxV2PatServiceGetTokenFlags.String("uid", "REQUIRED", "Token UID")
-		lfxV2PatServiceGetTokenVersionFlag     = lfxV2PatServiceGetTokenFlags.String("version", "", "")
-		lfxV2PatServiceGetTokenBearerTokenFlag = lfxV2PatServiceGetTokenFlags.String("bearer-token", "", "")
-
 		lfxV2PatServiceDeleteTokenFlags           = flag.NewFlagSet("delete-token", flag.ExitOnError)
 		lfxV2PatServiceDeleteTokenUIDFlag         = lfxV2PatServiceDeleteTokenFlags.String("uid", "REQUIRED", "Token UID")
 		lfxV2PatServiceDeleteTokenVersionFlag     = lfxV2PatServiceDeleteTokenFlags.String("version", "", "")
@@ -77,7 +72,6 @@ func ParseEndpoint(
 	lfxV2PatServiceFlags.Usage = lfxV2PatServiceUsage
 	lfxV2PatServiceCreateTokenFlags.Usage = lfxV2PatServiceCreateTokenUsage
 	lfxV2PatServiceListTokensFlags.Usage = lfxV2PatServiceListTokensUsage
-	lfxV2PatServiceGetTokenFlags.Usage = lfxV2PatServiceGetTokenUsage
 	lfxV2PatServiceDeleteTokenFlags.Usage = lfxV2PatServiceDeleteTokenUsage
 	lfxV2PatServiceValidateTokenFlags.Usage = lfxV2PatServiceValidateTokenUsage
 	lfxV2PatServiceLivezFlags.Usage = lfxV2PatServiceLivezUsage
@@ -123,9 +117,6 @@ func ParseEndpoint(
 			case "list-tokens":
 				epf = lfxV2PatServiceListTokensFlags
 
-			case "get-token":
-				epf = lfxV2PatServiceGetTokenFlags
-
 			case "delete-token":
 				epf = lfxV2PatServiceDeleteTokenFlags
 
@@ -169,9 +160,6 @@ func ParseEndpoint(
 			case "list-tokens":
 				endpoint = c.ListTokens()
 				data, err = lfxv2patservicec.BuildListTokensPayload(*lfxV2PatServiceListTokensVersionFlag, *lfxV2PatServiceListTokensAudienceFlag, *lfxV2PatServiceListTokensBearerTokenFlag)
-			case "get-token":
-				endpoint = c.GetToken()
-				data, err = lfxv2patservicec.BuildGetTokenPayload(*lfxV2PatServiceGetTokenUIDFlag, *lfxV2PatServiceGetTokenVersionFlag, *lfxV2PatServiceGetTokenBearerTokenFlag)
 			case "delete-token":
 				endpoint = c.DeleteToken()
 				data, err = lfxv2patservicec.BuildDeleteTokenPayload(*lfxV2PatServiceDeleteTokenUIDFlag, *lfxV2PatServiceDeleteTokenVersionFlag, *lfxV2PatServiceDeleteTokenBearerTokenFlag)
@@ -200,7 +188,6 @@ func lfxV2PatServiceUsage() {
 	fmt.Fprintln(os.Stderr, "COMMAND:")
 	fmt.Fprintln(os.Stderr, `    create-token: Create a token for the caller. The secret is returned once and is never retrievable again.`)
 	fmt.Fprintln(os.Stderr, `    list-tokens: List the caller's active tokens, newest first. Not paginated: the per-audience limit bounds the size.`)
-	fmt.Fprintln(os.Stderr, `    get-token: Get one of the caller's active tokens.`)
 	fmt.Fprintln(os.Stderr, `    delete-token: Revoke one of the caller's tokens. The row is kept for audit; later reads return 404 and validation fails.`)
 	fmt.Fprintln(os.Stderr, `    validate-token: Resolve a secret to its owner identity and record the use. Machine-to-machine: the gateway admits only members of the validator OpenFGA team. The caller must check the returned audience against the one it expects.`)
 	fmt.Fprintln(os.Stderr, `    livez: Liveness probe.`)
@@ -251,28 +238,6 @@ func lfxV2PatServiceListTokensUsage() {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "lfx-v2-pat-service list-tokens --version \"1\" --audience \"insights\" --bearer-token \"eyJhbGci...\"")
-}
-
-func lfxV2PatServiceGetTokenUsage() {
-	// Header with flags
-	fmt.Fprintf(os.Stderr, "%s [flags] lfx-v2-pat-service get-token", os.Args[0])
-	fmt.Fprint(os.Stderr, " -uid STRING")
-	fmt.Fprint(os.Stderr, " -version STRING")
-	fmt.Fprint(os.Stderr, " -bearer-token STRING")
-	fmt.Fprintln(os.Stderr)
-
-	// Description
-	fmt.Fprintln(os.Stderr)
-	fmt.Fprintln(os.Stderr, `Get one of the caller's active tokens.`)
-
-	// Flags list
-	fmt.Fprintln(os.Stderr, `    -uid STRING: Token UID`)
-	fmt.Fprintln(os.Stderr, `    -version STRING: `)
-	fmt.Fprintln(os.Stderr, `    -bearer-token STRING: `)
-
-	fmt.Fprintln(os.Stderr)
-	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "lfx-v2-pat-service get-token --uid \"8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f\" --version \"1\" --bearer-token \"eyJhbGci...\"")
 }
 
 func lfxV2PatServiceDeleteTokenUsage() {

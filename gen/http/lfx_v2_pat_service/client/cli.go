@@ -105,44 +105,6 @@ func BuildListTokensPayload(lfxV2PatServiceListTokensVersion string, lfxV2PatSer
 	return v, nil
 }
 
-// BuildGetTokenPayload builds the payload for the lfx_v2_pat_service get-token
-// endpoint from CLI flags.
-func BuildGetTokenPayload(lfxV2PatServiceGetTokenUID string, lfxV2PatServiceGetTokenVersion string, lfxV2PatServiceGetTokenBearerToken string) (*lfxv2patservice.GetTokenPayload, error) {
-	var err error
-	var uid string
-	{
-		uid = lfxV2PatServiceGetTokenUID
-		err = goa.MergeErrors(err, goa.ValidateFormat("uid", uid, goa.FormatUUID))
-		if err != nil {
-			return nil, err
-		}
-	}
-	var version *string
-	{
-		if lfxV2PatServiceGetTokenVersion != "" {
-			version = &lfxV2PatServiceGetTokenVersion
-			if !(*version == "1") {
-				err = goa.MergeErrors(err, goa.InvalidEnumValueError("version", *version, []any{"1"}))
-			}
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	var bearerToken *string
-	{
-		if lfxV2PatServiceGetTokenBearerToken != "" {
-			bearerToken = &lfxV2PatServiceGetTokenBearerToken
-		}
-	}
-	v := &lfxv2patservice.GetTokenPayload{}
-	v.UID = uid
-	v.Version = version
-	v.BearerToken = bearerToken
-
-	return v, nil
-}
-
 // BuildDeleteTokenPayload builds the payload for the lfx_v2_pat_service
 // delete-token endpoint from CLI flags.
 func BuildDeleteTokenPayload(lfxV2PatServiceDeleteTokenUID string, lfxV2PatServiceDeleteTokenVersion string, lfxV2PatServiceDeleteTokenBearerToken string) (*lfxv2patservice.DeleteTokenPayload, error) {

@@ -50,6 +50,20 @@ func (f fixture) create(t *testing.T, caller domain.Caller, name, audience strin
 	return created
 }
 
+// active returns the owner's active token with the given uid, read back through List.
+func (f fixture) active(t *testing.T, username, uid string) model.Token {
+	t.Helper()
+	tokens, err := f.manager.List(context.Background(), username, "")
+	require.NoError(t, err)
+	for _, tok := range tokens {
+		if tok.UID == uid {
+			return tok
+		}
+	}
+	require.FailNow(t, "token not active", uid)
+	return model.Token{}
+}
+
 func conflictCode(t *testing.T, err error) string {
 	t.Helper()
 	var c errors.Conflict
@@ -75,9 +89,7 @@ func TestCreateIssuesSecretAndStoresOwner(t *testing.T) {
 	assert.Nil(t, created.Token.LastUsedAt)
 	assert.True(t, created.Token.Active())
 
-	got, err := f.manager.Get(context.Background(), created.Token.UID, "alice")
-	require.NoError(t, err)
-	assert.Equal(t, created.Token, got)
+	assert.Equal(t, created.Token, f.active(t, "alice", created.Token.UID))
 }
 
 func TestCreateUsesTheAudiencePrefix(t *testing.T) {
@@ -193,16 +205,6 @@ func TestListIsOwnerScopedFilteredAndNewestFirst(t *testing.T) {
 	assert.Empty(t, none)
 }
 
-func TestGetHidesTokensOfOthers(t *testing.T) {
-	f := newFixture(25)
-	created := f.create(t, alice, "ci", constants.AudienceInsights)
-
-	_, err := f.manager.Get(context.Background(), created.Token.UID, "bob")
-	assert.True(t, errors.IsNotFound(err))
-	_, err = f.manager.Get(context.Background(), "8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f", "alice")
-	assert.True(t, errors.IsNotFound(err))
-}
-
 func TestRevoke(t *testing.T) {
 	f := newFixture(25)
 	created := f.create(t, alice, "ci", constants.AudienceInsights)
@@ -210,8 +212,6 @@ func TestRevoke(t *testing.T) {
 	assert.True(t, errors.IsNotFound(f.manager.Revoke(context.Background(), created.Token.UID, "bob")))
 	require.NoError(t, f.manager.Revoke(context.Background(), created.Token.UID, "alice"))
 
-	_, err := f.manager.Get(context.Background(), created.Token.UID, "alice")
-	assert.True(t, errors.IsNotFound(err))
 	assert.True(t, errors.IsNotFound(f.manager.Revoke(context.Background(), created.Token.UID, "alice")))
 	list, err := f.manager.List(context.Background(), "alice", "")
 	require.NoError(t, err)

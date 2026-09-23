@@ -115,8 +115,6 @@ func TestTokenRoutesRefuseMachinePrincipals(t *testing.T) {
 	assert.Equal(t, "Forbidden", serviceErrorName(t, err))
 	_, err = s.ListTokens(ctx, &svc.ListTokensPayload{})
 	assert.Equal(t, "Forbidden", serviceErrorName(t, err))
-	_, err = s.GetToken(ctx, &svc.GetTokenPayload{UID: "x"})
-	assert.Equal(t, "Forbidden", serviceErrorName(t, err))
 	assert.Equal(t, "Forbidden", serviceErrorName(t, s.DeleteToken(ctx, &svc.DeleteTokenPayload{UID: "x"})))
 
 	// validate-token is the machine route: the same caller reaches the credential check.
@@ -141,8 +139,6 @@ func TestMethodsRequireCallerInContext(t *testing.T) {
 	_, err := s.CreateToken(ctx, &svc.CreateTokenPayload{Name: "ci", Audience: constants.AudienceInsights})
 	assert.Equal(t, "Unauthorized", serviceErrorName(t, err))
 	_, err = s.ListTokens(ctx, &svc.ListTokensPayload{})
-	assert.Equal(t, "Unauthorized", serviceErrorName(t, err))
-	_, err = s.GetToken(ctx, &svc.GetTokenPayload{UID: "x"})
 	assert.Equal(t, "Unauthorized", serviceErrorName(t, err))
 	assert.Equal(t, "Unauthorized", serviceErrorName(t, s.DeleteToken(ctx, &svc.DeleteTokenPayload{UID: "x"})))
 	_, err = s.ValidateToken(ctx, &svc.ValidateTokenPayload{Secret: "x"})

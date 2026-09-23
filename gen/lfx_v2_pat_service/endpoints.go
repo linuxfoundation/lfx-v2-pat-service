@@ -18,7 +18,6 @@ import (
 type Endpoints struct {
 	CreateToken   goa.Endpoint
 	ListTokens    goa.Endpoint
-	GetToken      goa.Endpoint
 	DeleteToken   goa.Endpoint
 	ValidateToken goa.Endpoint
 	Livez         goa.Endpoint
@@ -33,7 +32,6 @@ func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
 		CreateToken:   NewCreateTokenEndpoint(s, a.JWTAuth),
 		ListTokens:    NewListTokensEndpoint(s, a.JWTAuth),
-		GetToken:      NewGetTokenEndpoint(s, a.JWTAuth),
 		DeleteToken:   NewDeleteTokenEndpoint(s, a.JWTAuth),
 		ValidateToken: NewValidateTokenEndpoint(s, a.JWTAuth),
 		Livez:         NewLivezEndpoint(s),
@@ -46,7 +44,6 @@ func NewEndpoints(s Service) *Endpoints {
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.CreateToken = m(e.CreateToken)
 	e.ListTokens = m(e.ListTokens)
-	e.GetToken = m(e.GetToken)
 	e.DeleteToken = m(e.DeleteToken)
 	e.ValidateToken = m(e.ValidateToken)
 	e.Livez = m(e.Livez)
@@ -96,29 +93,6 @@ func NewListTokensEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoi
 			return nil, err
 		}
 		return s.ListTokens(ctx, p)
-	}
-}
-
-// NewGetTokenEndpoint returns an endpoint function that calls the method
-// "get-token" of service "lfx_v2_pat_service".
-func NewGetTokenEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
-	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*GetTokenPayload)
-		var err error
-		sc := security.JWTScheme{
-			Name:           "jwt",
-			Scopes:         []string{},
-			RequiredScopes: []string{},
-		}
-		var token string
-		if p.BearerToken != nil {
-			token = *p.BearerToken
-		}
-		ctx, err = authJWTFn(ctx, token, &sc)
-		if err != nil {
-			return nil, err
-		}
-		return s.GetToken(ctx, p)
 	}
 }
 

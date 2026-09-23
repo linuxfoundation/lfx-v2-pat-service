@@ -83,33 +83,6 @@ var _ = dsl.Service("lfx_v2_pat_service", func() {
 		})
 	})
 
-	dsl.Method("get-token", func() {
-		dsl.Description("Get one of the caller's active tokens.")
-		dsl.Security(JWTAuth)
-		dsl.Payload(func() {
-			BearerTokenAttribute()
-			VersionAttribute()
-			UIDAttribute()
-			dsl.Required("uid")
-		})
-		dsl.Result(TokenResponse)
-		AuthErrors()
-		dsl.Error("BadRequest", dsl.ErrorResult, "uid is not a UUID")
-		dsl.Error("NotFound", dsl.ErrorResult, "No active token with this uid is owned by the caller")
-		ServerErrors()
-		dsl.HTTP(func() {
-			dsl.GET("/tokens/{uid}")
-			dsl.Header("bearer_token:Authorization")
-			dsl.Param("version:v")
-			dsl.Param("uid")
-			dsl.Response(dsl.StatusOK)
-			AuthResponses()
-			dsl.Response("BadRequest", dsl.StatusBadRequest)
-			dsl.Response("NotFound", dsl.StatusNotFound)
-			ServerResponses()
-		})
-	})
-
 	dsl.Method("delete-token", func() {
 		dsl.Description("Revoke one of the caller's tokens. The row is kept for audit; later reads return 404 and validation fails.")
 		dsl.Security(JWTAuth)

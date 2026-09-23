@@ -143,18 +143,6 @@ func (r *TokenRepository) ListActiveByOwner(_ context.Context, username, audienc
 	return out, nil
 }
 
-// GetActiveByOwner implements port.TokenReader.
-func (r *TokenRepository) GetActiveByOwner(_ context.Context, uid, username string) (model.Token, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	s, ok := r.byUID[uid]
-	if !ok || !s.Active() || s.Username != username {
-		return model.Token{}, notFound(uid)
-	}
-	return s.Token, nil
-}
-
 // Revoke implements port.TokenWriter.
 func (r *TokenRepository) Revoke(_ context.Context, uid, username string) error {
 	r.mu.Lock()

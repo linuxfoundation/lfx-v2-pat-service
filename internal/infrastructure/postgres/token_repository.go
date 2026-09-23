@@ -119,16 +119,6 @@ func (r *TokenRepository) ListActiveByOwner(ctx context.Context, username, audie
 	return tokens, nil
 }
 
-// GetActiveByOwner implements port.TokenReader. A token owned by someone else is NotFound.
-func (r *TokenRepository) GetActiveByOwner(ctx context.Context, uid, username string) (model.Token, error) {
-	const q = `SELECT ` + tokenColumns + ` FROM tokens WHERE uid = $1 AND username = $2 AND revoked_at IS NULL`
-	t, err := scanToken(r.pool.QueryRow(ctx, q, uid, username))
-	if err != nil {
-		return model.Token{}, notFoundOr("get token", uid, err)
-	}
-	return t, nil
-}
-
 // Revoke implements port.TokenWriter. Revoking twice, or revoking someone else's token, is NotFound.
 func (r *TokenRepository) Revoke(ctx context.Context, uid, username string) error {
 	const q = `UPDATE tokens SET revoked_at = now(), updated_at = now()

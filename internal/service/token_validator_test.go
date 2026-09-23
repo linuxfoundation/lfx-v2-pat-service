@@ -33,8 +33,7 @@ func TestValidateResolvesOwnerAndRecordsUse(t *testing.T) {
 		Email:    "alice@example.com",
 	}, identity)
 
-	after, err := f.manager.Get(context.Background(), created.Token.UID, "alice")
-	require.NoError(t, err)
+	after := f.active(t, "alice", created.Token.UID)
 	require.NotNil(t, after.LastUsedAt)
 	assert.Equal(t, created.Token.UpdatedAt, after.UpdatedAt, "recording a use must not move UpdatedAt")
 }
@@ -70,8 +69,7 @@ func TestValidateRejections(t *testing.T) {
 	}
 
 	// None of the rejections recorded a use.
-	still, err := f.manager.Get(context.Background(), created.Token.UID, "alice")
-	require.NoError(t, err)
+	still := f.active(t, "alice", created.Token.UID)
 	assert.Nil(t, still.LastUsedAt)
 }
 

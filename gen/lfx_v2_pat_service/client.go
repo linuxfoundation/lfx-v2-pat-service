@@ -17,7 +17,6 @@ import (
 type Client struct {
 	CreateTokenEndpoint   goa.Endpoint
 	ListTokensEndpoint    goa.Endpoint
-	GetTokenEndpoint      goa.Endpoint
 	DeleteTokenEndpoint   goa.Endpoint
 	ValidateTokenEndpoint goa.Endpoint
 	LivezEndpoint         goa.Endpoint
@@ -26,11 +25,10 @@ type Client struct {
 
 // NewClient initializes a "lfx_v2_pat_service" service client given the
 // endpoints.
-func NewClient(createToken, listTokens, getToken, deleteToken, validateToken, livez, readyz goa.Endpoint) *Client {
+func NewClient(createToken, listTokens, deleteToken, validateToken, livez, readyz goa.Endpoint) *Client {
 	return &Client{
 		CreateTokenEndpoint:   createToken,
 		ListTokensEndpoint:    listTokens,
-		GetTokenEndpoint:      getToken,
 		DeleteTokenEndpoint:   deleteToken,
 		ValidateTokenEndpoint: validateToken,
 		LivezEndpoint:         livez,
@@ -73,24 +71,6 @@ func (c *Client) ListTokens(ctx context.Context, p *ListTokensPayload) (res *Lis
 		return
 	}
 	return ires.(*ListTokensResult), nil
-}
-
-// GetToken calls the "get-token" endpoint of the "lfx_v2_pat_service" service.
-// GetToken may return the following errors:
-//   - "Unauthorized" (type *goa.ServiceError): Missing, invalid or anonymous bearer token
-//   - "Forbidden" (type *goa.ServiceError): Principal is not allowed to call this endpoint
-//   - "BadRequest" (type *goa.ServiceError): uid is not a UUID
-//   - "NotFound" (type *goa.ServiceError): No active token with this uid is owned by the caller
-//   - "InternalServerError" (type *goa.ServiceError): Internal server error
-//   - "ServiceUnavailable" (type *goa.ServiceError): Service unavailable
-//   - error: internal error
-func (c *Client) GetToken(ctx context.Context, p *GetTokenPayload) (res *TokenResponse, err error) {
-	var ires any
-	ires, err = c.GetTokenEndpoint(ctx, p)
-	if err != nil {
-		return
-	}
-	return ires.(*TokenResponse), nil
 }
 
 // DeleteToken calls the "delete-token" endpoint of the "lfx_v2_pat_service"

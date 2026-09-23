@@ -22,7 +22,6 @@ type Server struct {
 	Mounts              []*MountPoint
 	CreateToken         http.Handler
 	ListTokens          http.Handler
-	GetToken            http.Handler
 	DeleteToken         http.Handler
 	ValidateToken       http.Handler
 	Livez               http.Handler
@@ -64,7 +63,6 @@ func New(
 		Mounts: []*MountPoint{
 			{"CreateToken", "POST", "/tokens"},
 			{"ListTokens", "GET", "/tokens"},
-			{"GetToken", "GET", "/tokens/{uid}"},
 			{"DeleteToken", "DELETE", "/tokens/{uid}"},
 			{"ValidateToken", "POST", "/_tokens/validate"},
 			{"Livez", "GET", "/livez"},
@@ -73,7 +71,6 @@ func New(
 		},
 		CreateToken:         NewCreateTokenHandler(e.CreateToken, mux, decoder, encoder, errhandler, formatter),
 		ListTokens:          NewListTokensHandler(e.ListTokens, mux, decoder, encoder, errhandler, formatter),
-		GetToken:            NewGetTokenHandler(e.GetToken, mux, decoder, encoder, errhandler, formatter),
 		DeleteToken:         NewDeleteTokenHandler(e.DeleteToken, mux, decoder, encoder, errhandler, formatter),
 		ValidateToken:       NewValidateTokenHandler(e.ValidateToken, mux, decoder, encoder, errhandler, formatter),
 		Livez:               NewLivezHandler(e.Livez, mux, decoder, encoder, errhandler, formatter),
@@ -89,7 +86,6 @@ func (s *Server) Service() string { return "lfx_v2_pat_service" }
 func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.CreateToken = m(s.CreateToken)
 	s.ListTokens = m(s.ListTokens)
-	s.GetToken = m(s.GetToken)
 	s.DeleteToken = m(s.DeleteToken)
 	s.ValidateToken = m(s.ValidateToken)
 	s.Livez = m(s.Livez)
@@ -103,7 +99,6 @@ func (s *Server) MethodNames() []string { return lfxv2patservice.MethodNames[:] 
 func Mount(mux goahttp.Muxer, h *Server) {
 	MountCreateTokenHandler(mux, h.CreateToken)
 	MountListTokensHandler(mux, h.ListTokens)
-	MountGetTokenHandler(mux, h.GetToken)
 	MountDeleteTokenHandler(mux, h.DeleteToken)
 	MountValidateTokenHandler(mux, h.ValidateToken)
 	MountLivezHandler(mux, h.Livez)
@@ -199,59 +194,6 @@ func NewListTokensHandler(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "list-tokens")
-		ctx = context.WithValue(ctx, goa.ServiceKey, "lfx_v2_pat_service")
-		payload, err := decodeRequest(r)
-		if err != nil {
-			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
-				errhandler(ctx, w, err)
-			}
-			return
-		}
-		res, err := endpoint(ctx, payload)
-		if err != nil {
-			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
-				errhandler(ctx, w, err)
-			}
-			return
-		}
-		if err := encodeResponse(ctx, w, res); err != nil {
-			if errhandler != nil {
-				errhandler(ctx, w, err)
-			}
-		}
-	})
-}
-
-// MountGetTokenHandler configures the mux to serve the "lfx_v2_pat_service"
-// service "get-token" endpoint.
-func MountGetTokenHandler(mux goahttp.Muxer, h http.Handler) {
-	f, ok := h.(http.HandlerFunc)
-	if !ok {
-		f = func(w http.ResponseWriter, r *http.Request) {
-			h.ServeHTTP(w, r)
-		}
-	}
-	mux.Handle("GET", "/tokens/{uid}", f)
-}
-
-// NewGetTokenHandler creates a HTTP handler which loads the HTTP request and
-// calls the "lfx_v2_pat_service" service "get-token" endpoint.
-func NewGetTokenHandler(
-	endpoint goa.Endpoint,
-	mux goahttp.Muxer,
-	decoder func(*http.Request) goahttp.Decoder,
-	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
-	errhandler func(context.Context, http.ResponseWriter, error),
-	formatter func(ctx context.Context, err error) goahttp.Statuser,
-) http.Handler {
-	var (
-		decodeRequest  = DecodeGetTokenRequest(mux, decoder)
-		encodeResponse = EncodeGetTokenResponse(encoder)
-		encodeError    = EncodeGetTokenError(encoder, formatter)
-	)
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "get-token")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "lfx_v2_pat_service")
 		payload, err := decodeRequest(r)
 		if err != nil {

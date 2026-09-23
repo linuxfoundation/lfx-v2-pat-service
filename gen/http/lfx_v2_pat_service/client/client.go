@@ -25,10 +25,6 @@ type Client struct {
 	// endpoint.
 	ListTokensDoer goahttp.Doer
 
-	// GetToken Doer is the HTTP client used to make requests to the get-token
-	// endpoint.
-	GetTokenDoer goahttp.Doer
-
 	// DeleteToken Doer is the HTTP client used to make requests to the
 	// delete-token endpoint.
 	DeleteTokenDoer goahttp.Doer
@@ -66,7 +62,6 @@ func NewClient(
 	return &Client{
 		CreateTokenDoer:     doer,
 		ListTokensDoer:      doer,
-		GetTokenDoer:        doer,
 		DeleteTokenDoer:     doer,
 		ValidateTokenDoer:   doer,
 		LivezDoer:           doer,
@@ -122,30 +117,6 @@ func (c *Client) ListTokens() goa.Endpoint {
 		resp, err := c.ListTokensDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("lfx_v2_pat_service", "list-tokens", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
-// GetToken returns an endpoint that makes HTTP requests to the
-// lfx_v2_pat_service service get-token server.
-func (c *Client) GetToken() goa.Endpoint {
-	var (
-		encodeRequest  = EncodeGetTokenRequest(c.encoder)
-		decodeResponse = DecodeGetTokenResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildGetTokenRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		err = encodeRequest(req, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.GetTokenDoer.Do(req)
-		if err != nil {
-			return nil, goahttp.ErrRequestError("lfx_v2_pat_service", "get-token", err)
 		}
 		return decodeResponse(resp)
 	}

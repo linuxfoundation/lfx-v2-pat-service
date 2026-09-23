@@ -196,6 +196,12 @@ func normalizeEndpointURL(raw string, insecure bool) string {
 	return "https://" + raw
 }
 
+// httpSignalURL appends the OTLP signal path to the base endpoint, as the spec requires for
+// OTEL_EXPORTER_OTLP_ENDPOINT; the HTTP exporters send a path-less URL to "/".
+func httpSignalURL(endpoint, signal string) string {
+	return strings.TrimSuffix(endpoint, "/") + "/v1/" + signal
+}
+
 func newTraceProvider(ctx context.Context, cfg OTelConfig, res *resource.Resource) (*sdktrace.TracerProvider, error) {
 	var (
 		exporter sdktrace.SpanExporter
@@ -204,7 +210,7 @@ func newTraceProvider(ctx context.Context, cfg OTelConfig, res *resource.Resourc
 	if cfg.Protocol == OTelProtocolHTTP {
 		opts := []otlptracehttp.Option{}
 		if cfg.Endpoint != "" {
-			opts = append(opts, otlptracehttp.WithEndpointURL(cfg.Endpoint))
+			opts = append(opts, otlptracehttp.WithEndpointURL(httpSignalURL(cfg.Endpoint, "traces")))
 		}
 		if cfg.Insecure {
 			opts = append(opts, otlptracehttp.WithInsecure())
@@ -238,7 +244,7 @@ func newMetricsProvider(ctx context.Context, cfg OTelConfig, res *resource.Resou
 	if cfg.Protocol == OTelProtocolHTTP {
 		opts := []otlpmetrichttp.Option{}
 		if cfg.Endpoint != "" {
-			opts = append(opts, otlpmetrichttp.WithEndpointURL(cfg.Endpoint))
+			opts = append(opts, otlpmetrichttp.WithEndpointURL(httpSignalURL(cfg.Endpoint, "metrics")))
 		}
 		if cfg.Insecure {
 			opts = append(opts, otlpmetrichttp.WithInsecure())
@@ -271,7 +277,7 @@ func newLoggerProvider(ctx context.Context, cfg OTelConfig, res *resource.Resour
 	if cfg.Protocol == OTelProtocolHTTP {
 		opts := []otlploghttp.Option{}
 		if cfg.Endpoint != "" {
-			opts = append(opts, otlploghttp.WithEndpointURL(cfg.Endpoint))
+			opts = append(opts, otlploghttp.WithEndpointURL(httpSignalURL(cfg.Endpoint, "logs")))
 		}
 		if cfg.Insecure {
 			opts = append(opts, otlploghttp.WithInsecure())

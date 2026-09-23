@@ -32,11 +32,13 @@ jobs:
 
       - name: Prepare versions and chart name
         id: prepare
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          APP_VERSION=$(echo ${{ github.ref_name }} | sed 's/v//g')
+          APP_VERSION="${REF_NAME#v}"
           CHART_NAME="$(yq '.name' charts/*/Chart.yaml)"
-          CHART_VERSION=$(echo ${{ github.ref_name }} | sed 's/v//g')
+          CHART_VERSION="${REF_NAME#v}"
           {
             echo "app_version=$APP_VERSION"
             echo "chart_name=$CHART_NAME"
@@ -57,6 +59,7 @@ jobs:
         env:
           VERSION: ${{ steps.prepare.outputs.app_version }}
           GIT_COMMIT: ${{ github.sha }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           BUILD_TIME=$(date -u '+%Y-%m-%d_%H:%M:%S')
           GIT_COMMIT="${GIT_COMMIT:0:7}"
@@ -65,8 +68,8 @@ jobs:
           ko build github.com/linuxfoundation/lfx-v2-pat-service/cmd/pat-api \
             -B \
             --platform linux/amd64,linux/arm64 \
-            -t ${{ github.ref_name }} \
-            -t ${{ steps.prepare.outputs.app_version }} \
+            -t "$REF_NAME" \
+            -t "$VERSION" \
             -t latest \
             --sbom spdx
 

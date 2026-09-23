@@ -27,7 +27,8 @@ A token is `{uid, name, audience, lookup_id, username, created_at, last_used_at?
 appears once, in the create response. List returns each token with its public `lookup_id`
 and never the secret, the salt or the hash. Revoke addresses a token by `uid`.
 
-Every error has the same body, `{"error": "<code>", "message": "..."}`. The `error` code is stable and LFX One
+Every error an endpoint returns has the same body, `{"error": "<code>", "message": "..."}`. Requests that match
+no route are rejected by Heimdall before they reach the service. The `error` code is stable and LFX One
 forwards it to its UI as `upstreamCode`; `message` is for humans and may change. The `X-Request-Id` response header
 correlates a failure with the server logs.
 

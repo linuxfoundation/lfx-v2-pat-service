@@ -29,7 +29,8 @@ an unfiltered list is bounded by that limit times the number of audiences.
 
 ## Errors
 
-Every error has the same body, `{"error": "<code>", "message": "..."}`. The `error` code is stable and LFX One
+Every error an endpoint returns has the same body, `{"error": "<code>", "message": "..."}`. Requests that match
+no route are rejected by Heimdall before they reach the service. The `error` code is stable and LFX One
 forwards it to its UI as `upstreamCode`; `message` is for humans and may change. The `X-Request-Id` response header
 correlates a failure with the server logs.
 

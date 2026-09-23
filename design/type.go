@@ -115,9 +115,9 @@ func errorType(name, description, message string, codes ...any) expr.UserType {
 // BadRequestError covers the design's own validation and the use-case checks. Goa's validation errors reach it
 // through the error formatter, see cmd/pat-api/service/format_error.go.
 var BadRequestError = errorType("BadRequestError", "The request is invalid",
-	"audience \"nope\" is unknown or disabled",
-	constants.ErrCodeInvalidName, constants.ErrCodeInvalidUID, constants.ErrCodeUnknownAudience,
-	constants.ErrCodeInvalidRequest)
+	"value of version must be one of \"1\" but got value \"2\"",
+	constants.ErrCodeInvalidRequest, constants.ErrCodeInvalidName, constants.ErrCodeInvalidUID,
+	constants.ErrCodeUnknownAudience)
 
 // ConflictError lets lfx-one tell the two 409 causes apart.
 var ConflictError = errorType("ConflictError", "Name already used, or active-token limit reached, for this audience",

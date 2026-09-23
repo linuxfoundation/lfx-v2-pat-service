@@ -331,20 +331,20 @@ definitions:
             error:
                 type: string
                 description: Stable machine-readable code
-                example: invalid_name
+                example: invalid_request
                 enum:
+                    - invalid_request
                     - invalid_name
                     - invalid_uid
                     - unknown_audience
-                    - invalid_request
             message:
                 type: string
                 description: Human-readable explanation
-                example: audience "nope" is unknown or disabled
+                example: value of version must be one of "1" but got value "2"
         description: Invalid name, or unknown or disabled audience
         example:
-            error: invalid_name
-            message: audience "nope" is unknown or disabled
+            error: invalid_request
+            message: value of version must be one of "1" but got value "2"
         required:
             - error
             - message

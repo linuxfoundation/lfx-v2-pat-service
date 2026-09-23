@@ -704,8 +704,8 @@ func ValidateCreateTokenBadRequestResponseBody(body *CreateTokenBadRequestRespon
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	if body.Code != nil {
-		if !(*body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience" || *body.Code == "invalid_request") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_name", "invalid_uid", "unknown_audience", "invalid_request"}))
+		if !(*body.Code == "invalid_request" || *body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_request", "invalid_name", "invalid_uid", "unknown_audience"}))
 		}
 	}
 	return
@@ -806,8 +806,8 @@ func ValidateListTokensBadRequestResponseBody(body *ListTokensBadRequestResponse
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	if body.Code != nil {
-		if !(*body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience" || *body.Code == "invalid_request") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_name", "invalid_uid", "unknown_audience", "invalid_request"}))
+		if !(*body.Code == "invalid_request" || *body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_request", "invalid_name", "invalid_uid", "unknown_audience"}))
 		}
 	}
 	return
@@ -891,8 +891,8 @@ func ValidateDeleteTokenBadRequestResponseBody(body *DeleteTokenBadRequestRespon
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	if body.Code != nil {
-		if !(*body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience" || *body.Code == "invalid_request") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_name", "invalid_uid", "unknown_audience", "invalid_request"}))
+		if !(*body.Code == "invalid_request" || *body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_request", "invalid_name", "invalid_uid", "unknown_audience"}))
 		}
 	}
 	return
@@ -993,8 +993,8 @@ func ValidateValidateTokenBadRequestResponseBody(body *ValidateTokenBadRequestRe
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	if body.Code != nil {
-		if !(*body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience" || *body.Code == "invalid_request") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_name", "invalid_uid", "unknown_audience", "invalid_request"}))
+		if !(*body.Code == "invalid_request" || *body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_request", "invalid_name", "invalid_uid", "unknown_audience"}))
 		}
 	}
 	return

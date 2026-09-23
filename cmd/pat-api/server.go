@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 
+	patsvc "github.com/linuxfoundation/lfx-v2-pat-service/cmd/pat-api/service"
 	svcsvr "github.com/linuxfoundation/lfx-v2-pat-service/gen/http/lfx_v2_pat_service/server"
 	svc "github.com/linuxfoundation/lfx-v2-pat-service/gen/lfx_v2_pat_service"
 	"github.com/linuxfoundation/lfx-v2-pat-service/internal/container"
@@ -52,7 +53,7 @@ func handleHTTPServer(ctx context.Context, cfg *config.Config, endpoints *svc.En
 		goahttp.RequestDecoder,
 		goahttp.ResponseEncoder,
 		eh,
-		nil,
+		patsvc.FormatError,
 		http.Dir(koDataPath()),
 	)
 	svcsvr.Mount(mux, server)

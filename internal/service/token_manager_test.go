@@ -123,7 +123,7 @@ func TestCreateNameValidation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			created, err := f.manager.Create(context.Background(), alice, tt.input, constants.AudienceInsights)
 			if !tt.valid {
-				assert.True(t, errors.IsValidation(err), "got %v", err)
+				assertValidation(t, err, constants.ErrCodeInvalidName)
 				return
 			}
 			require.NoError(t, err)
@@ -132,19 +132,24 @@ func TestCreateNameValidation(t *testing.T) {
 	}
 }
 
+func assertValidation(t *testing.T, err error, code string) {
+	t.Helper()
+	var v errors.Validation
+	require.ErrorAs(t, err, &v)
+	assert.Equal(t, code, v.Code())
+}
+
 func TestCreateRejectsUnknownOrDisabledAudience(t *testing.T) {
 	f := newFixture(25)
 
 	_, err := f.manager.Create(context.Background(), alice, "ci", "nope")
-	assert.True(t, errors.IsValidation(err))
-	assert.Contains(t, err.Error(), constants.ErrCodeUnknownAudience)
+	assertValidation(t, err, constants.ErrCodeUnknownAudience)
 
 	disabled := mock.SeedAudience
 	disabled.Enabled = false
 	f.audiences.Set(disabled)
 	_, err = f.manager.Create(context.Background(), alice, "ci", constants.AudienceInsights)
-	assert.True(t, errors.IsValidation(err))
-	assert.Contains(t, err.Error(), constants.ErrCodeUnknownAudience)
+	assertValidation(t, err, constants.ErrCodeUnknownAudience)
 }
 
 func TestCreateRejectsDuplicateNameCaseInsensitively(t *testing.T) {

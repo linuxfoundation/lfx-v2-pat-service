@@ -41,7 +41,7 @@ var _ = dsl.Service("lfx_v2_pat_service", func() {
 			dsl.Required("secret", "token")
 		})
 		AuthErrors()
-		dsl.Error("BadRequest", dsl.ErrorResult, "Invalid name, or unknown or disabled audience")
+		dsl.Error("BadRequest", BadRequestError, "Invalid name, or unknown or disabled audience")
 		dsl.Error("Conflict", ConflictError, "Name already used, or active-token limit reached, for this audience")
 		ServerErrors()
 		dsl.HTTP(func() {
@@ -69,7 +69,7 @@ var _ = dsl.Service("lfx_v2_pat_service", func() {
 			dsl.Required("tokens")
 		})
 		AuthErrors()
-		dsl.Error("BadRequest", dsl.ErrorResult, "Invalid filter")
+		dsl.Error("BadRequest", BadRequestError, "Invalid filter")
 		ServerErrors()
 		dsl.HTTP(func() {
 			dsl.GET("/tokens")
@@ -93,8 +93,8 @@ var _ = dsl.Service("lfx_v2_pat_service", func() {
 			dsl.Required("uid")
 		})
 		AuthErrors()
-		dsl.Error("BadRequest", dsl.ErrorResult, "uid is not a UUID")
-		dsl.Error("NotFound", dsl.ErrorResult, "No active token with this uid is owned by the caller")
+		dsl.Error("BadRequest", BadRequestError, "uid is not a UUID")
+		dsl.Error("NotFound", NotFoundError, "No active token with this uid is owned by the caller")
 		ServerErrors()
 		dsl.HTTP(func() {
 			dsl.DELETE("/tokens/{uid}")
@@ -124,7 +124,7 @@ var _ = dsl.Service("lfx_v2_pat_service", func() {
 		})
 		dsl.Result(TokenIdentity)
 		AuthErrors()
-		dsl.Error("BadRequest", dsl.ErrorResult, "Malformed request body")
+		dsl.Error("BadRequest", BadRequestError, "Malformed request body")
 		dsl.Error("InvalidToken", InvalidTokenError, "Unknown, malformed, revoked, or disabled-audience secret")
 		ServerErrors()
 		dsl.HTTP(func() {
@@ -153,7 +153,7 @@ var _ = dsl.Service("lfx_v2_pat_service", func() {
 		dsl.Description("Readiness probe.")
 		dsl.Meta("swagger:generate", "false")
 		dsl.Result(dsl.Bytes, func() { dsl.Example("OK") })
-		dsl.Error("ServiceUnavailable", dsl.ErrorResult, "Service unavailable", func() { dsl.Temporary() })
+		dsl.Error("ServiceUnavailable", ServiceUnavailableError, "Service unavailable", func() { dsl.Temporary() })
 		dsl.HTTP(func() {
 			dsl.GET("/readyz")
 			dsl.Response(dsl.StatusOK, func() { dsl.ContentType("text/plain") })

@@ -88,7 +88,7 @@ func createErr(t model.NewToken, err error) error {
 		case pgErr.Code == uniqueViolation && pgErr.ConstraintName == "tokens_lookup_id_key":
 			return port.ErrLookupIDTaken
 		case pgErr.Code == foreignKeyViolation:
-			return errors.NewValidation(fmt.Sprintf("%s: audience %q is unknown or disabled", constants.ErrCodeUnknownAudience, t.Audience))
+			return errors.NewValidation(constants.ErrCodeUnknownAudience, fmt.Sprintf("audience %q is unknown or disabled", t.Audience))
 		}
 	}
 	return storeErr("insert token", err)

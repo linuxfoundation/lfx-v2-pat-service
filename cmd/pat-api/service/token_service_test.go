@@ -45,9 +45,9 @@ func newDeps(ready bool, authenticator domain.Authenticator) (Deps, *mock.TokenR
 
 func serviceErrorName(t *testing.T, err error) string {
 	t.Helper()
-	var serr *goa.ServiceError
-	require.ErrorAs(t, err, &serr)
-	return serr.Name
+	var named goa.GoaErrorNamer
+	require.ErrorAs(t, err, &named)
+	return named.GoaErrorName()
 }
 
 func TestLivez(t *testing.T) {
@@ -151,24 +151,26 @@ func TestWrapError(t *testing.T) {
 		name    string
 		err     error
 		want    string
+		code    string
 		message string
 	}{
-		{"not found", pkgerrors.NewNotFound("no token", cause), "NotFound", "no token"},
-		{"validation", pkgerrors.NewValidation("bad name"), "BadRequest", "bad name"},
-		{"unauthorized", pkgerrors.NewUnauthorized("expired"), "Unauthorized", "expired"},
-		{"forbidden", pkgerrors.NewForbidden("nope"), "Forbidden", "nope"},
-		{"unavailable hides cause", pkgerrors.NewServiceUnavailable("database unavailable", cause), "ServiceUnavailable", "database unavailable"},
-		{"unexpected is redacted", pkgerrors.NewUnexpected("boom", cause), "InternalServerError", "internal service error"},
-		{"plain error is redacted", cause, "InternalServerError", "internal service error"},
+		{"not found", pkgerrors.NewNotFound("no token", cause), "NotFound", constants.ErrCodeTokenNotFound, "no token"},
+		{"validation keeps code", pkgerrors.NewValidation(constants.ErrCodeInvalidName, "bad name"), "BadRequest", constants.ErrCodeInvalidName, "bad name"},
+		{"unauthorized", pkgerrors.NewUnauthorized("expired"), "Unauthorized", constants.ErrCodeUnauthorized, "expired"},
+		{"forbidden", pkgerrors.NewForbidden("nope"), "Forbidden", constants.ErrCodeForbidden, "nope"},
+		{"unavailable hides cause", pkgerrors.NewServiceUnavailable("database unavailable", cause), "ServiceUnavailable", constants.ErrCodeServiceUnavailable, "database unavailable"},
+		{"unexpected is redacted", pkgerrors.NewUnexpected("boom", cause), "InternalServerError", constants.ErrCodeInternal, "internal service error"},
+		{"plain error is redacted", cause, "InternalServerError", constants.ErrCodeInternal, "internal service error"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var serr *goa.ServiceError
-			require.ErrorAs(t, wrapError(context.Background(), tt.err), &serr)
-			assert.Equal(t, tt.want, serr.Name)
-			assert.Equal(t, tt.message, serr.Message)
-			assert.NotContains(t, serr.Message, "exploded")
+			err := wrapError(context.Background(), tt.err)
+			assert.Equal(t, tt.want, serviceErrorName(t, err))
+			body := FormatError(context.Background(), err).(*errorBody)
+			assert.Equal(t, tt.code, body.Code)
+			assert.Equal(t, tt.message, body.Message)
+			assert.NotContains(t, body.Message, "exploded")
 		})
 	}
 }

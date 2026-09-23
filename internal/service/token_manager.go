@@ -48,8 +48,8 @@ func (m *Manager) Create(ctx context.Context, caller domain.Caller, name, audien
 	audience, err := m.audiences.GetEnabledBySlug(ctx, audienceSlug)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			return CreatedToken{}, errors.NewValidation(
-				fmt.Sprintf("%s: audience %q is unknown or disabled", constants.ErrCodeUnknownAudience, audienceSlug))
+			return CreatedToken{}, errors.NewValidation(constants.ErrCodeUnknownAudience,
+				fmt.Sprintf("audience %q is unknown or disabled", audienceSlug))
 		}
 		return CreatedToken{}, err
 	}
@@ -103,14 +103,14 @@ func (m *Manager) Revoke(ctx context.Context, uid, username string) error {
 func normalizeName(raw string) (string, error) {
 	name := strings.TrimSpace(raw)
 	if name == "" {
-		return "", errors.NewValidation("name is required")
+		return "", errors.NewValidation(constants.ErrCodeInvalidName, "name is required")
 	}
 	if utf8.RuneCountInString(name) > constants.TokenNameMaxLength {
-		return "", errors.NewValidation(fmt.Sprintf("name must be at most %d characters", constants.TokenNameMaxLength))
+		return "", errors.NewValidation(constants.ErrCodeInvalidName, fmt.Sprintf("name must be at most %d characters", constants.TokenNameMaxLength))
 	}
 	for _, r := range name {
 		if unicode.IsControl(r) {
-			return "", errors.NewValidation("name must not contain control characters")
+			return "", errors.NewValidation(constants.ErrCodeInvalidName, "name must not contain control characters")
 		}
 	}
 	return name, nil

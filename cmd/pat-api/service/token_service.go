@@ -7,7 +7,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	svc "github.com/linuxfoundation/lfx-v2-pat-service/gen/lfx_v2_pat_service"
@@ -114,7 +113,7 @@ func (s *Service) ValidateToken(ctx context.Context, p *svc.ValidateTokenPayload
 // Readyz implements the readiness probe.
 func (s *Service) Readyz(ctx context.Context) ([]byte, error) {
 	if !s.deps.Ready(ctx) {
-		return nil, svc.MakeServiceUnavailable(fmt.Errorf("the service is unavailable"))
+		return nil, &svc.ServiceUnavailableError{Code: constants.ErrCodeServiceUnavailable, Message: "the service is unavailable"}
 	}
 	return []byte("OK\n"), nil
 }
@@ -130,7 +129,7 @@ func (s *Service) Livez(_ context.Context) ([]byte, error) {
 func callerFrom(ctx context.Context) (domain.Caller, error) {
 	caller, ok := ctx.Value(constants.CallerContextKey).(domain.Caller)
 	if !ok || caller.Principal == "" {
-		return domain.Caller{}, svc.MakeUnauthorized(fmt.Errorf("missing caller identity"))
+		return domain.Caller{}, &svc.UnauthorizedError{Code: constants.ErrCodeUnauthorized, Message: "missing caller identity"}
 	}
 	return caller, nil
 }
@@ -143,7 +142,7 @@ func ownerFrom(ctx context.Context) (domain.Caller, error) {
 		return domain.Caller{}, err
 	}
 	if strings.HasSuffix(caller.Principal, constants.ClientPrincipalSuffix) {
-		return domain.Caller{}, svc.MakeForbidden(fmt.Errorf("machine principals cannot manage personal access tokens"))
+		return domain.Caller{}, &svc.ForbiddenError{Code: constants.ErrCodeForbidden, Message: "machine principals cannot manage personal access tokens"}
 	}
 	return caller, nil
 }

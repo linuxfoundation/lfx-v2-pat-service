@@ -61,98 +61,14 @@ type ValidateTokenResponseBody struct {
 	Email *string `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`
 }
 
-// CreateTokenUnauthorizedResponseBody is the type of the "lfx_v2_pat_service"
-// service "create-token" endpoint HTTP response body for the "Unauthorized"
-// error.
-type CreateTokenUnauthorizedResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
-}
-
-// CreateTokenForbiddenResponseBody is the type of the "lfx_v2_pat_service"
-// service "create-token" endpoint HTTP response body for the "Forbidden" error.
-type CreateTokenForbiddenResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
-}
-
 // CreateTokenBadRequestResponseBody is the type of the "lfx_v2_pat_service"
 // service "create-token" endpoint HTTP response body for the "BadRequest"
 // error.
 type CreateTokenBadRequestResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
-}
-
-// CreateTokenInternalServerErrorResponseBody is the type of the
-// "lfx_v2_pat_service" service "create-token" endpoint HTTP response body for
-// the "InternalServerError" error.
-type CreateTokenInternalServerErrorResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
-}
-
-// CreateTokenServiceUnavailableResponseBody is the type of the
-// "lfx_v2_pat_service" service "create-token" endpoint HTTP response body for
-// the "ServiceUnavailable" error.
-type CreateTokenServiceUnavailableResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
 // CreateTokenConflictResponseBody is the type of the "lfx_v2_pat_service"
@@ -164,304 +80,179 @@ type CreateTokenConflictResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// ListTokensUnauthorizedResponseBody is the type of the "lfx_v2_pat_service"
-// service "list-tokens" endpoint HTTP response body for the "Unauthorized"
-// error.
-type ListTokensUnauthorizedResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+// CreateTokenForbiddenResponseBody is the type of the "lfx_v2_pat_service"
+// service "create-token" endpoint HTTP response body for the "Forbidden" error.
+type CreateTokenForbiddenResponseBody struct {
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
-// ListTokensForbiddenResponseBody is the type of the "lfx_v2_pat_service"
-// service "list-tokens" endpoint HTTP response body for the "Forbidden" error.
-type ListTokensForbiddenResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+// CreateTokenInternalServerErrorResponseBody is the type of the
+// "lfx_v2_pat_service" service "create-token" endpoint HTTP response body for
+// the "InternalServerError" error.
+type CreateTokenInternalServerErrorResponseBody struct {
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// CreateTokenServiceUnavailableResponseBody is the type of the
+// "lfx_v2_pat_service" service "create-token" endpoint HTTP response body for
+// the "ServiceUnavailable" error.
+type CreateTokenServiceUnavailableResponseBody struct {
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// CreateTokenUnauthorizedResponseBody is the type of the "lfx_v2_pat_service"
+// service "create-token" endpoint HTTP response body for the "Unauthorized"
+// error.
+type CreateTokenUnauthorizedResponseBody struct {
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
 // ListTokensBadRequestResponseBody is the type of the "lfx_v2_pat_service"
 // service "list-tokens" endpoint HTTP response body for the "BadRequest" error.
 type ListTokensBadRequestResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// ListTokensForbiddenResponseBody is the type of the "lfx_v2_pat_service"
+// service "list-tokens" endpoint HTTP response body for the "Forbidden" error.
+type ListTokensForbiddenResponseBody struct {
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
 // ListTokensInternalServerErrorResponseBody is the type of the
 // "lfx_v2_pat_service" service "list-tokens" endpoint HTTP response body for
 // the "InternalServerError" error.
 type ListTokensInternalServerErrorResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
 // ListTokensServiceUnavailableResponseBody is the type of the
 // "lfx_v2_pat_service" service "list-tokens" endpoint HTTP response body for
 // the "ServiceUnavailable" error.
 type ListTokensServiceUnavailableResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
-// DeleteTokenUnauthorizedResponseBody is the type of the "lfx_v2_pat_service"
-// service "delete-token" endpoint HTTP response body for the "Unauthorized"
+// ListTokensUnauthorizedResponseBody is the type of the "lfx_v2_pat_service"
+// service "list-tokens" endpoint HTTP response body for the "Unauthorized"
 // error.
-type DeleteTokenUnauthorizedResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+type ListTokensUnauthorizedResponseBody struct {
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
-}
-
-// DeleteTokenForbiddenResponseBody is the type of the "lfx_v2_pat_service"
-// service "delete-token" endpoint HTTP response body for the "Forbidden" error.
-type DeleteTokenForbiddenResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
 // DeleteTokenBadRequestResponseBody is the type of the "lfx_v2_pat_service"
 // service "delete-token" endpoint HTTP response body for the "BadRequest"
 // error.
 type DeleteTokenBadRequestResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
-// DeleteTokenNotFoundResponseBody is the type of the "lfx_v2_pat_service"
-// service "delete-token" endpoint HTTP response body for the "NotFound" error.
-type DeleteTokenNotFoundResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+// DeleteTokenForbiddenResponseBody is the type of the "lfx_v2_pat_service"
+// service "delete-token" endpoint HTTP response body for the "Forbidden" error.
+type DeleteTokenForbiddenResponseBody struct {
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
 // DeleteTokenInternalServerErrorResponseBody is the type of the
 // "lfx_v2_pat_service" service "delete-token" endpoint HTTP response body for
 // the "InternalServerError" error.
 type DeleteTokenInternalServerErrorResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// DeleteTokenNotFoundResponseBody is the type of the "lfx_v2_pat_service"
+// service "delete-token" endpoint HTTP response body for the "NotFound" error.
+type DeleteTokenNotFoundResponseBody struct {
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
 // DeleteTokenServiceUnavailableResponseBody is the type of the
 // "lfx_v2_pat_service" service "delete-token" endpoint HTTP response body for
 // the "ServiceUnavailable" error.
 type DeleteTokenServiceUnavailableResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
-// ValidateTokenUnauthorizedResponseBody is the type of the
-// "lfx_v2_pat_service" service "validate-token" endpoint HTTP response body
-// for the "Unauthorized" error.
-type ValidateTokenUnauthorizedResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
-}
-
-// ValidateTokenForbiddenResponseBody is the type of the "lfx_v2_pat_service"
-// service "validate-token" endpoint HTTP response body for the "Forbidden"
+// DeleteTokenUnauthorizedResponseBody is the type of the "lfx_v2_pat_service"
+// service "delete-token" endpoint HTTP response body for the "Unauthorized"
 // error.
-type ValidateTokenForbiddenResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+type DeleteTokenUnauthorizedResponseBody struct {
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
 // ValidateTokenBadRequestResponseBody is the type of the "lfx_v2_pat_service"
 // service "validate-token" endpoint HTTP response body for the "BadRequest"
 // error.
 type ValidateTokenBadRequestResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// ValidateTokenForbiddenResponseBody is the type of the "lfx_v2_pat_service"
+// service "validate-token" endpoint HTTP response body for the "Forbidden"
+// error.
+type ValidateTokenForbiddenResponseBody struct {
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
 // ValidateTokenInternalServerErrorResponseBody is the type of the
 // "lfx_v2_pat_service" service "validate-token" endpoint HTTP response body
 // for the "InternalServerError" error.
 type ValidateTokenInternalServerErrorResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
-}
-
-// ValidateTokenServiceUnavailableResponseBody is the type of the
-// "lfx_v2_pat_service" service "validate-token" endpoint HTTP response body
-// for the "ServiceUnavailable" error.
-type ValidateTokenServiceUnavailableResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
 // ValidateTokenInvalidTokenResponseBody is the type of the
@@ -474,23 +265,34 @@ type ValidateTokenInvalidTokenResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// ValidateTokenServiceUnavailableResponseBody is the type of the
+// "lfx_v2_pat_service" service "validate-token" endpoint HTTP response body
+// for the "ServiceUnavailable" error.
+type ValidateTokenServiceUnavailableResponseBody struct {
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ValidateTokenUnauthorizedResponseBody is the type of the
+// "lfx_v2_pat_service" service "validate-token" endpoint HTTP response body
+// for the "Unauthorized" error.
+type ValidateTokenUnauthorizedResponseBody struct {
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // ReadyzServiceUnavailableResponseBody is the type of the "lfx_v2_pat_service"
 // service "readyz" endpoint HTTP response body for the "ServiceUnavailable"
 // error.
 type ReadyzServiceUnavailableResponseBody struct {
-	// Name is the name of this class of errors.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code *string `form:"error,omitempty" json:"error,omitempty" xml:"error,omitempty"`
+	// Human-readable explanation
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// Is the error temporary?
-	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
-	// Is the error a timeout?
-	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
-	// Is the error a server-side fault?
-	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
 // TokenResponseResponseBody is used to define fields on response body types.
@@ -542,76 +344,12 @@ func NewCreateTokenResultCreated(body *CreateTokenResponseBody) *lfxv2patservice
 	return v
 }
 
-// NewCreateTokenUnauthorized builds a lfx_v2_pat_service service create-token
-// endpoint Unauthorized error.
-func NewCreateTokenUnauthorized(body *CreateTokenUnauthorizedResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
-	}
-
-	return v
-}
-
-// NewCreateTokenForbidden builds a lfx_v2_pat_service service create-token
-// endpoint Forbidden error.
-func NewCreateTokenForbidden(body *CreateTokenForbiddenResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
-	}
-
-	return v
-}
-
 // NewCreateTokenBadRequest builds a lfx_v2_pat_service service create-token
 // endpoint BadRequest error.
-func NewCreateTokenBadRequest(body *CreateTokenBadRequestResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
-	}
-
-	return v
-}
-
-// NewCreateTokenInternalServerError builds a lfx_v2_pat_service service
-// create-token endpoint InternalServerError error.
-func NewCreateTokenInternalServerError(body *CreateTokenInternalServerErrorResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
-	}
-
-	return v
-}
-
-// NewCreateTokenServiceUnavailable builds a lfx_v2_pat_service service
-// create-token endpoint ServiceUnavailable error.
-func NewCreateTokenServiceUnavailable(body *CreateTokenServiceUnavailableResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
+func NewCreateTokenBadRequest(body *CreateTokenBadRequestResponseBody) *lfxv2patservice.BadRequestError {
+	v := &lfxv2patservice.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
 	}
 
 	return v
@@ -621,6 +359,50 @@ func NewCreateTokenServiceUnavailable(body *CreateTokenServiceUnavailableRespons
 // endpoint Conflict error.
 func NewCreateTokenConflict(body *CreateTokenConflictResponseBody) *lfxv2patservice.ConflictError {
 	v := &lfxv2patservice.ConflictError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewCreateTokenForbidden builds a lfx_v2_pat_service service create-token
+// endpoint Forbidden error.
+func NewCreateTokenForbidden(body *CreateTokenForbiddenResponseBody) *lfxv2patservice.ForbiddenError {
+	v := &lfxv2patservice.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewCreateTokenInternalServerError builds a lfx_v2_pat_service service
+// create-token endpoint InternalServerError error.
+func NewCreateTokenInternalServerError(body *CreateTokenInternalServerErrorResponseBody) *lfxv2patservice.InternalError {
+	v := &lfxv2patservice.InternalError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewCreateTokenServiceUnavailable builds a lfx_v2_pat_service service
+// create-token endpoint ServiceUnavailable error.
+func NewCreateTokenServiceUnavailable(body *CreateTokenServiceUnavailableResponseBody) *lfxv2patservice.ServiceUnavailableError {
+	v := &lfxv2patservice.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewCreateTokenUnauthorized builds a lfx_v2_pat_service service create-token
+// endpoint Unauthorized error.
+func NewCreateTokenUnauthorized(body *CreateTokenUnauthorizedResponseBody) *lfxv2patservice.UnauthorizedError {
+	v := &lfxv2patservice.UnauthorizedError{
 		Code:    *body.Code,
 		Message: *body.Message,
 	}
@@ -644,16 +426,12 @@ func NewListTokensResultOK(body *ListTokensResponseBody) *lfxv2patservice.ListTo
 	return v
 }
 
-// NewListTokensUnauthorized builds a lfx_v2_pat_service service list-tokens
-// endpoint Unauthorized error.
-func NewListTokensUnauthorized(body *ListTokensUnauthorizedResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
+// NewListTokensBadRequest builds a lfx_v2_pat_service service list-tokens
+// endpoint BadRequest error.
+func NewListTokensBadRequest(body *ListTokensBadRequestResponseBody) *lfxv2patservice.BadRequestError {
+	v := &lfxv2patservice.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
 	}
 
 	return v
@@ -661,29 +439,10 @@ func NewListTokensUnauthorized(body *ListTokensUnauthorizedResponseBody) *goa.Se
 
 // NewListTokensForbidden builds a lfx_v2_pat_service service list-tokens
 // endpoint Forbidden error.
-func NewListTokensForbidden(body *ListTokensForbiddenResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
-	}
-
-	return v
-}
-
-// NewListTokensBadRequest builds a lfx_v2_pat_service service list-tokens
-// endpoint BadRequest error.
-func NewListTokensBadRequest(body *ListTokensBadRequestResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
+func NewListTokensForbidden(body *ListTokensForbiddenResponseBody) *lfxv2patservice.ForbiddenError {
+	v := &lfxv2patservice.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
 	}
 
 	return v
@@ -691,14 +450,10 @@ func NewListTokensBadRequest(body *ListTokensBadRequestResponseBody) *goa.Servic
 
 // NewListTokensInternalServerError builds a lfx_v2_pat_service service
 // list-tokens endpoint InternalServerError error.
-func NewListTokensInternalServerError(body *ListTokensInternalServerErrorResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
+func NewListTokensInternalServerError(body *ListTokensInternalServerErrorResponseBody) *lfxv2patservice.InternalError {
+	v := &lfxv2patservice.InternalError{
+		Code:    *body.Code,
+		Message: *body.Message,
 	}
 
 	return v
@@ -706,44 +461,21 @@ func NewListTokensInternalServerError(body *ListTokensInternalServerErrorRespons
 
 // NewListTokensServiceUnavailable builds a lfx_v2_pat_service service
 // list-tokens endpoint ServiceUnavailable error.
-func NewListTokensServiceUnavailable(body *ListTokensServiceUnavailableResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
+func NewListTokensServiceUnavailable(body *ListTokensServiceUnavailableResponseBody) *lfxv2patservice.ServiceUnavailableError {
+	v := &lfxv2patservice.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
 	}
 
 	return v
 }
 
-// NewDeleteTokenUnauthorized builds a lfx_v2_pat_service service delete-token
+// NewListTokensUnauthorized builds a lfx_v2_pat_service service list-tokens
 // endpoint Unauthorized error.
-func NewDeleteTokenUnauthorized(body *DeleteTokenUnauthorizedResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
-	}
-
-	return v
-}
-
-// NewDeleteTokenForbidden builds a lfx_v2_pat_service service delete-token
-// endpoint Forbidden error.
-func NewDeleteTokenForbidden(body *DeleteTokenForbiddenResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
+func NewListTokensUnauthorized(body *ListTokensUnauthorizedResponseBody) *lfxv2patservice.UnauthorizedError {
+	v := &lfxv2patservice.UnauthorizedError{
+		Code:    *body.Code,
+		Message: *body.Message,
 	}
 
 	return v
@@ -751,29 +483,21 @@ func NewDeleteTokenForbidden(body *DeleteTokenForbiddenResponseBody) *goa.Servic
 
 // NewDeleteTokenBadRequest builds a lfx_v2_pat_service service delete-token
 // endpoint BadRequest error.
-func NewDeleteTokenBadRequest(body *DeleteTokenBadRequestResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
+func NewDeleteTokenBadRequest(body *DeleteTokenBadRequestResponseBody) *lfxv2patservice.BadRequestError {
+	v := &lfxv2patservice.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
 	}
 
 	return v
 }
 
-// NewDeleteTokenNotFound builds a lfx_v2_pat_service service delete-token
-// endpoint NotFound error.
-func NewDeleteTokenNotFound(body *DeleteTokenNotFoundResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
+// NewDeleteTokenForbidden builds a lfx_v2_pat_service service delete-token
+// endpoint Forbidden error.
+func NewDeleteTokenForbidden(body *DeleteTokenForbiddenResponseBody) *lfxv2patservice.ForbiddenError {
+	v := &lfxv2patservice.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
 	}
 
 	return v
@@ -781,14 +505,21 @@ func NewDeleteTokenNotFound(body *DeleteTokenNotFoundResponseBody) *goa.ServiceE
 
 // NewDeleteTokenInternalServerError builds a lfx_v2_pat_service service
 // delete-token endpoint InternalServerError error.
-func NewDeleteTokenInternalServerError(body *DeleteTokenInternalServerErrorResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
+func NewDeleteTokenInternalServerError(body *DeleteTokenInternalServerErrorResponseBody) *lfxv2patservice.InternalError {
+	v := &lfxv2patservice.InternalError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteTokenNotFound builds a lfx_v2_pat_service service delete-token
+// endpoint NotFound error.
+func NewDeleteTokenNotFound(body *DeleteTokenNotFoundResponseBody) *lfxv2patservice.NotFoundError {
+	v := &lfxv2patservice.NotFoundError{
+		Code:    *body.Code,
+		Message: *body.Message,
 	}
 
 	return v
@@ -796,14 +527,21 @@ func NewDeleteTokenInternalServerError(body *DeleteTokenInternalServerErrorRespo
 
 // NewDeleteTokenServiceUnavailable builds a lfx_v2_pat_service service
 // delete-token endpoint ServiceUnavailable error.
-func NewDeleteTokenServiceUnavailable(body *DeleteTokenServiceUnavailableResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
+func NewDeleteTokenServiceUnavailable(body *DeleteTokenServiceUnavailableResponseBody) *lfxv2patservice.ServiceUnavailableError {
+	v := &lfxv2patservice.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteTokenUnauthorized builds a lfx_v2_pat_service service delete-token
+// endpoint Unauthorized error.
+func NewDeleteTokenUnauthorized(body *DeleteTokenUnauthorizedResponseBody) *lfxv2patservice.UnauthorizedError {
+	v := &lfxv2patservice.UnauthorizedError{
+		Code:    *body.Code,
+		Message: *body.Message,
 	}
 
 	return v
@@ -822,16 +560,12 @@ func NewValidateTokenTokenIdentityOK(body *ValidateTokenResponseBody) *lfxv2pats
 	return v
 }
 
-// NewValidateTokenUnauthorized builds a lfx_v2_pat_service service
-// validate-token endpoint Unauthorized error.
-func NewValidateTokenUnauthorized(body *ValidateTokenUnauthorizedResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
+// NewValidateTokenBadRequest builds a lfx_v2_pat_service service
+// validate-token endpoint BadRequest error.
+func NewValidateTokenBadRequest(body *ValidateTokenBadRequestResponseBody) *lfxv2patservice.BadRequestError {
+	v := &lfxv2patservice.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
 	}
 
 	return v
@@ -839,29 +573,10 @@ func NewValidateTokenUnauthorized(body *ValidateTokenUnauthorizedResponseBody) *
 
 // NewValidateTokenForbidden builds a lfx_v2_pat_service service validate-token
 // endpoint Forbidden error.
-func NewValidateTokenForbidden(body *ValidateTokenForbiddenResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
-	}
-
-	return v
-}
-
-// NewValidateTokenBadRequest builds a lfx_v2_pat_service service
-// validate-token endpoint BadRequest error.
-func NewValidateTokenBadRequest(body *ValidateTokenBadRequestResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
+func NewValidateTokenForbidden(body *ValidateTokenForbiddenResponseBody) *lfxv2patservice.ForbiddenError {
+	v := &lfxv2patservice.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
 	}
 
 	return v
@@ -869,29 +584,10 @@ func NewValidateTokenBadRequest(body *ValidateTokenBadRequestResponseBody) *goa.
 
 // NewValidateTokenInternalServerError builds a lfx_v2_pat_service service
 // validate-token endpoint InternalServerError error.
-func NewValidateTokenInternalServerError(body *ValidateTokenInternalServerErrorResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
-	}
-
-	return v
-}
-
-// NewValidateTokenServiceUnavailable builds a lfx_v2_pat_service service
-// validate-token endpoint ServiceUnavailable error.
-func NewValidateTokenServiceUnavailable(body *ValidateTokenServiceUnavailableResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
+func NewValidateTokenInternalServerError(body *ValidateTokenInternalServerErrorResponseBody) *lfxv2patservice.InternalError {
+	v := &lfxv2patservice.InternalError{
+		Code:    *body.Code,
+		Message: *body.Message,
 	}
 
 	return v
@@ -908,16 +604,34 @@ func NewValidateTokenInvalidToken(body *ValidateTokenInvalidTokenResponseBody) *
 	return v
 }
 
+// NewValidateTokenServiceUnavailable builds a lfx_v2_pat_service service
+// validate-token endpoint ServiceUnavailable error.
+func NewValidateTokenServiceUnavailable(body *ValidateTokenServiceUnavailableResponseBody) *lfxv2patservice.ServiceUnavailableError {
+	v := &lfxv2patservice.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewValidateTokenUnauthorized builds a lfx_v2_pat_service service
+// validate-token endpoint Unauthorized error.
+func NewValidateTokenUnauthorized(body *ValidateTokenUnauthorizedResponseBody) *lfxv2patservice.UnauthorizedError {
+	v := &lfxv2patservice.UnauthorizedError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // NewReadyzServiceUnavailable builds a lfx_v2_pat_service service readyz
 // endpoint ServiceUnavailable error.
-func NewReadyzServiceUnavailable(body *ReadyzServiceUnavailableResponseBody) *goa.ServiceError {
-	v := &goa.ServiceError{
-		Name:      *body.Name,
-		ID:        *body.ID,
-		Message:   *body.Message,
-		Temporary: *body.Temporary,
-		Timeout:   *body.Timeout,
-		Fault:     *body.Fault,
+func NewReadyzServiceUnavailable(body *ReadyzServiceUnavailableResponseBody) *lfxv2patservice.ServiceUnavailableError {
+	v := &lfxv2patservice.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
 	}
 
 	return v
@@ -980,122 +694,19 @@ func ValidateValidateTokenResponseBody(body *ValidateTokenResponseBody) (err err
 	return
 }
 
-// ValidateCreateTokenUnauthorizedResponseBody runs the validations defined on
-// create-token_Unauthorized_response_body
-func ValidateCreateTokenUnauthorizedResponseBody(body *CreateTokenUnauthorizedResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
-	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
-	}
-	return
-}
-
-// ValidateCreateTokenForbiddenResponseBody runs the validations defined on
-// create-token_Forbidden_response_body
-func ValidateCreateTokenForbiddenResponseBody(body *CreateTokenForbiddenResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
-	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
-	}
-	return
-}
-
 // ValidateCreateTokenBadRequestResponseBody runs the validations defined on
 // create-token_BadRequest_response_body
 func ValidateCreateTokenBadRequestResponseBody(body *CreateTokenBadRequestResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
-	}
-	return
-}
-
-// ValidateCreateTokenInternalServerErrorResponseBody runs the validations
-// defined on create-token_InternalServerError_response_body
-func ValidateCreateTokenInternalServerErrorResponseBody(body *CreateTokenInternalServerErrorResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
-	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
-	}
-	return
-}
-
-// ValidateCreateTokenServiceUnavailableResponseBody runs the validations
-// defined on create-token_ServiceUnavailable_response_body
-func ValidateCreateTokenServiceUnavailableResponseBody(body *CreateTokenServiceUnavailableResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
-	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience" || *body.Code == "invalid_request") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_name", "invalid_uid", "unknown_audience", "invalid_request"}))
+		}
 	}
 	return
 }
@@ -1117,50 +728,70 @@ func ValidateCreateTokenConflictResponseBody(body *CreateTokenConflictResponseBo
 	return
 }
 
-// ValidateListTokensUnauthorizedResponseBody runs the validations defined on
-// list-tokens_Unauthorized_response_body
-func ValidateListTokensUnauthorizedResponseBody(body *ListTokensUnauthorizedResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+// ValidateCreateTokenForbiddenResponseBody runs the validations defined on
+// create-token_Forbidden_response_body
+func ValidateCreateTokenForbiddenResponseBody(body *CreateTokenForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "forbidden") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"forbidden"}))
+		}
 	}
 	return
 }
 
-// ValidateListTokensForbiddenResponseBody runs the validations defined on
-// list-tokens_Forbidden_response_body
-func ValidateListTokensForbiddenResponseBody(body *ListTokensForbiddenResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+// ValidateCreateTokenInternalServerErrorResponseBody runs the validations
+// defined on create-token_InternalServerError_response_body
+func ValidateCreateTokenInternalServerErrorResponseBody(body *CreateTokenInternalServerErrorResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "internal_error") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"internal_error"}))
+		}
 	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	return
+}
+
+// ValidateCreateTokenServiceUnavailableResponseBody runs the validations
+// defined on create-token_ServiceUnavailable_response_body
+func ValidateCreateTokenServiceUnavailableResponseBody(body *CreateTokenServiceUnavailableResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Code != nil {
+		if !(*body.Code == "service_unavailable") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"service_unavailable"}))
+		}
+	}
+	return
+}
+
+// ValidateCreateTokenUnauthorizedResponseBody runs the validations defined on
+// create-token_Unauthorized_response_body
+func ValidateCreateTokenUnauthorizedResponseBody(body *CreateTokenUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Code != nil {
+		if !(*body.Code == "unauthorized") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"unauthorized"}))
+		}
 	}
 	return
 }
@@ -1168,23 +799,33 @@ func ValidateListTokensForbiddenResponseBody(body *ListTokensForbiddenResponseBo
 // ValidateListTokensBadRequestResponseBody runs the validations defined on
 // list-tokens_BadRequest_response_body
 func ValidateListTokensBadRequestResponseBody(body *ListTokensBadRequestResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience" || *body.Code == "invalid_request") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_name", "invalid_uid", "unknown_audience", "invalid_request"}))
+		}
 	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	return
+}
+
+// ValidateListTokensForbiddenResponseBody runs the validations defined on
+// list-tokens_Forbidden_response_body
+func ValidateListTokensForbiddenResponseBody(body *ListTokensForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Code != nil {
+		if !(*body.Code == "forbidden") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"forbidden"}))
+		}
 	}
 	return
 }
@@ -1192,23 +833,16 @@ func ValidateListTokensBadRequestResponseBody(body *ListTokensBadRequestResponse
 // ValidateListTokensInternalServerErrorResponseBody runs the validations
 // defined on list-tokens_InternalServerError_response_body
 func ValidateListTokensInternalServerErrorResponseBody(body *ListTokensInternalServerErrorResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "internal_error") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"internal_error"}))
+		}
 	}
 	return
 }
@@ -1216,71 +850,33 @@ func ValidateListTokensInternalServerErrorResponseBody(body *ListTokensInternalS
 // ValidateListTokensServiceUnavailableResponseBody runs the validations
 // defined on list-tokens_ServiceUnavailable_response_body
 func ValidateListTokensServiceUnavailableResponseBody(body *ListTokensServiceUnavailableResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "service_unavailable") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"service_unavailable"}))
+		}
 	}
 	return
 }
 
-// ValidateDeleteTokenUnauthorizedResponseBody runs the validations defined on
-// delete-token_Unauthorized_response_body
-func ValidateDeleteTokenUnauthorizedResponseBody(body *DeleteTokenUnauthorizedResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+// ValidateListTokensUnauthorizedResponseBody runs the validations defined on
+// list-tokens_Unauthorized_response_body
+func ValidateListTokensUnauthorizedResponseBody(body *ListTokensUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
-	}
-	return
-}
-
-// ValidateDeleteTokenForbiddenResponseBody runs the validations defined on
-// delete-token_Forbidden_response_body
-func ValidateDeleteTokenForbiddenResponseBody(body *DeleteTokenForbiddenResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
-	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "unauthorized") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"unauthorized"}))
+		}
 	}
 	return
 }
@@ -1288,47 +884,33 @@ func ValidateDeleteTokenForbiddenResponseBody(body *DeleteTokenForbiddenResponse
 // ValidateDeleteTokenBadRequestResponseBody runs the validations defined on
 // delete-token_BadRequest_response_body
 func ValidateDeleteTokenBadRequestResponseBody(body *DeleteTokenBadRequestResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience" || *body.Code == "invalid_request") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_name", "invalid_uid", "unknown_audience", "invalid_request"}))
+		}
 	}
 	return
 }
 
-// ValidateDeleteTokenNotFoundResponseBody runs the validations defined on
-// delete-token_NotFound_response_body
-func ValidateDeleteTokenNotFoundResponseBody(body *DeleteTokenNotFoundResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+// ValidateDeleteTokenForbiddenResponseBody runs the validations defined on
+// delete-token_Forbidden_response_body
+func ValidateDeleteTokenForbiddenResponseBody(body *DeleteTokenForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "forbidden") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"forbidden"}))
+		}
 	}
 	return
 }
@@ -1336,23 +918,33 @@ func ValidateDeleteTokenNotFoundResponseBody(body *DeleteTokenNotFoundResponseBo
 // ValidateDeleteTokenInternalServerErrorResponseBody runs the validations
 // defined on delete-token_InternalServerError_response_body
 func ValidateDeleteTokenInternalServerErrorResponseBody(body *DeleteTokenInternalServerErrorResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "internal_error") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"internal_error"}))
+		}
 	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	return
+}
+
+// ValidateDeleteTokenNotFoundResponseBody runs the validations defined on
+// delete-token_NotFound_response_body
+func ValidateDeleteTokenNotFoundResponseBody(body *DeleteTokenNotFoundResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Code != nil {
+		if !(*body.Code == "token_not_found") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"token_not_found"}))
+		}
 	}
 	return
 }
@@ -1360,71 +952,33 @@ func ValidateDeleteTokenInternalServerErrorResponseBody(body *DeleteTokenInterna
 // ValidateDeleteTokenServiceUnavailableResponseBody runs the validations
 // defined on delete-token_ServiceUnavailable_response_body
 func ValidateDeleteTokenServiceUnavailableResponseBody(body *DeleteTokenServiceUnavailableResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "service_unavailable") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"service_unavailable"}))
+		}
 	}
 	return
 }
 
-// ValidateValidateTokenUnauthorizedResponseBody runs the validations defined
-// on validate-token_Unauthorized_response_body
-func ValidateValidateTokenUnauthorizedResponseBody(body *ValidateTokenUnauthorizedResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+// ValidateDeleteTokenUnauthorizedResponseBody runs the validations defined on
+// delete-token_Unauthorized_response_body
+func ValidateDeleteTokenUnauthorizedResponseBody(body *DeleteTokenUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
-	}
-	return
-}
-
-// ValidateValidateTokenForbiddenResponseBody runs the validations defined on
-// validate-token_Forbidden_response_body
-func ValidateValidateTokenForbiddenResponseBody(body *ValidateTokenForbiddenResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
-	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "unauthorized") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"unauthorized"}))
+		}
 	}
 	return
 }
@@ -1432,23 +986,33 @@ func ValidateValidateTokenForbiddenResponseBody(body *ValidateTokenForbiddenResp
 // ValidateValidateTokenBadRequestResponseBody runs the validations defined on
 // validate-token_BadRequest_response_body
 func ValidateValidateTokenBadRequestResponseBody(body *ValidateTokenBadRequestResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience" || *body.Code == "invalid_request") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_name", "invalid_uid", "unknown_audience", "invalid_request"}))
+		}
 	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	return
+}
+
+// ValidateValidateTokenForbiddenResponseBody runs the validations defined on
+// validate-token_Forbidden_response_body
+func ValidateValidateTokenForbiddenResponseBody(body *ValidateTokenForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Code != nil {
+		if !(*body.Code == "forbidden") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"forbidden"}))
+		}
 	}
 	return
 }
@@ -1456,47 +1020,16 @@ func ValidateValidateTokenBadRequestResponseBody(body *ValidateTokenBadRequestRe
 // ValidateValidateTokenInternalServerErrorResponseBody runs the validations
 // defined on validate-token_InternalServerError_response_body
 func ValidateValidateTokenInternalServerErrorResponseBody(body *ValidateTokenInternalServerErrorResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
-	}
-	return
-}
-
-// ValidateValidateTokenServiceUnavailableResponseBody runs the validations
-// defined on validate-token_ServiceUnavailable_response_body
-func ValidateValidateTokenServiceUnavailableResponseBody(body *ValidateTokenServiceUnavailableResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
-	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
-	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
-	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "internal_error") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"internal_error"}))
+		}
 	}
 	return
 }
@@ -1518,26 +1051,53 @@ func ValidateValidateTokenInvalidTokenResponseBody(body *ValidateTokenInvalidTok
 	return
 }
 
-// ValidateReadyzServiceUnavailableResponseBody runs the validations defined on
-// readyz_ServiceUnavailable_response_body
-func ValidateReadyzServiceUnavailableResponseBody(body *ReadyzServiceUnavailableResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+// ValidateValidateTokenServiceUnavailableResponseBody runs the validations
+// defined on validate-token_ServiceUnavailable_response_body
+func ValidateValidateTokenServiceUnavailableResponseBody(body *ValidateTokenServiceUnavailableResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
-	if body.Temporary == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	if body.Code != nil {
+		if !(*body.Code == "service_unavailable") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"service_unavailable"}))
+		}
 	}
-	if body.Timeout == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	return
+}
+
+// ValidateValidateTokenUnauthorizedResponseBody runs the validations defined
+// on validate-token_Unauthorized_response_body
+func ValidateValidateTokenUnauthorizedResponseBody(body *ValidateTokenUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
 	}
-	if body.Fault == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Code != nil {
+		if !(*body.Code == "unauthorized") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"unauthorized"}))
+		}
+	}
+	return
+}
+
+// ValidateReadyzServiceUnavailableResponseBody runs the validations defined on
+// readyz_ServiceUnavailable_response_body
+func ValidateReadyzServiceUnavailableResponseBody(body *ReadyzServiceUnavailableResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("error", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Code != nil {
+		if !(*body.Code == "service_unavailable") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"service_unavailable"}))
+		}
 	}
 	return
 }

@@ -5,10 +5,10 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	svc "github.com/linuxfoundation/lfx-v2-pat-service/gen/lfx_v2_pat_service"
+	"github.com/linuxfoundation/lfx-v2-pat-service/pkg/constants"
 	pkgerrors "github.com/linuxfoundation/lfx-v2-pat-service/pkg/errors"
 	"github.com/linuxfoundation/lfx-v2-pat-service/pkg/log"
 )
@@ -20,13 +20,13 @@ func wrapError(ctx context.Context, err error) error {
 	var notFound pkgerrors.NotFound
 	if pkgerrors.As(err, &notFound) {
 		slog.InfoContext(ctx, "resource not found", log.ErrKey, err)
-		return svc.MakeNotFound(fmt.Errorf("%s", notFound.Message()))
+		return &svc.NotFoundError{Code: constants.ErrCodeTokenNotFound, Message: notFound.Message()}
 	}
 
 	var validation pkgerrors.Validation
 	if pkgerrors.As(err, &validation) {
 		slog.InfoContext(ctx, "request validation failed", log.ErrKey, err)
-		return svc.MakeBadRequest(fmt.Errorf("%s", validation.Message()))
+		return &svc.BadRequestError{Code: validation.Code(), Message: validation.Message()}
 	}
 
 	var conflict pkgerrors.Conflict
@@ -38,21 +38,21 @@ func wrapError(ctx context.Context, err error) error {
 	var unauthorized pkgerrors.Unauthorized
 	if pkgerrors.As(err, &unauthorized) {
 		slog.InfoContext(ctx, "request not authenticated", log.ErrKey, err)
-		return svc.MakeUnauthorized(fmt.Errorf("%s", unauthorized.Message()))
+		return &svc.UnauthorizedError{Code: constants.ErrCodeUnauthorized, Message: unauthorized.Message()}
 	}
 
 	var forbidden pkgerrors.Forbidden
 	if pkgerrors.As(err, &forbidden) {
 		slog.WarnContext(ctx, "request forbidden", log.ErrKey, err)
-		return svc.MakeForbidden(fmt.Errorf("%s", forbidden.Message()))
+		return &svc.ForbiddenError{Code: constants.ErrCodeForbidden, Message: forbidden.Message()}
 	}
 
 	var unavailable pkgerrors.ServiceUnavailable
 	if pkgerrors.As(err, &unavailable) {
 		slog.ErrorContext(ctx, "dependency unavailable", log.ErrKey, err)
-		return svc.MakeServiceUnavailable(fmt.Errorf("%s", unavailable.Message()))
+		return &svc.ServiceUnavailableError{Code: constants.ErrCodeServiceUnavailable, Message: unavailable.Message()}
 	}
 
 	slog.ErrorContext(ctx, "request failed", log.ErrKey, err)
-	return svc.MakeInternalServerError(fmt.Errorf("internal service error"))
+	return &svc.InternalError{Code: constants.ErrCodeInternal, Message: "internal service error"}
 }

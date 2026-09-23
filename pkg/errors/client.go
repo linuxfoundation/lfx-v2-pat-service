@@ -8,6 +8,7 @@ import "errors"
 // Validation represents invalid input (HTTP 400).
 type Validation struct {
 	base
+	code string
 }
 
 // Error returns the error message for Validation.
@@ -15,9 +16,14 @@ func (v Validation) Error() string {
 	return v.error()
 }
 
-// NewValidation creates a new Validation error with the provided message.
-func NewValidation(message string, err ...error) Validation {
-	return Validation{base: base{message: message, err: errors.Join(err...)}}
+// Code returns the stable machine-readable code.
+func (v Validation) Code() string {
+	return v.code
+}
+
+// NewValidation creates a new Validation error with the provided code and message.
+func NewValidation(code, message string, err ...error) Validation {
+	return Validation{base: base{message: message, err: errors.Join(err...)}, code: code}
 }
 
 // IsValidation reports whether err is a Validation error.

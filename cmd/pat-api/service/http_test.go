@@ -26,7 +26,7 @@ func newTestServer(t *testing.T, s *Service) *httptest.Server {
 	t.Helper()
 	mux := goahttp.NewMuxer()
 	endpoints := svc.NewEndpoints(s)
-	server := svcsvr.New(endpoints, mux, goahttp.RequestDecoder, goahttp.ResponseEncoder, nil, nil, http.Dir("../../.."))
+	server := svcsvr.New(endpoints, mux, goahttp.RequestDecoder, goahttp.ResponseEncoder, nil, FormatError, http.Dir("../../.."))
 	svcsvr.Mount(mux, server)
 	ts := httptest.NewServer(mux)
 	t.Cleanup(ts.Close)
@@ -169,16 +169,18 @@ func TestHTTPErrorBodies(t *testing.T) {
 	}{
 		{"duplicate name", "alice", http.MethodPost, "/tokens", `{"name":"ONE","audience":"insights"}`, http.StatusConflict, constants.ErrCodeTokenNameTaken},
 		{"limit reached", "alice", http.MethodPost, "/tokens", `{"name":"four","audience":"insights"}`, http.StatusConflict, constants.ErrCodeTokenLimitReached},
-		{"unknown audience", "alice", http.MethodPost, "/tokens", `{"name":"x","audience":"nope"}`, http.StatusBadRequest, ""},
-		{"audience shape", "alice", http.MethodPost, "/tokens", `{"name":"x","audience":"Not Valid"}`, http.StatusBadRequest, ""},
-		{"blank name", "alice", http.MethodPost, "/tokens", `{"name":"   ","audience":"insights"}`, http.StatusBadRequest, ""},
-		{"unknown version", "alice", http.MethodGet, "/tokens?v=2", "", http.StatusBadRequest, ""},
-		{"non-uuid uid", "alice", http.MethodDelete, "/tokens/not-a-uuid", "", http.StatusBadRequest, ""},
+		{"unknown audience", "alice", http.MethodPost, "/tokens", `{"name":"x","audience":"nope"}`, http.StatusBadRequest, constants.ErrCodeUnknownAudience},
+		{"audience shape", "alice", http.MethodPost, "/tokens", `{"name":"x","audience":"Not Valid"}`, http.StatusBadRequest, constants.ErrCodeUnknownAudience},
+		{"blank name", "alice", http.MethodPost, "/tokens", `{"name":"   ","audience":"insights"}`, http.StatusBadRequest, constants.ErrCodeInvalidName},
+		{"unknown version", "alice", http.MethodGet, "/tokens?v=2", "", http.StatusBadRequest, constants.ErrCodeInvalidRequest},
+		{"non-uuid uid", "alice", http.MethodDelete, "/tokens/not-a-uuid", "", http.StatusBadRequest, constants.ErrCodeInvalidUID},
 		{"get by uid is not routed", "alice", http.MethodGet, "/tokens/00000000-0000-4000-8000-000000000000", "", http.StatusMethodNotAllowed, ""},
-		{"no bearer", "", http.MethodGet, "/tokens", "", http.StatusUnauthorized, ""},
-		{"machine on user route", "abc123@clients", http.MethodGet, "/tokens", "", http.StatusForbidden, ""},
+		{"no bearer", "", http.MethodGet, "/tokens", "", http.StatusUnauthorized, constants.ErrCodeUnauthorized},
+		{"machine on user route", "abc123@clients", http.MethodGet, "/tokens", "", http.StatusForbidden, constants.ErrCodeForbidden},
 		{"malformed secret", "abc123@clients", http.MethodPost, "/_tokens/validate", `{"secret":"lfi_x"}`, http.StatusNotFound, constants.ErrCodeInvalidToken},
-		{"empty secret", "abc123@clients", http.MethodPost, "/_tokens/validate", `{"secret":""}`, http.StatusBadRequest, ""},
+		{"empty secret", "abc123@clients", http.MethodPost, "/_tokens/validate", `{"secret":""}`, http.StatusBadRequest, constants.ErrCodeInvalidRequest},
+		{"malformed json", "alice", http.MethodPost, "/tokens", `{"name":`, http.StatusBadRequest, constants.ErrCodeInvalidRequest},
+		{"unknown uid", "alice", http.MethodDelete, "/tokens/00000000-0000-4000-8000-000000000000", "", http.StatusNotFound, constants.ErrCodeTokenNotFound},
 	}
 
 	for _, tt := range tests {
@@ -186,11 +188,8 @@ func TestHTTPErrorBodies(t *testing.T) {
 			status, body, raw := do(t, ts, tt.principal, tt.method, tt.path, tt.body)
 			assert.Equal(t, tt.status, status, raw)
 			if tt.code != "" {
-				assert.Equal(t, tt.code, body["error"], raw)
-				assert.Contains(t, body, "message")
-			}
-			if tt.name == "unknown audience" {
-				assert.Contains(t, raw, constants.ErrCodeUnknownAudience)
+				assert.Equal(t, map[string]any{"error": tt.code, "message": body["message"]}, body, raw)
+				assert.NotEmpty(t, body["message"])
 			}
 		})
 	}

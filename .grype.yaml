@@ -7,4 +7,5 @@ ignore:
   # No fixed release exists; it only reaches go.sum through golang-migrate's test helper (dktest).
   - package:
       name: github.com/docker/docker
+      version: v28.5.2+incompatible
       type: go-module

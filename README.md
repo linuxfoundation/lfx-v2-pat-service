@@ -8,14 +8,6 @@ Cloudflare Worker exchanges a secret for a short-lived JWT.
 The design is recorded in the Insights repository: ADR-0006 (token exchange), ADR-0015 (issuance in LFX One)
 and ADR-0020 (this service on the platform cluster).
 
-## Service Setup
-
-**Delete this section after working through the template PRs:**
-
-- [ ] [Merge the OpenTofu PR](https://github.com/linuxfoundation/lfx-v2-opentofu/pull/256) to create service accounts used in the ArgoCD PR
-- [ ] [Merge the ArgoCD PR](https://github.com/linuxfoundation/lfx-v2-argocd/pull/1608) to deploy the new service
-- [ ] [Merge the Backstage Config PR](https://github.com/linuxfoundation/lfx-backstage/pull/81) to sync the service into Backstage
-
 ## API
 
 The token and validate endpoints sit behind Heimdall and expect `Authorization: Bearer <Heimdall-issued JWT>`;

@@ -10,6 +10,11 @@ image:
   # pullPolicy is the image pull policy
   pullPolicy: IfNotPresent
 
+# imagePullSecrets are the registry credentials used to pull the image.
+# Example:
+#   - name: linuxfoundation-imagepull
+imagePullSecrets: []
+
 # replicaCount is the number of replicas for the deployment
 replicaCount: 1
 

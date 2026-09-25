@@ -1,0 +1,1431 @@
+swagger: "2.0"
+info:
+    title: LFX V2 Personal Access Token Service
+    description: Issues, lists, revokes and validates audience-scoped personal access tokens.
+    version: "1.0"
+host: localhost:80
+consumes:
+    - application/json
+    - application/xml
+    - application/gob
+produces:
+    - application/json
+    - application/xml
+    - application/gob
+paths:
+    /_tokens/validate:
+        post:
+            tags:
+                - lfx_v2_pat_service
+            summary: validate-token lfx_v2_pat_service
+            description: 'Resolve a secret to its owner identity and record the use. Machine-to-machine: the gateway admits only members of the validator OpenFGA team. The caller must check the returned audience against the one it expects.'
+            operationId: lfx_v2_pat_service#validate-token
+            parameters:
+                - name: v
+                  in: query
+                  description: Version of the API
+                  required: false
+                  type: string
+                  enum:
+                    - "1"
+                - name: Authorization
+                  in: header
+                  description: JWT issued by Heimdall
+                  required: false
+                  type: string
+                - name: Validate-TokenRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/LfxV2PatServiceValidateTokenRequestBody'
+                    required:
+                        - secret
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/TokenIdentity'
+                        required:
+                            - uid
+                            - username
+                            - audience
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceValidateTokenBadRequestResponseBody'
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceValidateTokenUnauthorizedResponseBody'
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceValidateTokenForbiddenResponseBody'
+                "404":
+                    description: Not Found response.
+                    schema:
+                        $ref: '#/definitions/InvalidTokenError'
+                        required:
+                            - error
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceValidateTokenInternalServerErrorResponseBody'
+                "503":
+                    description: Service Unavailable response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceValidateTokenServiceUnavailableResponseBody'
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+    /tokens:
+        get:
+            tags:
+                - lfx_v2_pat_service
+            summary: list-tokens lfx_v2_pat_service
+            description: 'List the caller''s active tokens, newest first. Not paginated: the per-audience limit bounds the size.'
+            operationId: lfx_v2_pat_service#list-tokens
+            parameters:
+                - name: v
+                  in: query
+                  description: Version of the API
+                  required: false
+                  type: string
+                  enum:
+                    - "1"
+                - name: audience
+                  in: query
+                  description: Only return tokens minted for this audience
+                  required: false
+                  type: string
+                  pattern: ^[a-z][a-z0-9-]{1,31}$
+                - name: Authorization
+                  in: header
+                  description: JWT issued by Heimdall
+                  required: false
+                  type: string
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceListTokensResponseBody'
+                        required:
+                            - tokens
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceListTokensBadRequestResponseBody'
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceListTokensUnauthorizedResponseBody'
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceListTokensForbiddenResponseBody'
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceListTokensInternalServerErrorResponseBody'
+                "503":
+                    description: Service Unavailable response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceListTokensServiceUnavailableResponseBody'
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+        post:
+            tags:
+                - lfx_v2_pat_service
+            summary: create-token lfx_v2_pat_service
+            description: Create a token for the caller. The secret is returned once and is never retrievable again.
+            operationId: lfx_v2_pat_service#create-token
+            parameters:
+                - name: v
+                  in: query
+                  description: Version of the API
+                  required: false
+                  type: string
+                  enum:
+                    - "1"
+                - name: Authorization
+                  in: header
+                  description: JWT issued by Heimdall
+                  required: false
+                  type: string
+                - name: Create-TokenRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/LfxV2PatServiceCreateTokenRequestBody'
+                    required:
+                        - name
+                        - audience
+            responses:
+                "201":
+                    description: Created response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceCreateTokenResponseBody'
+                        required:
+                            - secret
+                            - token
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceCreateTokenBadRequestResponseBody'
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceCreateTokenUnauthorizedResponseBody'
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceCreateTokenForbiddenResponseBody'
+                "409":
+                    description: Conflict response.
+                    schema:
+                        $ref: '#/definitions/ConflictError'
+                        required:
+                            - error
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceCreateTokenInternalServerErrorResponseBody'
+                "503":
+                    description: Service Unavailable response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceCreateTokenServiceUnavailableResponseBody'
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+    /tokens/{uid}:
+        delete:
+            tags:
+                - lfx_v2_pat_service
+            summary: delete-token lfx_v2_pat_service
+            description: Revoke one of the caller's tokens. The row is kept for audit; later reads return 404 and validation fails.
+            operationId: lfx_v2_pat_service#delete-token
+            parameters:
+                - name: v
+                  in: query
+                  description: Version of the API
+                  required: false
+                  type: string
+                  enum:
+                    - "1"
+                - name: uid
+                  in: path
+                  description: Token UID
+                  required: true
+                  type: string
+                  format: uuid
+                - name: Authorization
+                  in: header
+                  description: JWT issued by Heimdall
+                  required: false
+                  type: string
+            responses:
+                "204":
+                    description: No Content response.
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceDeleteTokenBadRequestResponseBody'
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceDeleteTokenUnauthorizedResponseBody'
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceDeleteTokenForbiddenResponseBody'
+                "404":
+                    description: Not Found response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceDeleteTokenNotFoundResponseBody'
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceDeleteTokenInternalServerErrorResponseBody'
+                "503":
+                    description: Service Unavailable response.
+                    schema:
+                        $ref: '#/definitions/LfxV2PatServiceDeleteTokenServiceUnavailableResponseBody'
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+definitions:
+    ConflictError:
+        title: ConflictError
+        type: object
+        properties:
+            error:
+                type: string
+                description: Stable machine-readable code
+                example: token_name_taken
+                enum:
+                    - token_name_taken
+                    - token_limit_reached
+            message:
+                type: string
+                description: Human-readable explanation
+                example: a token named "ci-pipeline" already exists for audience insights
+        description: Name already used, or active-token limit reached, for this audience
+        example:
+            error: token_name_taken
+            message: a token named "ci-pipeline" already exists for audience insights
+        required:
+            - error
+            - message
+    InvalidTokenError:
+        title: InvalidTokenError
+        type: object
+        properties:
+            error:
+                type: string
+                description: Stable machine-readable code
+                example: invalid_token
+                enum:
+                    - invalid_token
+            message:
+                type: string
+                description: Human-readable explanation
+                example: secret is invalid or revoked
+        description: Unknown, malformed, revoked, or disabled-audience secret
+        example:
+            error: invalid_token
+            message: secret is invalid or revoked
+        required:
+            - error
+            - message
+    LfxV2PatServiceCreateTokenBadRequestResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: true
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Invalid name, or unknown or disabled audience (default view)
+        example:
+            fault: false
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: true
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceCreateTokenForbiddenResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Principal is not allowed to call this endpoint (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceCreateTokenInternalServerErrorResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Internal server error (default view)
+        example:
+            fault: false
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: true
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceCreateTokenRequestBody:
+        title: LfxV2PatServiceCreateTokenRequestBody
+        type: object
+        properties:
+            audience:
+                type: string
+                description: Audience to mint the token for
+                example: insights
+                pattern: ^[a-z][a-z0-9-]{1,31}$
+            name:
+                type: string
+                description: Display name, unique (case-insensitive) among the caller's active tokens for the audience
+                example: ci-pipeline
+                minLength: 1
+                maxLength: 100
+        example:
+            audience: insights
+            name: ci-pipeline
+        required:
+            - name
+            - audience
+    LfxV2PatServiceCreateTokenResponseBody:
+        title: LfxV2PatServiceCreateTokenResponseBody
+        type: object
+        properties:
+            secret:
+                type: string
+                description: Plaintext secret. Shown once; store it now.
+                example: lfi_aaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+            token:
+                $ref: '#/definitions/TokenResponse'
+        example:
+            secret: lfi_aaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+            token:
+                audience: insights
+                created_at: "2026-09-21T12:00:00Z"
+                last_used_at: "2026-09-22T08:30:00Z"
+                lookup_id: Ab3kZ9QmT2xL
+                name: ci-pipeline
+                uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                username: jdoe
+        required:
+            - secret
+            - token
+    LfxV2PatServiceCreateTokenServiceUnavailableResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: true
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Service unavailable (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: true
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceCreateTokenUnauthorizedResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: false
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: false
+        description: Missing, invalid or anonymous bearer token (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceDeleteTokenBadRequestResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: false
+        description: uid is not a UUID (default view)
+        example:
+            fault: false
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceDeleteTokenForbiddenResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: false
+        description: Principal is not allowed to call this endpoint (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceDeleteTokenInternalServerErrorResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Internal server error (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceDeleteTokenNotFoundResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: false
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: No active token with this uid is owned by the caller (default view)
+        example:
+            fault: false
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: true
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceDeleteTokenServiceUnavailableResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Service unavailable (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: true
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceDeleteTokenUnauthorizedResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: true
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: false
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Missing, invalid or anonymous bearer token (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: true
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceListTokensBadRequestResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Invalid filter (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceListTokensForbiddenResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: true
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Principal is not allowed to call this endpoint (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: true
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceListTokensInternalServerErrorResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Internal server error (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: true
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceListTokensResponseBody:
+        title: LfxV2PatServiceListTokensResponseBody
+        type: object
+        properties:
+            tokens:
+                type: array
+                items:
+                    $ref: '#/definitions/TokenResponse'
+                description: Active tokens owned by the caller
+                example:
+                    - audience: insights
+                      created_at: "2026-09-21T12:00:00Z"
+                      last_used_at: "2026-09-22T08:30:00Z"
+                      lookup_id: Ab3kZ9QmT2xL
+                      name: ci-pipeline
+                      uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                      username: jdoe
+                    - audience: insights
+                      created_at: "2026-09-21T12:00:00Z"
+                      last_used_at: "2026-09-22T08:30:00Z"
+                      lookup_id: Ab3kZ9QmT2xL
+                      name: ci-pipeline
+                      uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                      username: jdoe
+                    - audience: insights
+                      created_at: "2026-09-21T12:00:00Z"
+                      last_used_at: "2026-09-22T08:30:00Z"
+                      lookup_id: Ab3kZ9QmT2xL
+                      name: ci-pipeline
+                      uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                      username: jdoe
+                    - audience: insights
+                      created_at: "2026-09-21T12:00:00Z"
+                      last_used_at: "2026-09-22T08:30:00Z"
+                      lookup_id: Ab3kZ9QmT2xL
+                      name: ci-pipeline
+                      uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                      username: jdoe
+        example:
+            tokens:
+                - audience: insights
+                  created_at: "2026-09-21T12:00:00Z"
+                  last_used_at: "2026-09-22T08:30:00Z"
+                  lookup_id: Ab3kZ9QmT2xL
+                  name: ci-pipeline
+                  uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                  username: jdoe
+                - audience: insights
+                  created_at: "2026-09-21T12:00:00Z"
+                  last_used_at: "2026-09-22T08:30:00Z"
+                  lookup_id: Ab3kZ9QmT2xL
+                  name: ci-pipeline
+                  uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                  username: jdoe
+                - audience: insights
+                  created_at: "2026-09-21T12:00:00Z"
+                  last_used_at: "2026-09-22T08:30:00Z"
+                  lookup_id: Ab3kZ9QmT2xL
+                  name: ci-pipeline
+                  uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                  username: jdoe
+                - audience: insights
+                  created_at: "2026-09-21T12:00:00Z"
+                  last_used_at: "2026-09-22T08:30:00Z"
+                  lookup_id: Ab3kZ9QmT2xL
+                  name: ci-pipeline
+                  uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                  username: jdoe
+        required:
+            - tokens
+    LfxV2PatServiceListTokensServiceUnavailableResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: false
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: false
+        description: Service unavailable (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceListTokensUnauthorizedResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: false
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Missing, invalid or anonymous bearer token (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceValidateTokenBadRequestResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: true
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: false
+        description: Malformed request body (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceValidateTokenForbiddenResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Principal is not allowed to call this endpoint (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: true
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceValidateTokenInternalServerErrorResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: false
+        description: Internal server error (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: true
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceValidateTokenRequestBody:
+        title: LfxV2PatServiceValidateTokenRequestBody
+        type: object
+        properties:
+            secret:
+                type: string
+                description: Opaque secret presented by the end user
+                example: lfi_aaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                minLength: 1
+                maxLength: 128
+        example:
+            secret: lfi_aaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+        required:
+            - secret
+    LfxV2PatServiceValidateTokenServiceUnavailableResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: true
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: false
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: false
+        description: Service unavailable (default view)
+        example:
+            fault: false
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: true
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    LfxV2PatServiceValidateTokenUnauthorizedResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: false
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Missing, invalid or anonymous bearer token (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    TokenIdentity:
+        title: TokenIdentity
+        type: object
+        properties:
+            audience:
+                type: string
+                description: Audience the token was minted for. The caller must compare it with the audience it expects.
+                example: insights
+                pattern: ^[a-z][a-z0-9-]{1,31}$
+            email:
+                type: string
+                description: Owner email captured at issuance, when the user JWT carried a verified one
+                example: jdoe@example.com
+                format: email
+            uid:
+                type: string
+                description: Token UID
+                example: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                format: uuid
+            username:
+                type: string
+                description: Owner LFID username
+                example: jdoe
+        example:
+            audience: insights
+            email: jdoe@example.com
+            uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+            username: jdoe
+        required:
+            - uid
+            - username
+            - audience
+    TokenResponse:
+        title: TokenResponse
+        type: object
+        properties:
+            audience:
+                type: string
+                description: Audience the token was minted for
+                example: insights
+                pattern: ^[a-z][a-z0-9-]{1,31}$
+            created_at:
+                type: string
+                description: Creation time
+                example: "2026-09-21T12:00:00Z"
+                format: date-time
+            last_used_at:
+                type: string
+                description: Time of the last successful validation; absent until first use
+                example: "2026-09-22T08:30:00Z"
+                format: date-time
+            lookup_id:
+                type: string
+                description: Public locator embedded in the secret; safe to display
+                example: Ab3kZ9QmT2xL
+                minLength: 12
+                maxLength: 12
+            name:
+                type: string
+                description: Display name, unique (case-insensitive) among the caller's active tokens for the audience
+                example: ci-pipeline
+                minLength: 1
+                maxLength: 100
+            uid:
+                type: string
+                description: Token UID
+                example: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                format: uuid
+            username:
+                type: string
+                description: Owner LFID username
+                example: jdoe
+        description: A personal access token as seen by its owner. The secret is only returned at creation.
+        example:
+            audience: insights
+            created_at: "2026-09-21T12:00:00Z"
+            last_used_at: "2026-09-22T08:30:00Z"
+            lookup_id: Ab3kZ9QmT2xL
+            name: ci-pipeline
+            uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+            username: jdoe
+        required:
+            - uid
+            - name
+            - audience
+            - lookup_id
+            - username
+            - created_at
+securityDefinitions:
+    jwt_header_Authorization:
+        type: apiKey
+        description: Heimdall authorization
+        name: Authorization
+        in: header

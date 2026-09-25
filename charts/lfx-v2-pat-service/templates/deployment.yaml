@@ -1,0 +1,198 @@
+# Copyright The Linux Foundation and each contributor to LFX.
+# SPDX-License-Identifier: MIT
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: {{ .Chart.Name }}
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name | default .Chart.Name }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if not (has .Values.database.store (list "postgres" "memory")) }}
+          {{- fail "database.store must be postgres or memory" }}
+          {{- end }}
+          {{- if not (has .Values.database.mode (list "external" "local")) }}
+          {{- fail "database.mode must be external or local" }}
+          {{- end }}
+          env:
+          - name: PORT
+            value: {{ .Values.service.port | quote }}
+          - name: LOG_LEVEL
+            value: {{ .Values.app.logLevel | quote }}
+          - name: LOG_ADD_SOURCE
+            value: {{ .Values.app.logAddSource | quote }}
+          - name: JWKS_URL
+            value: {{ .Values.app.jwksUrl | quote }}
+          - name: AUDIENCE
+            value: {{ .Values.app.audience | quote }}
+          - name: ISSUER
+            value: {{ .Values.app.issuer | quote }}
+          {{- with .Values.app.jwtAuthDisabledMockLocalPrincipal }}
+          - name: JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL
+            value: {{ . | quote }}
+          {{- end }}
+          - name: TOKEN_MAX_ACTIVE_PER_AUDIENCE
+            value: {{ .Values.app.maxActivePerAudience | quote }}
+          - name: STORE
+            value: {{ .Values.database.store | quote }}
+          {{- if eq .Values.database.store "postgres" }}
+          - name: DB_MIGRATE_ON_START
+            value: {{ .Values.database.migrateOnStart | quote }}
+          - name: PG_MAX_CONNS
+            value: {{ .Values.database.maxConns | quote }}
+          - name: PGSSLMODE
+            value: {{ .Values.database.sslmode | quote }}
+          {{- if eq .Values.database.mode "external" }}
+          # The five credential parts come straight from the Secret; the service composes the URL itself so the
+          # password is never rendered into a manifest.
+          {{- $secret := .Values.database.external.secretName }}
+          {{- $keys := .Values.database.external.keys }}
+          - name: PGHOST
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secret }}
+                key: {{ $keys.host }}
+          - name: PGPORT
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secret }}
+                key: {{ $keys.port }}
+          - name: PGUSER
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secret }}
+                key: {{ $keys.username }}
+          - name: PGPASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secret }}
+                key: {{ $keys.password }}
+          - name: PGDATABASE
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secret }}
+                key: {{ $keys.dbname }}
+          {{- else }}
+          - name: PGHOST
+            value: {{ .Values.database.local.host | quote }}
+          - name: PGPORT
+            value: {{ .Values.database.local.port | quote }}
+          - name: PGUSER
+            value: {{ .Values.database.local.user | quote }}
+          - name: PGPASSWORD
+            value: {{ .Values.database.local.password | quote }}
+          - name: PGDATABASE
+            value: {{ .Values.database.local.dbname | quote }}
+          {{- end }}
+          {{- end }}
+          {{- with .Values.app.extraEnv }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+          {{- $otelServiceName := .Values.app.otel.serviceName | toString | trim }}
+          {{- if ne $otelServiceName "" }}
+          - name: OTEL_SERVICE_NAME
+            value: {{ $otelServiceName | quote }}
+          {{- end }}
+          {{- $otelServiceVersion := .Values.app.otel.serviceVersion | toString | trim }}
+          {{- if ne $otelServiceVersion "" }}
+          - name: OTEL_SERVICE_VERSION
+            value: {{ $otelServiceVersion | quote }}
+          {{- end }}
+          {{- $otelEndpoint := .Values.app.otel.endpoint | toString | trim }}
+          {{- if ne $otelEndpoint "" }}
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: {{ $otelEndpoint | quote }}
+          {{- end }}
+          {{- $otelProtocol := .Values.app.otel.protocol | toString | trim }}
+          {{- if ne $otelProtocol "" }}
+          - name: OTEL_EXPORTER_OTLP_PROTOCOL
+            value: {{ $otelProtocol | quote }}
+          {{- end }}
+          {{- $otelInsecure := .Values.app.otel.insecure | toString | trim }}
+          {{- if ne $otelInsecure "" }}
+          - name: OTEL_EXPORTER_OTLP_INSECURE
+            value: {{ $otelInsecure | quote }}
+          {{- end }}
+          {{- $otelTracesExporter := .Values.app.otel.tracesExporter | toString | trim }}
+          {{- if ne $otelTracesExporter "" }}
+          - name: OTEL_TRACES_EXPORTER
+            value: {{ $otelTracesExporter | quote }}
+          {{- end }}
+          {{- $otelTracesSampleRatio := .Values.app.otel.tracesSampleRatio | toString | trim }}
+          {{- if ne $otelTracesSampleRatio "" }}
+          - name: OTEL_TRACES_SAMPLE_RATIO
+            value: {{ $otelTracesSampleRatio | quote }}
+          {{- end }}
+          {{- $otelMetricsExporter := .Values.app.otel.metricsExporter | toString | trim }}
+          {{- if ne $otelMetricsExporter "" }}
+          - name: OTEL_METRICS_EXPORTER
+            value: {{ $otelMetricsExporter | quote }}
+          {{- end }}
+          {{- $otelLogsExporter := .Values.app.otel.logsExporter | toString | trim }}
+          {{- if ne $otelLogsExporter "" }}
+          - name: OTEL_LOGS_EXPORTER
+            value: {{ $otelLogsExporter | quote }}
+          {{- end }}
+          {{- $otelPropagators := .Values.app.otel.propagators | toString | trim }}
+          {{- if ne $otelPropagators "" }}
+          - name: OTEL_PROPAGATORS
+            value: {{ $otelPropagators | quote }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+              name: web
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: web
+            failureThreshold: 3
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: web
+            failureThreshold: 1
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /readyz
+              port: web
+            failureThreshold: 30
+            periodSeconds: 1

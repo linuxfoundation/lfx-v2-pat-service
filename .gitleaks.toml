@@ -1,0 +1,26 @@
+# Copyright The Linux Foundation and each contributor to LFX.
+# SPDX-License-Identifier: MIT
+
+title = "gitleaks config"
+
+[extend]
+# useDefault will extend the base configuration with the default gitleaks config
+useDefault = true
+
+[allowlist]
+    description = "Allowlisted files"
+    paths = [
+        # Exclude test files as they often contain dummy/fake data
+        '''.*_test\.go$''',
+        '''(go.mod|go.sum)$''',
+        # Exclude documentation files with example tokens
+        '''CLAUDE\.md$''',
+        # Goa-generated Go source is deterministic codegen carrying only the design's
+        # low-entropy example secrets. Generated JSON/YAML specs under gen/ stay scanned.
+        '''^gen/.*\.go$'''
+    ]
+    # design/ stays scanned; only its two deliberately low-entropy example values are allowlisted.
+    regexes = [
+        '''lfi_a{12}b{32}''',
+        '''eyJhbGci\.\.\.'''
+    ] 

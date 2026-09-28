@@ -5,7 +5,7 @@
 
 A secret is what the user pastes into a script or CI job. Its shape:
 
-```
+```text
 <prefix><lookup id><random part>
 lfi_    Ab3kZ9QmT2xL 32 base62 characters
 ```

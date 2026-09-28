@@ -27,6 +27,9 @@ DISABLE_ERRORS_LINTERS:
   - REPOSITORY_TRIVY
   - REPOSITORY_CHECKOV
   - REPOSITORY_DEVSKIM
+# Only scan commits introduced by the PR. Full-history scans pick up example
+# secrets from other open branches (gitleaks generic-api-key on docs/api.md).
+REPOSITORY_GITLEAKS_PR_COMMITS_SCAN: true
 YAML_YAMLLINT_CONFIG_FILE: .yamllint
 REPOSITORY_KICS_ARGUMENTS: >-
   scan --no-progress --exclude-severities="medium,low,info,trace" --exclude-paths="gen/*"

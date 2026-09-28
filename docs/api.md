@@ -9,12 +9,12 @@ on each of them. The OpenAPI document at `/_tokens/openapi3.json` is served with
 
 ## Endpoints
 
-| Method | Path | Caller | Success |
-|---|---|---|---|
-| `POST` | `/tokens` `{name, audience}` | user | `201 {secret, token}` |
-| `GET` | `/tokens?audience=` | user | `200 {tokens: [...]}`, newest first |
-| `DELETE` | `/tokens/{uid}` | user | `204` |
-| `POST` | `/_tokens/validate` `{secret}` | machine principal in the validator team | `200 {uid, username, audience, email?}` |
+| Method   | Path                           | Caller                                  | Success                                 |
+|----------|--------------------------------|-----------------------------------------|-----------------------------------------|
+| `POST`   | `/tokens` `{name, audience}`   | user                                    | `201 {secret, token}`                   |
+| `GET`    | `/tokens?audience=`            | user                                    | `200 {tokens: [...]}`, newest first     |
+| `DELETE` | `/tokens/{uid}`                | user                                    | `204`                                   |
+| `POST`   | `/_tokens/validate` `{secret}` | machine principal in the validator team | `200 {uid, username, audience, email?}` |
 
 A token is `{uid, name, audience, lookup_id, username, created_at, last_used_at?}`. The plaintext `secret`
 appears once, in the create response. List returns each token with its public `lookup_id`
@@ -32,16 +32,16 @@ an unfiltered list is bounded by that limit times the number of audiences.
 Errors use Goa's default body (`name`, `message`) except two that carry a stable `error` code next to `message`, which LFX One
 forwards to its UI as `upstreamCode`:
 
-| Status | Body | When |
-|---|---|---|
-| `409` | `{"error": "token_name_taken", "message": "..."}` | an active token with that name already exists for the caller and audience |
-| `409` | `{"error": "token_limit_reached", "message": "..."}` | the caller already holds the maximum active tokens for the audience |
-| `404` | `{"error": "invalid_token", "message": "..."}` | validate: unknown, malformed, or revoked secret, or a disabled audience |
-| `400` | message starts with `unknown_audience` | create: unknown or disabled audience slug |
-| `400` | | invalid body, unknown `v`, a `uid` that is not a UUID, or a `secret` that is missing, empty or longer than 128 characters (rejected before the credential check) |
-| `401` | | missing, invalid or anonymous bearer token |
-| `403` | | a machine principal on a token route; on validate, Heimdall rejects callers outside the validator team |
-| `503` | | the database is unreachable |
+| Status | Body                                                 | When                                                                                                                                                             |
+|--------|------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `409`  | `{"error": "token_name_taken", "message": "..."}`    | an active token with that name already exists for the caller and audience                                                                                        |
+| `409`  | `{"error": "token_limit_reached", "message": "..."}` | the caller already holds the maximum active tokens for the audience                                                                                              |
+| `404`  | `{"error": "invalid_token", "message": "..."}`       | validate: unknown, malformed, or revoked secret, or a disabled audience                                                                                          |
+| `400`  | message starts with `unknown_audience`               | create: unknown or disabled audience slug                                                                                                                        |
+| `400`  |                                                      | invalid body, unknown `v`, a `uid` that is not a UUID, or a `secret` that is missing, empty or longer than 128 characters (rejected before the credential check) |
+| `401`  |                                                      | missing, invalid or anonymous bearer token                                                                                                                       |
+| `403`  |                                                      | a machine principal on a token route; on validate, Heimdall rejects callers outside the validator team                                                           |
+| `503`  |                                                      | the database is unreachable                                                                                                                                      |
 
 Owner scoping is enforced by the service: a token another user owns reads as `404`, and revoke is idempotent
 (`204` once, `404` after). Every rejected secret on validate is the same `404` body, so a caller cannot tell an

@@ -31,6 +31,12 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name | default .Chart.Name }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -40,6 +46,15 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if not (has .Values.database.store (list "postgres" "memory")) }}
           {{- fail "database.store must be postgres or memory" }}
@@ -196,3 +211,9 @@ spec:
               port: web
             failureThreshold: 30
             periodSeconds: 1
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

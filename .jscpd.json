@@ -1,0 +1,10 @@
+{
+  "threshold": 0,
+  "gitignore": true,
+  "ignore": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/gen/**",
+    "**/megalinter-reports/**"
+  ]
+}

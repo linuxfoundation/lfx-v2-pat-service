@@ -8,4 +8,4 @@ type: application
 # This version should not be incremented, as it is dynamically replaced with the release version during the chart build
 # job.
 version: 0.0.1
-appVersion: "latest"
+appVersion: "0.0.1"

@@ -19,8 +19,9 @@ useDefault = true
         # low-entropy example secrets. Generated JSON/YAML specs under gen/ stay scanned.
         '''^gen/.*\.go$'''
     ]
-    # design/ stays scanned; only its two deliberately low-entropy example values are allowlisted.
+    # design/ stays scanned; only deliberately low-entropy example values are allowlisted.
     regexes = [
         '''lfi_a{12}b{32}''',
+        '''lfi_\.\.\.''',
         '''eyJhbGci\.\.\.'''
-    ] 
+    ]

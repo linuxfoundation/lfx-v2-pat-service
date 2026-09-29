@@ -27,6 +27,12 @@ DISABLE_ERRORS_LINTERS:
   - REPOSITORY_TRIVY
   - REPOSITORY_CHECKOV
   - REPOSITORY_DEVSKIM
+# Only scan commits introduced by the PR. MegaLinter requires VALIDATE_ALL_CODEBASE
+# false together with REPOSITORY_GITLEAKS_PR_COMMITS_SCAN, otherwise gitleaks
+# still walks full history (example secrets on other branches).
+VALIDATE_ALL_CODEBASE: false
+REPOSITORY_GITLEAKS_PR_COMMITS_SCAN: true
+COPYPASTE_JSCPD_CONFIG_FILE: .jscpd.json
 YAML_YAMLLINT_CONFIG_FILE: .yamllint
 REPOSITORY_KICS_ARGUMENTS: >-
   scan --no-progress --exclude-severities="medium,low,info,trace" --exclude-paths="gen/*"

@@ -1,0 +1,11 @@
+# Copyright The Linux Foundation and each contributor to LFX.
+# SPDX-License-Identifier: MIT
+
+# Chainguard images have no free versioned tags (see Dockerfile checkov skip).
+AVD-DS-0001
+# Distroless static image has no shell; Kubernetes probes cover liveness.
+AVD-DS-0026
+# ghcr.io is this org's registry; Trivy's default trusted-registry list omits it.
+AVD-KSV-0125
+# Transitive golang.org/x/crypto/openpgp advisory with no published fix; we do not import openpgp.
+GO-2026-5932

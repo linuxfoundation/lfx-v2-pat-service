@@ -15,14 +15,13 @@ useDefault = true
         '''(go.mod|go.sum)$''',
         # Exclude documentation files with example tokens
         '''CLAUDE\.md$''',
-        '''^README\.md$''',
-        '''^docs/.*\.md$''',
         # Goa-generated Go source is deterministic codegen carrying only the design's
         # low-entropy example secrets. Generated JSON/YAML specs under gen/ stay scanned.
         '''^gen/.*\.go$'''
     ]
-    # design/ stays scanned; only its two deliberately low-entropy example values are allowlisted.
+    # design/ stays scanned; only deliberately low-entropy example values are allowlisted.
     regexes = [
         '''lfi_a{12}b{32}''',
+        '''lfi_\.\.\.''',
         '''eyJhbGci\.\.\.'''
-    ] 
+    ]

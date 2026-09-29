@@ -27,8 +27,10 @@ DISABLE_ERRORS_LINTERS:
   - REPOSITORY_TRIVY
   - REPOSITORY_CHECKOV
   - REPOSITORY_DEVSKIM
-# Only scan commits introduced by the PR. Full-history scans pick up example
-# secrets from other open branches (gitleaks generic-api-key on docs/api.md).
+# Only scan commits introduced by the PR. MegaLinter requires VALIDATE_ALL_CODEBASE
+# false together with REPOSITORY_GITLEAKS_PR_COMMITS_SCAN, otherwise gitleaks
+# still walks full history (example secrets on other branches).
+VALIDATE_ALL_CODEBASE: false
 REPOSITORY_GITLEAKS_PR_COMMITS_SCAN: true
 COPYPASTE_JSCPD_CONFIG_FILE: .jscpd.json
 YAML_YAMLLINT_CONFIG_FILE: .yamllint
@@ -47,6 +49,3 @@ API_SPECTRAL_FILTER_REGEX_EXCLUDE: "gen/"
 FILTER_REGEX_EXCLUDE: '(templates/.*\.yml|templates/.*\.yaml|gen/.*)'
 KUBERNETES_DIRECTORY: charts/lfx-v2-pat-service/templates
 KUBERNETES_HELM_ARGUMENTS: charts/lfx-v2-pat-service
-
-
-[You have received this identical output 3 times. Re-reading '/Users/ddeal/orca/workspaces/lfx-v2-pat-service.git.main/feat-argocd-pr-automation/.mega-linter.yml:raw' will not change it — use a narrower selector (path:A-B), or proceed with the edit.]

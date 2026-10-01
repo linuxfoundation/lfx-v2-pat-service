@@ -26,8 +26,9 @@ jobs:
       - name: Download Dependencies
         run: make deps
 
-      - name: Generate service code
-        run: make apigen
+      # Release builds compile the committed gen/, so CI must test those exact bytes.
+      - name: Check generated code is up to date
+        run: make apigen-check
 
       - name: Build
         run: make build

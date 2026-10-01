@@ -52,6 +52,13 @@ deps: ## Install dependencies
 apigen: deps ## Generate API code using Goa
 	goa gen github.com/linuxfoundation/lfx-v2-pat-service/design
 
+.PHONY: apigen-check
+apigen-check: apigen ## Fail when committed gen/ differs from goa output of design/
+	@git diff --exit-code -- gen/ || { echo "gen/ is out of date with design/; run make apigen and commit the result"; exit 1; }
+	@untracked="$$(git ls-files --others --exclude-standard -- gen/)"; \
+		if [ -n "$$untracked" ]; then echo "make apigen produced uncommitted files:"; echo "$$untracked"; exit 1; fi
+	@echo "==> gen/ matches design/"
+
 .PHONY: fmt
 fmt: ## Format Go source (generated code excluded)
 	@echo "==> Formatting code..."

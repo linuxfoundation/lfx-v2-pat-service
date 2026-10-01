@@ -167,9 +167,9 @@ database:
   sslmode: verify-full
   # allowInsecureSSLMode permits an sslmode weaker than verify-full. Local development only.
   allowInsecureSSLMode: false
-  # caBundle overrides the CA that signs the database server certificate. Without it the service trusts the AWS
-  # RDS us-west-2 bundle shipped in the image (certs/, refreshed with make rds-ca). Set one of the two sources
-  # below for a database outside that bundle; the file is mounted read-only and passed as PGSSLROOTCERT.
+  # caBundle supplies the CA that signs the database server certificate, mounted read-only and passed to the
+  # service as PGSSLROOTCERT. RDS certificates chain to the AWS RDS CA, which is absent from the image's system
+  # roots, so RDS deployments set one of the two sources below. With neither, the system roots are used.
   caBundle:
     # pem is the PEM bundle inline (for RDS, the regional or global bundle AWS publishes); the chart renders it
     # into a ConfigMap.

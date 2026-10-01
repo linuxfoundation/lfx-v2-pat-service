@@ -112,9 +112,6 @@ tramp
 
 # Local certificates
 *.pem
-# Public AWS RDS CA bundle shipped in the image, see make rds-ca.
-!certs/*.pem
-!cmd/pat-api/kodata/certs/*.pem
 *.key
 *.crt
 

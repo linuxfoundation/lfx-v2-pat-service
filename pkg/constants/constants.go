@@ -22,8 +22,7 @@ const (
 	EnvPGPassword = "PGPASSWORD"
 	EnvPGDatabase = "PGDATABASE"
 	EnvPGSSLMode  = "PGSSLMODE"
-	// EnvPGSSLRootCert is the PEM bundle that signs the database server certificate. Unset under verify-full it
-	// defaults to the RDS bundle shipped in the image; "system" uses the system roots.
+	// EnvPGSSLRootCert is the PEM bundle that signs the database server certificate; empty uses the system roots.
 	EnvPGSSLRootCert = "PGSSLROOTCERT"
 	// EnvPGAllowInsecureSSLMode permits an sslmode weaker than verify-full. Local development only.
 	EnvPGAllowInsecureSSLMode = "PG_ALLOW_INSECURE_SSLMODE"
@@ -55,9 +54,6 @@ const (
 
 	DefaultKoDataPath = "."
 )
-
-// RDSCABundlePath is where the AWS RDS CA bundle sits under KO_DATA_PATH. It is refreshed with make rds-ca.
-const RDSCABundlePath = "certs/rds-us-west-2-bundle.pem"
 
 // PGSSLModeVerifyFull is the only sslmode that authenticates the server: weaker modes skip the chain or
 // host-name check, so anyone on the network path could terminate TLS and read the credential.

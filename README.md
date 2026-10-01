@@ -82,7 +82,7 @@ The service reads its configuration from environment variables (CLI flags `-p`, 
 | `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` |                                         | Postgres connection, read from the RDS secret in the chart; all four required when `STORE=postgres` |
 | `PGPORT`                                       | `5432`                                  | Postgres port; optional                                                                             |
 | `PGSSLMODE`                                    | `verify-full`                           | libpq SSL mode; anything weaker is refused unless `PG_ALLOW_INSECURE_SSLMODE=true`                  |
-| `PGSSLROOTCERT`                                | shipped RDS bundle                      | CA bundle path for the database certificate; `system` uses the system roots                         |
+| `PGSSLROOTCERT`                                |                                         | PEM bundle that signs the database server certificate; empty uses the system roots                  |
 | `PG_ALLOW_INSECURE_SSLMODE`                    | `false`                                 | Local development only: accept `disable`, `require` and other modes that skip server verification   |
 | `PG_MAX_CONNS`                                 | `10`                                    | Connection pool size                                                                                |
 | `DB_MIGRATE_ON_START`                          | `true`                                  | Apply pending migrations before listening                                                           |
@@ -147,8 +147,8 @@ The chart reads the Postgres credential from the Secret the ArgoCD ExternalSecre
 DevOps writes `user:<Auth0 Actions client_id>@clients member team:pat_validator` into each environment's store
 (the name comes from `app.validatorTeamName`). See `charts/lfx-v2-pat-service/values.yaml`.
 
-The database link uses `sslmode=verify-full`. The image ships the public AWS RDS us-west-2 CA bundle under
-`certs/` and trusts it by default; `make rds-ca` refreshes it from AWS. For a database signed by another CA, set
-`database.caBundle.pem` or `database.caBundle.existingConfigMap` in the chart (mounted read-only at
-`/etc/pat/db-ca` and passed as `PGSSLROOTCERT`). `require` and the other weaker modes encrypt without checking who
-answers, so they are for a local database only and need `database.allowInsecureSSLMode: true`.
+The database link uses `sslmode=verify-full`, so the pod must trust the CA that signs the RDS certificate. The
+chart mounts it read-only at `/etc/pat/db-ca` and sets `PGSSLROOTCERT`: put the AWS RDS CA bundle in
+`database.caBundle.pem`, or name a ConfigMap that holds it in `database.caBundle.existingConfigMap`. `require` and
+the other weaker modes encrypt without checking who answers, so they are for a local database only and need
+`database.allowInsecureSSLMode: true`.

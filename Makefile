@@ -52,19 +52,6 @@ deps: ## Install dependencies
 apigen: deps ## Generate API code using Goa
 	goa gen github.com/linuxfoundation/lfx-v2-pat-service/design
 
-# Public AWS RDS CA certificates for us-west-2, shipped in the image so verify-full works without deploy config.
-RDS_CA_URL := https://truststore.pki.rds.amazonaws.com/us-west-2/us-west-2-bundle.pem
-RDS_CA_FILE := certs/rds-us-west-2-bundle.pem
-
-.PHONY: rds-ca
-rds-ca: ## Refresh the RDS CA bundle from AWS and print its fingerprint
-	@mkdir -p certs
-	curl -fsS -o $(RDS_CA_FILE).tmp $(RDS_CA_URL)
-	@grep -q "BEGIN CERTIFICATE" $(RDS_CA_FILE).tmp && ! grep -q "PRIVATE KEY" $(RDS_CA_FILE).tmp || { rm -f $(RDS_CA_FILE).tmp; echo "unexpected bundle content"; exit 1; }
-	@mv $(RDS_CA_FILE).tmp $(RDS_CA_FILE)
-	@echo "==> $(RDS_CA_FILE): $$(grep -c 'BEGIN CERTIFICATE' $(RDS_CA_FILE)) certificates"
-	@sha256sum $(RDS_CA_FILE)
-
 .PHONY: fmt
 fmt: ## Format Go source (generated code excluded)
 	@echo "==> Formatting code..."

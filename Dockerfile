@@ -38,6 +38,5 @@ ENV KO_DATA_PATH=/var/run
 
 COPY --from=builder /go/bin/lfx-v2-pat-service /cmd/lfx-v2-pat-service
 COPY --from=builder /build/gen/http ${KO_DATA_PATH}/gen/http
-COPY --from=builder /build/certs ${KO_DATA_PATH}/certs
 
 ENTRYPOINT ["/cmd/lfx-v2-pat-service"]

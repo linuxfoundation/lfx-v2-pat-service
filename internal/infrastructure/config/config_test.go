@@ -27,7 +27,7 @@ func TestFromEnvDefaults(t *testing.T) {
 	assert.Empty(t, cfg.MockLocalPrincipal)
 	assert.Equal(t, "5432", cfg.PGPort)
 	assert.Equal(t, "verify-full", cfg.PGSSLMode)
-	assert.Equal(t, "certs/rds-us-west-2-bundle.pem", cfg.PGSSLRootCert)
+	assert.Empty(t, cfg.PGSSLRootCert)
 	assert.Equal(t, 10, cfg.PGMaxConns)
 	assert.Equal(t, "postgres", cfg.Store)
 	assert.True(t, cfg.MigrateOnStart)
@@ -42,7 +42,7 @@ func TestFromEnvReadsEverything(t *testing.T) {
 		"JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL": " alice ",
 		"PGHOST":                                 "db", "PGPORT": "5433", "PGUSER": "u", "PGPASSWORD": "p", "PGDATABASE": "d", "PGSSLMODE": "disable",
 		"PGSSLROOTCERT": "/etc/ca.pem",
-		"PG_MAX_CONNS":  "3", "DB_MIGRATE_ON_START": "false", "STORE": "memory",
+		"PG_MAX_CONNS": "3", "DB_MIGRATE_ON_START": "false", "STORE": "memory",
 		"TOKEN_MAX_ACTIVE_PER_AUDIENCE": "7",
 	}))
 	require.NoError(t, err)
@@ -97,21 +97,6 @@ func TestFromEnvRefusesUnverifiedSSLModesForPostgres(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestRootCertDefaultsToTheShippedRDSBundleUnderVerifyFull(t *testing.T) {
-	cfg, err := FromEnv(env(map[string]string{"KO_DATA_PATH": "/var/run"}))
-	require.NoError(t, err)
-	assert.Equal(t, "/var/run/certs/rds-us-west-2-bundle.pem", cfg.PGSSLRootCert)
-
-	cfg, err = FromEnv(env(map[string]string{"KO_DATA_PATH": "/var/run", "PGSSLROOTCERT": "system"}))
-	require.NoError(t, err)
-	assert.Equal(t, "system", cfg.PGSSLRootCert)
-
-	// sslrootcert would turn require into verify-ca, so weaker modes keep it empty unless asked for.
-	cfg, err = FromEnv(env(map[string]string{"PGSSLMODE": "require", "PG_ALLOW_INSECURE_SSLMODE": "true"}))
-	require.NoError(t, err)
-	assert.Empty(t, cfg.PGSSLRootCert)
-}
-
 func TestPostgresURLCarriesTheRootCert(t *testing.T) {
 	cfg, err := FromEnv(env(map[string]string{"PGHOST": "db", "PGSSLROOTCERT": "/etc/pat/db-ca/ca.pem"}))
 	require.NoError(t, err)
@@ -122,7 +107,7 @@ func TestPostgresURLCarriesTheRootCert(t *testing.T) {
 		assert.Equal(t, "/etc/pat/db-ca/ca.pem", u.Query().Get("sslrootcert"))
 	}
 
-	cfg, err = FromEnv(env(map[string]string{"PGHOST": "db", "PGSSLMODE": "disable", "PG_ALLOW_INSECURE_SSLMODE": "true"}))
+	cfg, err = FromEnv(env(map[string]string{"PGHOST": "db"}))
 	require.NoError(t, err)
 	u, err := url.Parse(cfg.PostgresURL("postgres"))
 	require.NoError(t, err)

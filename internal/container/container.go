@@ -99,6 +99,10 @@ func (c *Container) newStore(ctx context.Context, cfg *config.Config) (store, er
 		return store{}, fmt.Errorf("%s=%s requires %s, %s, %s and %s", constants.EnvStore, constants.StorePostgres,
 			constants.EnvPGHost, constants.EnvPGUser, constants.EnvPGPassword, constants.EnvPGDatabase)
 	}
+	if cfg.PGSSLMode != constants.PGSSLModeVerifyFull {
+		slog.Warn("the database server certificate is not verified: local development only",
+			"sslmode", cfg.PGSSLMode)
+	}
 	if cfg.MigrateOnStart {
 		slog.Info("applying database migrations")
 		if err := postgres.Migrate(cfg.PostgresURL("pgx5")); err != nil {

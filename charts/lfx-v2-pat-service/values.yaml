@@ -161,8 +161,24 @@ database:
   #              lfx-v2-opentofu provisions and the ArgoCD ExternalSecret materialises.
   #   "local"    uses the plain values below. Local development only.
   mode: external
-  # sslmode is the libpq SSL mode; RDS requires TLS.
-  sslmode: require
+  # sslmode is the libpq SSL mode. verify-full is the only mode that authenticates the server: require encrypts
+  # but accepts any certificate, and verify-ca accepts any certificate the CA issued for any host (every RDS
+  # instance in a region shares the RDS CA). Weaker modes fail the render unless allowInsecureSSLMode is set.
+  sslmode: verify-full
+  # allowInsecureSSLMode permits an sslmode weaker than verify-full. Local development only.
+  allowInsecureSSLMode: false
+  # caBundle mounts the PEM CA bundle the server certificate must chain to, read-only, and points PGSSLROOTCERT
+  # at it. RDS certificates chain to the AWS RDS CA, which is not in the image's system pool, so set this for
+  # RDS, e.g. from https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem:
+  #   kubectl create configmap lfx-v2-pat-service-db-ca --from-file=global-bundle.pem
+  # Set configMapName or secretName (not both); empty leaves the system pool, which fails against RDS, so set
+  # this before rolling out. verify-full also checks the host name: PGHOST must be the endpoint the RDS
+  # certificate names, not a CNAME alias.
+  caBundle:
+    configMapName: ""
+    secretName: ""
+    # key is the bundle's key in the ConfigMap or Secret.
+    key: global-bundle.pem
   # migrateOnStart applies pending migrations before the service listens.
   migrateOnStart: true
   # maxConns is the pgx pool size.

@@ -26,7 +26,9 @@ func TestFromEnvDefaults(t *testing.T) {
 	assert.Equal(t, "heimdall", cfg.Issuer)
 	assert.Empty(t, cfg.MockLocalPrincipal)
 	assert.Equal(t, "5432", cfg.PGPort)
-	assert.Equal(t, "require", cfg.PGSSLMode)
+	assert.Equal(t, "verify-full", cfg.PGSSLMode)
+	assert.Empty(t, cfg.PGSSLRootCert)
+	assert.False(t, cfg.PGAllowInsecureSSLMode)
 	assert.Equal(t, 10, cfg.PGMaxConns)
 	assert.Equal(t, "postgres", cfg.Store)
 	assert.True(t, cfg.MigrateOnStart)
@@ -91,7 +93,51 @@ func TestPostgresURLEscapesCredentials(t *testing.T) {
 		assert.Equal(t, "db.internal:5432", u.Host)
 		assert.Equal(t, "/pat", u.Path)
 		assert.Equal(t, "verify-full", u.Query().Get("sslmode"))
+		assert.False(t, u.Query().Has("sslrootcert"))
 	}
+}
+
+func TestPostgresURLCarriesRootCert(t *testing.T) {
+	cfg, err := FromEnv(env(map[string]string{
+		"PGHOST": "db.internal", "PGUSER": "u", "PGPASSWORD": "p", "PGDATABASE": "pat",
+		"PGSSLROOTCERT": "/etc/lfx-v2-pat-service/db-ca/root.crt",
+	}))
+	require.NoError(t, err)
+
+	for _, scheme := range []string{"postgres", "pgx5"} {
+		u, err := url.Parse(cfg.PostgresURL(scheme))
+		require.NoError(t, err)
+		assert.Equal(t, "verify-full", u.Query().Get("sslmode"))
+		assert.Equal(t, "/etc/lfx-v2-pat-service/db-ca/root.crt", u.Query().Get("sslrootcert"))
+	}
+}
+
+func TestFromEnvRefusesUnverifiedSSLModes(t *testing.T) {
+	for _, mode := range []string{"disable", "allow", "prefer", "require", "verify-ca"} {
+		_, err := FromEnv(env(map[string]string{"PGSSLMODE": mode}))
+		assert.Error(t, err, mode)
+
+		_, err = FromEnv(env(map[string]string{"PGSSLMODE": mode, "PG_ALLOW_INSECURE_SSLMODE": "false"}))
+		assert.Error(t, err, mode)
+
+		cfg, err := FromEnv(env(map[string]string{"PGSSLMODE": mode, "PG_ALLOW_INSECURE_SSLMODE": "true"}))
+		require.NoError(t, err, mode)
+		assert.Equal(t, mode, cfg.PGSSLMode)
+		assert.True(t, cfg.PGAllowInsecureSSLMode)
+	}
+
+	for _, m := range []map[string]string{
+		{"PGSSLMODE": "bogus"},
+		{"PGSSLMODE": "bogus", "PG_ALLOW_INSECURE_SSLMODE": "true"},
+		{"PG_ALLOW_INSECURE_SSLMODE": "maybe"},
+	} {
+		_, err := FromEnv(env(m))
+		assert.Error(t, err, "%v", m)
+	}
+
+	// The in-memory store never connects, so its sslmode is not checked.
+	_, err := FromEnv(env(map[string]string{"STORE": "memory", "PGSSLMODE": "disable"}))
+	assert.NoError(t, err)
 }
 
 func TestDatabaseConfiguredNeedsAllFour(t *testing.T) {

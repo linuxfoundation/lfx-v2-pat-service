@@ -81,7 +81,9 @@ The service reads its configuration from environment variables (CLI flags `-p`, 
 | `STORE`                                        | `postgres`                              | `postgres`, or `memory` for a local run without a database (nothing persists)                       |
 | `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` |                                         | Postgres connection, read from the RDS secret in the chart; all four required when `STORE=postgres` |
 | `PGPORT`                                       | `5432`                                  | Postgres port; optional                                                                             |
-| `PGSSLMODE`                                    | `require`                               | libpq SSL mode; `disable` for a local database                                                      |
+| `PGSSLMODE`                                    | `verify-full`                           | libpq SSL mode. Only `verify-full` authenticates the server; anything weaker is refused (below)     |
+| `PGSSLROOTCERT`                                | system pool                             | PEM CA bundle the server certificate must chain to; for RDS, the AWS RDS CA bundle (see the chart)  |
+| `PG_ALLOW_INSECURE_SSLMODE`                    | `false`                                 | Local development only: permit a `PGSSLMODE` weaker than `verify-full`, e.g. `disable`              |
 | `PG_MAX_CONNS`                                 | `10`                                    | Connection pool size                                                                                |
 | `DB_MIGRATE_ON_START`                          | `true`                                  | Apply pending migrations before listening                                                           |
 | `TOKEN_MAX_ACTIVE_PER_AUDIENCE`                | `25`                                    | Active tokens one user may hold per audience                                                        |
@@ -104,7 +106,7 @@ make helm-lint  # render the chart with the default and the local example values
 Run the service against the local database with JWT verification disabled:
 
 ```bash
-PGHOST=localhost PGPORT=5433 PGUSER=pat PGPASSWORD=pat PGDATABASE=pat PGSSLMODE=disable \
+PGHOST=localhost PGPORT=5433 PGUSER=pat PGPASSWORD=pat PGDATABASE=pat PGSSLMODE=disable PG_ALLOW_INSECURE_SSLMODE=true \
 JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=alice ./bin/lfx-v2-pat-service
 ```
 
@@ -120,6 +122,11 @@ curl -s -XPOST localhost:8080/_tokens/validate -H 'Authorization: Bearer x' -H '
 TOKEN_UID=...   # the uid from the create response
 curl -s -XDELETE "localhost:8080/tokens/$TOKEN_UID" -H 'Authorization: Bearer x' -o /dev/null -w '%{http_code}\n'  # 204
 ```
+
+`require` encrypts the connection but accepts any server certificate, and `verify-ca` accepts any certificate the
+CA issued, for any host (every RDS instance in a region shares the RDS CA), so neither authenticates the database
+server. The service therefore refuses every mode but `verify-full` unless `PG_ALLOW_INSECURE_SSLMODE=true` is set,
+which is for a local database only.
 
 Migrations live in `internal/infrastructure/postgres/migrations` and are applied at startup (`DB_MIGRATE_ON_START`).
 `STORE=memory` runs the same code paths against an in-memory store when no database is at hand.

@@ -62,6 +62,15 @@ spec:
           {{- if not (has .Values.database.mode (list "external" "local")) }}
           {{- fail "database.mode must be external or local" }}
           {{- end }}
+          {{- $caBundle := .Values.database.caBundle }}
+          {{- /* Compared as a string so a quoted "false" does not count as true. */}}
+          {{- $allowInsecureSSLMode := eq (toString .Values.database.allowInsecureSSLMode) "true" }}
+          {{- if and $caBundle.configMapName $caBundle.secretName }}
+          {{- fail "database.caBundle: set configMapName or secretName, not both" }}
+          {{- end }}
+          {{- if and (eq .Values.database.store "postgres") (ne .Values.database.sslmode "verify-full") (not $allowInsecureSSLMode) }}
+          {{- fail "database.sslmode must be verify-full; weaker modes do not verify the server and need database.allowInsecureSSLMode (local development only)" }}
+          {{- end }}
           env:
           - name: PORT
             value: {{ .Values.service.port | quote }}
@@ -90,6 +99,14 @@ spec:
             value: {{ .Values.database.maxConns | quote }}
           - name: PGSSLMODE
             value: {{ .Values.database.sslmode | quote }}
+          {{- if $allowInsecureSSLMode }}
+          - name: PG_ALLOW_INSECURE_SSLMODE
+            value: "true"
+          {{- end }}
+          {{- if or $caBundle.configMapName $caBundle.secretName }}
+          - name: PGSSLROOTCERT
+            value: /etc/lfx-v2-pat-service/db-ca/root.crt
+          {{- end }}
           {{- if eq .Values.database.mode "external" }}
           # The five credential parts come straight from the Secret; the service composes the URL itself so the
           # password is never rendered into a manifest.
@@ -214,6 +231,26 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+            {{- if or $caBundle.configMapName $caBundle.secretName }}
+            - name: db-ca
+              mountPath: /etc/lfx-v2-pat-service/db-ca
+              readOnly: true
+            {{- end }}
       volumes:
         - name: tmp
           emptyDir: {}
+        {{- if $caBundle.configMapName }}
+        - name: db-ca
+          configMap:
+            name: {{ $caBundle.configMapName | quote }}
+            items:
+              - key: {{ required "database.caBundle.key is required" $caBundle.key | quote }}
+                path: root.crt
+        {{- else if $caBundle.secretName }}
+        - name: db-ca
+          secret:
+            secretName: {{ $caBundle.secretName | quote }}
+            items:
+              - key: {{ required "database.caBundle.key is required" $caBundle.key | quote }}
+                path: root.crt
+        {{- end }}

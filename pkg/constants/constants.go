@@ -23,6 +23,10 @@ const (
 	EnvPGDatabase = "PGDATABASE"
 	EnvPGSSLMode  = "PGSSLMODE"
 	EnvPGMaxConns = "PG_MAX_CONNS"
+	// EnvPGSSLRootCert is the CA bundle (PEM) the server certificate must chain to, e.g. the RDS bundle.
+	EnvPGSSLRootCert = "PGSSLROOTCERT"
+	// EnvPGAllowInsecureSSLMode permits a PGSSLMODE weaker than verify-full. Local development only.
+	EnvPGAllowInsecureSSLMode = "PG_ALLOW_INSECURE_SSLMODE"
 
 	EnvStore                = "STORE"
 	EnvMigrateOnStart       = "DB_MIGRATE_ON_START"
@@ -41,7 +45,7 @@ const (
 	DefaultIssuer   = "heimdall"
 
 	DefaultPGPort     = "5432"
-	DefaultPGSSLMode  = "require"
+	DefaultPGSSLMode  = PGSSLModeVerifyFull
 	DefaultPGMaxConns = 10
 
 	DefaultStore                = StorePostgres
@@ -50,6 +54,11 @@ const (
 
 	DefaultKoDataPath = "."
 )
+
+// PGSSLModeVerifyFull is the only sslmode that authenticates the server: the certificate must chain to a trusted
+// CA and name the host. Weaker modes (verify-ca accepts any certificate from the CA, require and below accept
+// any certificate at all) need EnvPGAllowInsecureSSLMode.
+const PGSSLModeVerifyFull = "verify-full"
 
 // Store selects the token store. Postgres is the default; the in-memory store is an explicit opt-in for local
 // runs without a database and never persists anything.

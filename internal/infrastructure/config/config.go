@@ -37,6 +37,10 @@ type Config struct {
 	PGDatabase string
 	PGSSLMode  string
 	PGMaxConns int
+	// PGSSLRootCert is the CA bundle the server certificate must chain to; empty uses the system pool.
+	PGSSLRootCert string
+	// PGAllowInsecureSSLMode permits a PGSSLMode weaker than verify-full. Local development only.
+	PGAllowInsecureSSLMode bool
 
 	// Store is constants.StorePostgres or constants.StoreMemory.
 	Store                string
@@ -92,6 +96,17 @@ func FromEnv(getenv func(string) string) (*Config, error) {
 		return nil, fmt.Errorf("%s must be %q or %q, got %q", constants.EnvStore, constants.StorePostgres, constants.StoreMemory, store)
 	}
 
+	allowInsecureSSL, err := strconv.ParseBool(get(constants.EnvPGAllowInsecureSSLMode, "false"))
+	if err != nil {
+		return nil, fmt.Errorf("%s must be a boolean: %w", constants.EnvPGAllowInsecureSSLMode, err)
+	}
+	sslMode := get(constants.EnvPGSSLMode, constants.DefaultPGSSLMode)
+	if store == constants.StorePostgres {
+		if err := checkSSLMode(sslMode, allowInsecureSSL); err != nil {
+			return nil, err
+		}
+	}
+
 	pgPort := get(constants.EnvPGPort, constants.DefaultPGPort)
 	if n, err := strconv.Atoi(pgPort); err != nil || n < 1 || n > 65535 {
 		return nil, fmt.Errorf("%s must be a TCP port, got %q", constants.EnvPGPort, pgPort)
@@ -112,8 +127,11 @@ func FromEnv(getenv func(string) string) (*Config, error) {
 		PGUser:     get(constants.EnvPGUser, ""),
 		PGPassword: getenv(constants.EnvPGPassword),
 		PGDatabase: get(constants.EnvPGDatabase, ""),
-		PGSSLMode:  get(constants.EnvPGSSLMode, constants.DefaultPGSSLMode),
+		PGSSLMode:  sslMode,
 		PGMaxConns: maxConns,
+
+		PGSSLRootCert:          get(constants.EnvPGSSLRootCert, ""),
+		PGAllowInsecureSSLMode: allowInsecureSSL,
 
 		Store:                store,
 		MigrateOnStart:       migrate,
@@ -138,13 +156,36 @@ func (c *Config) DatabaseConfigured() bool {
 // scheme is "postgres" for pgx and "pgx5" for golang-migrate.
 func (c *Config) PostgresURL(scheme string) string {
 	u := url.URL{
-		Scheme:   scheme,
-		User:     url.UserPassword(c.PGUser, c.PGPassword),
-		Host:     net.JoinHostPort(c.PGHost, c.PGPort),
-		Path:     "/" + c.PGDatabase,
-		RawQuery: url.Values{"sslmode": {c.PGSSLMode}}.Encode(),
+		Scheme: scheme,
+		User:   url.UserPassword(c.PGUser, c.PGPassword),
+		Host:   net.JoinHostPort(c.PGHost, c.PGPort),
+		Path:   "/" + c.PGDatabase,
 	}
+	q := url.Values{"sslmode": {c.PGSSLMode}}
+	if c.PGSSLRootCert != "" {
+		// Explicit so the pool and the migrator verify against the same bundle whatever pgx merges from the env.
+		q.Set("sslrootcert", c.PGSSLRootCert)
+	}
+	u.RawQuery = q.Encode()
 	return u.String()
+}
+
+// checkSSLMode refuses any sslmode that does not authenticate the server unless insecure modes are explicitly
+// allowed. Under pgx (libpq semantics) require encrypts but accepts any certificate, and verify-ca accepts any
+// certificate the CA issued for any host, so neither authenticates the database server.
+func checkSSLMode(mode string, allowInsecure bool) error {
+	switch mode {
+	case constants.PGSSLModeVerifyFull:
+		return nil
+	case "disable", "allow", "prefer", "require", "verify-ca":
+		if allowInsecure {
+			return nil
+		}
+		return fmt.Errorf("%s=%s does not verify the database server certificate; use %s with %s, or set %s=true for local development",
+			constants.EnvPGSSLMode, mode, constants.PGSSLModeVerifyFull, constants.EnvPGSSLRootCert, constants.EnvPGAllowInsecureSSLMode)
+	default:
+		return fmt.Errorf("%s must be one of disable, allow, prefer, require, verify-ca or verify-full, got %q", constants.EnvPGSSLMode, mode)
+	}
 }
 
 func positiveInt(raw, key string) (int, error) {

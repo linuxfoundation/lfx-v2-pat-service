@@ -12,6 +12,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -36,7 +37,9 @@ type Config struct {
 	PGPassword string
 	PGDatabase string
 	PGSSLMode  string
-	PGMaxConns int
+	// PGSSLRootCert is the CA bundle path handed to pgx as sslrootcert; empty uses the system roots.
+	PGSSLRootCert string
+	PGMaxConns    int
 
 	// Store is constants.StorePostgres or constants.StoreMemory.
 	Store                string
@@ -92,6 +95,19 @@ func FromEnv(getenv func(string) string) (*Config, error) {
 		return nil, fmt.Errorf("%s must be %q or %q, got %q", constants.EnvStore, constants.StorePostgres, constants.StoreMemory, store)
 	}
 
+	allowInsecureSSL, err := strconv.ParseBool(get(constants.EnvPGAllowInsecureSSLMode, "false"))
+	if err != nil {
+		return nil, fmt.Errorf("%s must be a boolean: %w", constants.EnvPGAllowInsecureSSLMode, err)
+	}
+	sslMode := get(constants.EnvPGSSLMode, constants.DefaultPGSSLMode)
+	if !slices.Contains(pgSSLModes, sslMode) {
+		return nil, fmt.Errorf("%s must be one of %v, got %q", constants.EnvPGSSLMode, pgSSLModes, sslMode)
+	}
+	if store == constants.StorePostgres && sslMode != constants.PGSSLModeVerifyFull && !allowInsecureSSL {
+		return nil, fmt.Errorf("%s=%s does not verify the database server certificate; use %s, or set %s=true for a local database",
+			constants.EnvPGSSLMode, sslMode, constants.PGSSLModeVerifyFull, constants.EnvPGAllowInsecureSSLMode)
+	}
+
 	pgPort := get(constants.EnvPGPort, constants.DefaultPGPort)
 	if n, err := strconv.Atoi(pgPort); err != nil || n < 1 || n > 65535 {
 		return nil, fmt.Errorf("%s must be a TCP port, got %q", constants.EnvPGPort, pgPort)
@@ -107,13 +123,14 @@ func FromEnv(getenv func(string) string) (*Config, error) {
 		Issuer:             get(constants.EnvIssuer, constants.DefaultIssuer),
 		MockLocalPrincipal: strings.TrimSpace(getenv(constants.EnvMockLocalPrincipal)),
 
-		PGHost:     get(constants.EnvPGHost, ""),
-		PGPort:     pgPort,
-		PGUser:     get(constants.EnvPGUser, ""),
-		PGPassword: getenv(constants.EnvPGPassword),
-		PGDatabase: get(constants.EnvPGDatabase, ""),
-		PGSSLMode:  get(constants.EnvPGSSLMode, constants.DefaultPGSSLMode),
-		PGMaxConns: maxConns,
+		PGHost:        get(constants.EnvPGHost, ""),
+		PGPort:        pgPort,
+		PGUser:        get(constants.EnvPGUser, ""),
+		PGPassword:    getenv(constants.EnvPGPassword),
+		PGDatabase:    get(constants.EnvPGDatabase, ""),
+		PGSSLMode:     sslMode,
+		PGSSLRootCert: get(constants.EnvPGSSLRootCert, ""),
+		PGMaxConns:    maxConns,
 
 		Store:                store,
 		MigrateOnStart:       migrate,
@@ -137,15 +154,22 @@ func (c *Config) DatabaseConfigured() bool {
 // PostgresURL composes the connection URL in-process so the password is never interpolated by Helm or logged.
 // scheme is "postgres" for pgx and "pgx5" for golang-migrate.
 func (c *Config) PostgresURL(scheme string) string {
+	q := url.Values{"sslmode": {c.PGSSLMode}}
+	if c.PGSSLRootCert != "" {
+		q.Set("sslrootcert", c.PGSSLRootCert)
+	}
 	u := url.URL{
 		Scheme:   scheme,
 		User:     url.UserPassword(c.PGUser, c.PGPassword),
 		Host:     net.JoinHostPort(c.PGHost, c.PGPort),
 		Path:     "/" + c.PGDatabase,
-		RawQuery: url.Values{"sslmode": {c.PGSSLMode}}.Encode(),
+		RawQuery: q.Encode(),
 	}
 	return u.String()
 }
+
+// pgSSLModes are the libpq sslmode values pgx accepts.
+var pgSSLModes = []string{"disable", "allow", "prefer", "require", "verify-ca", constants.PGSSLModeVerifyFull}
 
 func positiveInt(raw, key string) (int, error) {
 	n, err := strconv.Atoi(raw)

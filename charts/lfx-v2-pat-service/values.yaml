@@ -161,8 +161,23 @@ database:
   #              lfx-v2-opentofu provisions and the ArgoCD ExternalSecret materialises.
   #   "local"    uses the plain values below. Local development only.
   mode: external
-  # sslmode is the libpq SSL mode; RDS requires TLS.
-  sslmode: require
+  # sslmode is the libpq SSL mode. verify-full checks the server certificate chain and host name; every
+  # weaker mode (require included) encrypts without authenticating the server, so the chart and the service
+  # refuse them unless allowInsecureSSLMode is true.
+  sslmode: verify-full
+  # allowInsecureSSLMode permits an sslmode weaker than verify-full. Local development only.
+  allowInsecureSSLMode: false
+  # caBundle supplies the CA that signs the database server certificate, mounted read-only and passed to the
+  # service as PGSSLROOTCERT. RDS certificates chain to the AWS RDS CA, which is absent from the image's system
+  # roots, so RDS deployments set one of the two sources below. With neither, the system roots are used.
+  caBundle:
+    # pem is the PEM bundle inline (for RDS, the regional or global bundle AWS publishes); the chart renders it
+    # into a ConfigMap.
+    pem: ""
+    # existingConfigMap names a ConfigMap that already holds the bundle; it takes precedence over pem.
+    existingConfigMap: ""
+    # key is the ConfigMap key holding the bundle.
+    key: ca.pem
   # migrateOnStart applies pending migrations before the service listens.
   migrateOnStart: true
   # maxConns is the pgx pool size.

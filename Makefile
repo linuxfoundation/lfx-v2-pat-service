@@ -117,7 +117,7 @@ docker-run: ## Run Docker container locally against the db-up database
 	docker run \
 		--name $(APP_NAME) \
 		-p 8080:8080 \
-		-e PGHOST=host.docker.internal -e PGPORT=$(DB_PORT) -e PGUSER=pat -e PGPASSWORD=pat -e PGDATABASE=pat -e PGSSLMODE=disable \
+		-e PGHOST=host.docker.internal -e PGPORT=$(DB_PORT) -e PGUSER=pat -e PGPASSWORD=pat -e PGDATABASE=pat -e PGSSLMODE=disable -e PG_ALLOW_INSECURE_SSLMODE=true \
 		-e JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=alice \
 		$(DOCKER_IMAGE):$(DOCKER_TAG)
 

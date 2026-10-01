@@ -62,6 +62,11 @@ spec:
           {{- if not (has .Values.database.mode (list "external" "local")) }}
           {{- fail "database.mode must be external or local" }}
           {{- end }}
+          {{- $ca := .Values.database.caBundle }}
+          {{- $caConfigMap := $ca.existingConfigMap | default (ternary (printf "%s-db-ca" .Chart.Name) "" (ne $ca.pem "")) }}
+          {{- if and (eq .Values.database.store "postgres") (ne .Values.database.sslmode "verify-full") (not .Values.database.allowInsecureSSLMode) }}
+          {{- fail "database.sslmode weaker than verify-full does not authenticate the database server; set database.allowInsecureSSLMode for local development only" }}
+          {{- end }}
           env:
           - name: PORT
             value: {{ .Values.service.port | quote }}
@@ -90,6 +95,12 @@ spec:
             value: {{ .Values.database.maxConns | quote }}
           - name: PGSSLMODE
             value: {{ .Values.database.sslmode | quote }}
+          - name: PG_ALLOW_INSECURE_SSLMODE
+            value: {{ .Values.database.allowInsecureSSLMode | quote }}
+          {{- if $caConfigMap }}
+          - name: PGSSLROOTCERT
+            value: /etc/pat/db-ca/{{ .Values.database.caBundle.key }}
+          {{- end }}
           {{- if eq .Values.database.mode "external" }}
           # The five credential parts come straight from the Secret; the service composes the URL itself so the
           # password is never rendered into a manifest.
@@ -214,6 +225,19 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+            {{- if and (eq .Values.database.store "postgres") $caConfigMap }}
+            - name: db-ca
+              mountPath: /etc/pat/db-ca
+              readOnly: true
+            {{- end }}
       volumes:
         - name: tmp
           emptyDir: {}
+        {{- if and (eq .Values.database.store "postgres") $caConfigMap }}
+        - name: db-ca
+          configMap:
+            name: {{ $caConfigMap }}
+            items:
+              - key: {{ .Values.database.caBundle.key }}
+                path: {{ .Values.database.caBundle.key }}
+        {{- end }}

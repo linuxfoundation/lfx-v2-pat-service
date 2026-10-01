@@ -92,6 +92,7 @@ The service reads its configuration from environment variables (CLI flags `-p`, 
 
 ```bash
 make apigen     # regenerate gen/ after changing design/ (gen/ is committed)
+make verify     # fail if committed gen/ differs from design/ (runs in PR CI)
 make build      # bin/lfx-v2-pat-service
 make test
 make db-up      # disposable Postgres 16 in Docker on 127.0.0.1:5433 (DB_PORT=... to change)

@@ -52,6 +52,16 @@ deps: ## Install dependencies
 apigen: deps ## Generate API code using Goa
 	goa gen github.com/linuxfoundation/lfx-v2-pat-service/design
 
+.PHONY: verify
+verify: apigen ## Verify that generated code is up to date
+	@echo "==> Verifying generated code is up to date..."
+	@if [ -n "$$(git status --porcelain gen/)" ]; then \
+		echo "Generated code is out of date. Run 'make apigen' and commit the changes."; \
+		git status --porcelain gen/; \
+		exit 1; \
+	fi
+	@echo "==> Generated code is up to date"
+
 .PHONY: fmt
 fmt: ## Format Go source (generated code excluded)
 	@echo "==> Formatting code..."

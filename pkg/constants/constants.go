@@ -22,7 +22,7 @@ const (
 	EnvPGPassword = "PGPASSWORD"
 	EnvPGDatabase = "PGDATABASE"
 	EnvPGSSLMode  = "PGSSLMODE"
-	// EnvPGSSLRootCert is the PEM bundle that signs the database server certificate; empty uses the system roots.
+	// EnvPGSSLRootCert is the path to the PEM bundle file that signs the database server certificate; empty uses the system roots.
 	EnvPGSSLRootCert = "PGSSLROOTCERT"
 	// EnvPGAllowInsecureSSLMode permits an sslmode weaker than verify-full. Local development only.
 	EnvPGAllowInsecureSSLMode = "PG_ALLOW_INSECURE_SSLMODE"

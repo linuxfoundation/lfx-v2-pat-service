@@ -19,9 +19,16 @@ spec:
       app: {{ .Chart.Name }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
+      {{- $caInline := and (eq .Values.database.store "postgres") (ne .Values.database.caBundle.pem "") (not .Values.database.caBundle.existingConfigMap) }}
+      {{- if or .Values.podAnnotations $caInline }}
       annotations:
+        {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if $caInline }}
+        {{- /* pgx reads the CA once at startup, so a changed bundle needs new pods. */}}
+        checksum/db-ca: {{ include (print $.Template.BasePath "/db-ca-configmap.yaml") . | sha256sum }}
+        {{- end }}
       {{- end }}
       labels:
         app: {{ .Chart.Name }}

@@ -82,7 +82,7 @@ The service reads its configuration from environment variables (CLI flags `-p`, 
 | `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` |                                         | Postgres connection, read from the RDS secret in the chart; all four required when `STORE=postgres` |
 | `PGPORT`                                       | `5432`                                  | Postgres port; optional                                                                             |
 | `PGSSLMODE`                                    | `verify-full`                           | libpq SSL mode. Only `verify-full` authenticates the server; anything weaker is refused (below)     |
-| `PGSSLROOTCERT`                                | system pool                             | PEM CA bundle the server certificate must chain to; for RDS, the AWS RDS CA bundle (see the chart)  |
+| `PGSSLROOTCERT`                                | system trust store                      | Path to a PEM CA bundle file; needed when the CA is not system-trusted, e.g. RDS (see the chart)    |
 | `PG_ALLOW_INSECURE_SSLMODE`                    | `false`                                 | Local development only: permit a `PGSSLMODE` weaker than `verify-full`, e.g. `disable`              |
 | `PG_MAX_CONNS`                                 | `10`                                    | Connection pool size                                                                                |
 | `DB_MIGRATE_ON_START`                          | `true`                                  | Apply pending migrations before listening                                                           |

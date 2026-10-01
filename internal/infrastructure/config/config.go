@@ -181,7 +181,8 @@ func checkSSLMode(mode string, allowInsecure bool) error {
 		if allowInsecure {
 			return nil
 		}
-		return fmt.Errorf("%s=%s does not verify the database server certificate; use %s with %s, or set %s=true for local development",
+		return fmt.Errorf("%s=%s does not verify the database server certificate; use %s (with %s set to the CA bundle file "+
+			"when the server's CA is not in the system trust store, as for RDS), or set %s=true for local development",
 			constants.EnvPGSSLMode, mode, constants.PGSSLModeVerifyFull, constants.EnvPGSSLRootCert, constants.EnvPGAllowInsecureSSLMode)
 	default:
 		return fmt.Errorf("%s must be one of disable, allow, prefer, require, verify-ca or verify-full, got %q", constants.EnvPGSSLMode, mode)

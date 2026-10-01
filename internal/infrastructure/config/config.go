@@ -12,6 +12,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -37,7 +38,7 @@ type Config struct {
 	PGPassword string
 	PGDatabase string
 	PGSSLMode  string
-	// PGSSLRootCert is the CA bundle path handed to pgx as sslrootcert; empty uses the system roots.
+	// PGSSLRootCert is the CA bundle path handed to pgx as sslrootcert, or "system" for the system roots.
 	PGSSLRootCert string
 	PGMaxConns    int
 
@@ -108,6 +109,13 @@ func FromEnv(getenv func(string) string) (*Config, error) {
 			constants.EnvPGSSLMode, sslMode, constants.PGSSLModeVerifyFull, constants.EnvPGAllowInsecureSSLMode)
 	}
 
+	// Under verify-full the RDS bundle shipped in the image is the default trust root. Weaker modes get no
+	// default because sslrootcert would silently turn require into verify-ca.
+	rootCert := get(constants.EnvPGSSLRootCert, "")
+	if rootCert == "" && sslMode == constants.PGSSLModeVerifyFull {
+		rootCert = filepath.Join(get(constants.EnvKoDataPath, constants.DefaultKoDataPath), constants.RDSCABundlePath)
+	}
+
 	pgPort := get(constants.EnvPGPort, constants.DefaultPGPort)
 	if n, err := strconv.Atoi(pgPort); err != nil || n < 1 || n > 65535 {
 		return nil, fmt.Errorf("%s must be a TCP port, got %q", constants.EnvPGPort, pgPort)
@@ -129,7 +137,7 @@ func FromEnv(getenv func(string) string) (*Config, error) {
 		PGPassword:    getenv(constants.EnvPGPassword),
 		PGDatabase:    get(constants.EnvPGDatabase, ""),
 		PGSSLMode:     sslMode,
-		PGSSLRootCert: get(constants.EnvPGSSLRootCert, ""),
+		PGSSLRootCert: rootCert,
 		PGMaxConns:    maxConns,
 
 		Store:                store,

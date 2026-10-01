@@ -18,6 +18,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -29,6 +30,12 @@ import (
 // TLS with a self-signed certificate for localhost, then hangs up. It reports each finished handshake.
 func untrustedPostgres(t *testing.T) (addr string, handshakes <-chan struct{}) {
 	t.Helper()
+	return fakePostgres(t, serverCert(t, nil, nil))
+}
+
+// serverCert issues a localhost certificate signed by ca, or self-signed when ca is nil.
+func serverCert(t *testing.T, ca *x509.Certificate, caKey *ecdsa.PrivateKey) tls.Certificate {
+	t.Helper()
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	require.NoError(t, err)
 	tmpl := &x509.Certificate{
@@ -39,10 +46,17 @@ func untrustedPostgres(t *testing.T) (addr string, handshakes <-chan struct{}) {
 		NotBefore:    time.Now().Add(-time.Hour),
 		NotAfter:     time.Now().Add(time.Hour),
 	}
-	der, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &key.PublicKey, key)
+	parent, signer := tmpl, key
+	if ca != nil {
+		parent, signer = ca, caKey
+	}
+	der, err := x509.CreateCertificate(rand.Reader, tmpl, parent, &key.PublicKey, signer)
 	require.NoError(t, err)
-	cert := tls.Certificate{Certificate: [][]byte{der}, PrivateKey: key}
+	return tls.Certificate{Certificate: [][]byte{der}, PrivateKey: key}
+}
 
+func fakePostgres(t *testing.T, cert tls.Certificate) (addr string, handshakes <-chan struct{}) {
+	t.Helper()
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = ln.Close() })
@@ -76,6 +90,13 @@ func untrustedPostgres(t *testing.T) (addr string, handshakes <-chan struct{}) {
 // otherCA writes a CA bundle that did not sign the untrusted server's certificate.
 func otherCA(t *testing.T) string {
 	t.Helper()
+	path, _, _ := newCA(t)
+	return path
+}
+
+// newCA creates a CA and writes it as a PEM bundle, the shape of the RDS bundle the chart mounts.
+func newCA(t *testing.T) (path string, ca *x509.Certificate, key *ecdsa.PrivateKey) {
+	t.Helper()
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	require.NoError(t, err)
 	tmpl := &x509.Certificate{
@@ -89,9 +110,11 @@ func otherCA(t *testing.T) string {
 	}
 	der, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &key.PublicKey, key)
 	require.NoError(t, err)
-	path := filepath.Join(t.TempDir(), "ca.pem")
+	ca, err = x509.ParseCertificate(der)
+	require.NoError(t, err)
+	path = filepath.Join(t.TempDir(), "ca.pem")
 	require.NoError(t, os.WriteFile(path, pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der}), 0o600))
-	return path
+	return path, ca, key
 }
 
 func TestVerifyFullRefusesAnUntrustedServer(t *testing.T) {
@@ -128,4 +151,31 @@ func TestRequireAcceptsAnUntrustedServer(t *testing.T) {
 	case <-time.After(5 * time.Second):
 		t.Fatal("sslmode=require did not complete TLS with the untrusted server")
 	}
+}
+
+// The pinned CA must reach both connections: the server below is trusted only through sslrootcert, so a finished
+// handshake proves the pool and golang-migrate each loaded it. The fake hangs up after TLS, so both still error.
+func TestVerifyFullTrustsThePinnedCA(t *testing.T) {
+	caPath, ca, caKey := newCA(t)
+	addr, handshakes := fakePostgres(t, serverCert(t, ca, caKey))
+	host := "localhost:" + addr[strings.LastIndex(addr, ":")+1:]
+	query := "sslmode=verify-full&sslrootcert=" + caPath
+
+	waitHandshake := func(what string) {
+		select {
+		case <-handshakes:
+		case <-time.After(5 * time.Second):
+			t.Fatalf("%s did not complete TLS with a server signed by the pinned CA", what)
+		}
+	}
+
+	_, err := NewPool(context.Background(), "postgres://pat:pw@"+host+"/pat?"+query, 1)
+	require.Error(t, err)
+	assert.NotContains(t, err.Error(), "certificate")
+	waitHandshake("NewPool")
+
+	err = Migrate("pgx5://pat:pw@" + host + "/pat?" + query)
+	require.Error(t, err)
+	assert.NotContains(t, err.Error(), "certificate")
+	waitHandshake("Migrate")
 }

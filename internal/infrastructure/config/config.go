@@ -37,7 +37,8 @@ type Config struct {
 	PGDatabase string
 	PGSSLMode  string
 	PGMaxConns int
-	// PGSSLRootCert is the CA bundle the server certificate must chain to; empty uses the system pool.
+	// PGSSLRootCert is the path to the PEM CA bundle file the server certificate must chain to (pgx sslrootcert);
+	// empty uses the system trust store.
 	PGSSLRootCert string
 	// PGAllowInsecureSSLMode permits a PGSSLMode weaker than verify-full. Local development only.
 	PGAllowInsecureSSLMode bool
@@ -163,7 +164,7 @@ func (c *Config) PostgresURL(scheme string) string {
 	}
 	q := url.Values{"sslmode": {c.PGSSLMode}}
 	if c.PGSSLRootCert != "" {
-		// Explicit so the pool and the migrator verify against the same bundle whatever pgx merges from the env.
+		// Explicit so the pool and the migrator read the same CA file whatever pgx merges from the env.
 		q.Set("sslrootcert", c.PGSSLRootCert)
 	}
 	u.RawQuery = q.Encode()

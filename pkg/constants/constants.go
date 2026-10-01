@@ -23,7 +23,8 @@ const (
 	EnvPGDatabase = "PGDATABASE"
 	EnvPGSSLMode  = "PGSSLMODE"
 	EnvPGMaxConns = "PG_MAX_CONNS"
-	// EnvPGSSLRootCert is the CA bundle (PEM) the server certificate must chain to, e.g. the RDS bundle.
+	// EnvPGSSLRootCert is the path to a PEM CA bundle file the server certificate must chain to, e.g. the RDS
+	// bundle. Unset uses the system trust store.
 	EnvPGSSLRootCert = "PGSSLROOTCERT"
 	// EnvPGAllowInsecureSSLMode permits a PGSSLMODE weaker than verify-full. Local development only.
 	EnvPGAllowInsecureSSLMode = "PG_ALLOW_INSECURE_SSLMODE"

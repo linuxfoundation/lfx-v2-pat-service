@@ -27,8 +27,8 @@ jobs:
         run: make deps
 
       # Release builds compile the committed gen/, so CI must test those exact bytes.
-      - name: Check generated code is up to date
-        run: make apigen-check
+      - name: Verify generated code is up to date
+        run: make verify
 
       - name: Build
         run: make build

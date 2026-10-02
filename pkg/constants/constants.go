@@ -22,7 +22,11 @@ const (
 	EnvPGPassword = "PGPASSWORD"
 	EnvPGDatabase = "PGDATABASE"
 	EnvPGSSLMode  = "PGSSLMODE"
-	EnvPGMaxConns = "PG_MAX_CONNS"
+	// EnvPGSSLRootCert is the path to the PEM bundle file that signs the database server certificate; empty uses the system roots.
+	EnvPGSSLRootCert = "PGSSLROOTCERT"
+	// EnvPGAllowInsecureSSLMode permits an sslmode weaker than verify-full. Local development only.
+	EnvPGAllowInsecureSSLMode = "PG_ALLOW_INSECURE_SSLMODE"
+	EnvPGMaxConns             = "PG_MAX_CONNS"
 
 	EnvStore                = "STORE"
 	EnvMigrateOnStart       = "DB_MIGRATE_ON_START"
@@ -41,7 +45,7 @@ const (
 	DefaultIssuer   = "heimdall"
 
 	DefaultPGPort     = "5432"
-	DefaultPGSSLMode  = "require"
+	DefaultPGSSLMode  = PGSSLModeVerifyFull
 	DefaultPGMaxConns = 10
 
 	DefaultStore                = StorePostgres
@@ -50,6 +54,10 @@ const (
 
 	DefaultKoDataPath = "."
 )
+
+// PGSSLModeVerifyFull is the only sslmode that authenticates the server: weaker modes skip the chain or
+// host-name check, so anyone on the network path could terminate TLS and read the credential.
+const PGSSLModeVerifyFull = "verify-full"
 
 // Store selects the token store. Postgres is the default; the in-memory store is an explicit opt-in for local
 // runs without a database and never persists anything.

@@ -81,7 +81,9 @@ The service reads its configuration from environment variables (CLI flags `-p`, 
 | `STORE`                                        | `postgres`                              | `postgres`, or `memory` for a local run without a database (nothing persists)                       |
 | `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` |                                         | Postgres connection, read from the RDS secret in the chart; all four required when `STORE=postgres` |
 | `PGPORT`                                       | `5432`                                  | Postgres port; optional                                                                             |
-| `PGSSLMODE`                                    | `require`                               | libpq SSL mode; `disable` for a local database                                                      |
+| `PGSSLMODE`                                    | `verify-full`                           | libpq SSL mode; anything weaker is refused unless `PG_ALLOW_INSECURE_SSLMODE=true`                  |
+| `PGSSLROOTCERT`                                |                                         | Path to the PEM bundle file that signs the database server certificate; empty uses the system roots |
+| `PG_ALLOW_INSECURE_SSLMODE`                    | `false`                                 | Local development only: accept `disable`, `require` and other modes that skip server verification   |
 | `PG_MAX_CONNS`                                 | `10`                                    | Connection pool size                                                                                |
 | `DB_MIGRATE_ON_START`                          | `true`                                  | Apply pending migrations before listening                                                           |
 | `TOKEN_MAX_ACTIVE_PER_AUDIENCE`                | `25`                                    | Active tokens one user may hold per audience                                                        |
@@ -104,7 +106,7 @@ make helm-lint  # render the chart with the default and the local example values
 Run the service against the local database with JWT verification disabled:
 
 ```bash
-PGHOST=localhost PGPORT=5433 PGUSER=pat PGPASSWORD=pat PGDATABASE=pat PGSSLMODE=disable \
+PGHOST=localhost PGPORT=5433 PGUSER=pat PGPASSWORD=pat PGDATABASE=pat PGSSLMODE=disable PG_ALLOW_INSECURE_SSLMODE=true \
 JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=alice ./bin/lfx-v2-pat-service
 ```
 
@@ -145,3 +147,10 @@ The chart reads the Postgres credential from the Secret the ArgoCD ExternalSecre
 (`database.external.secretName`, five keys). The validate route is gated by OpenFGA team membership: platform
 DevOps writes `user:<Auth0 Actions client_id>@clients member team:pat_validator` into each environment's store
 (the name comes from `app.validatorTeamName`). See `charts/lfx-v2-pat-service/values.yaml`.
+
+The database link uses `sslmode=verify-full`, so the pod must trust the CA that signs the RDS certificate. The
+chart mounts it read-only at `/etc/pat/db-ca` and sets `PGSSLROOTCERT` to the file path: put the AWS RDS CA bundle in
+`database.caBundle.pem`, or name a ConfigMap that holds it in `database.caBundle.existingConfigMap`. The CA is read at
+startup: inline `pem` changes roll the pods automatically, while an `existingConfigMap` needs a restart. `disable`,
+`allow`, `prefer`, `require` and `verify-ca` skip encryption or part of the server check, so they are for a local
+database only and need `database.allowInsecureSSLMode: true`.

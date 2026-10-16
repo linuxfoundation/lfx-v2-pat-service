@@ -121,8 +121,7 @@ func newAuthenticator(cfg *config.Config) (domain.Authenticator, error) {
 	if cfg.MockLocalPrincipal != "" {
 		slog.Warn("JWT verification is disabled: every request is attributed to the mock principal",
 			"principal", cfg.MockLocalPrincipal)
-		// Local runs have no Auth0 token to take a user ID from, so the mock caller gets a placeholder one.
-		return auth.Static{Caller: domain.Caller{Principal: cfg.MockLocalPrincipal, UserID: "auth0|" + cfg.MockLocalPrincipal}}, nil
+		return auth.Static{Caller: domain.Caller{Principal: cfg.MockLocalPrincipal}}, nil
 	}
 	jwtAuth, err := auth.NewJWTAuth(auth.Config{JWKSURL: cfg.JWKSUrl, Issuer: cfg.Issuer, Audience: cfg.Audience})
 	if err != nil {

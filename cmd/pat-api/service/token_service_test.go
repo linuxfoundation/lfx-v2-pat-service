@@ -28,7 +28,7 @@ func (bearerAuth) Authenticate(_ context.Context, token string) (domain.Caller, 
 	if token == "" {
 		return domain.Caller{}, pkgerrors.NewUnauthorized("missing bearer token")
 	}
-	return domain.Caller{Principal: token, Email: token + "@example.com", UserID: "auth0|" + token + "-id"}, nil
+	return domain.Caller{Principal: token, Email: token + "@example.com"}, nil
 }
 
 func newDeps(ready bool, authenticator domain.Authenticator) (Deps, *mock.TokenRepository) {

@@ -1350,8 +1350,9 @@ definitions:
                 format: email
             uid:
                 type: string
-                description: Owner's Auth0 user ID, captured at issuance
-                example: auth0|jdoe
+                description: Token UID
+                example: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                format: uuid
             username:
                 type: string
                 description: Owner LFID username
@@ -1359,7 +1360,7 @@ definitions:
         example:
             audience: https://api.example.org/
             email: jdoe@example.com
-            uid: auth0|jdoe
+            uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
             username: jdoe
         required:
             - uid

@@ -33,7 +33,7 @@ func toTokenResponses(tokens []model.Token) []*svc.TokenResponse {
 }
 
 func toIdentity(id model.TokenIdentity) *svc.TokenIdentity {
-	out := &svc.TokenIdentity{UID: id.UserID, Username: id.Username, Audience: id.Audience}
+	out := &svc.TokenIdentity{UID: id.UID, Username: id.Username, Audience: id.Audience}
 	if id.Email != "" {
 		out.Email = &id.Email
 	}

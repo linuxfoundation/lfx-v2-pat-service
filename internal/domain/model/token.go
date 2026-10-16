@@ -29,9 +29,7 @@ func (t Token) Active() bool {
 // NewToken is the write model for issuing a token: everything the store needs, with the secret already reduced
 // to its salted hash.
 type NewToken struct {
-	Username string
-	// UserID is the owner's Auth0 user ID, which the token exchange signs in as.
-	UserID     string
+	Username   string
 	Email      string
 	Audience   string
 	Name       string
@@ -42,10 +40,8 @@ type NewToken struct {
 
 // Credential is the verification material of one active token. Only the validator reads it.
 type Credential struct {
-	UID      string
-	Username string
-	// UserID is empty for tokens issued before it was captured; those cannot be exchanged.
-	UserID     string
+	UID        string
+	Username   string
 	Email      string
 	Audience   string
 	Salt       []byte
@@ -54,8 +50,7 @@ type Credential struct {
 
 // TokenIdentity is what a successful validation resolves to.
 type TokenIdentity struct {
-	// UserID is the owner's Auth0 user ID.
-	UserID   string
+	UID      string
 	Username string
 	// Audience is the identifier of the Auth0 API the token's audience maps to, not its slug.
 	Audience string

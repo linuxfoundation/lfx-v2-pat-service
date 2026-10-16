@@ -27,7 +27,7 @@ func TestValidateResolvesOwnerAndRecordsUse(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, model.TokenIdentity{
-		UserID:   "auth0|alice-id",
+		UID:      created.Token.UID,
 		Username: "alice",
 		Audience: "https://insights-api.test/",
 		Email:    "alice@example.com",
@@ -101,29 +101,7 @@ func TestValidateSucceedsWhenRecordingUseFails(t *testing.T) {
 	identity, err := service.NewValidator(flakyTouch{CredentialReader: f.tokens}, apiIdentifiers).Validate(context.Background(), created.Secret)
 
 	require.NoError(t, err)
-	assert.Equal(t, "auth0|alice-id", identity.UserID)
-}
-
-func TestValidateRejectsATokenIssuedWithoutUserID(t *testing.T) {
-	f := newFixture(25)
-	parts, err := secret.Generate("lfi_")
-	require.NoError(t, err)
-	salt, err := secret.NewSalt()
-	require.NoError(t, err)
-	legacy, err := f.tokens.Create(context.Background(), model.NewToken{
-		Username:   "alice",
-		Audience:   constants.AudienceInsights,
-		Name:       "legacy",
-		LookupID:   parts.LookupID,
-		Salt:       salt,
-		SecretHash: secret.Hash(salt, parts.Random),
-	}, 25)
-	require.NoError(t, err)
-
-	_, err = service.NewValidator(f.tokens, apiIdentifiers).Validate(context.Background(), parts.String())
-
-	assert.True(t, errors.IsNotFound(err), "got %v", err)
-	assert.Nil(t, f.active(t, "alice", legacy.UID).LastUsedAt)
+	assert.Equal(t, created.Token.UID, identity.UID)
 }
 
 func TestValidateFailsWithoutAnAPIIdentifierForTheAudience(t *testing.T) {

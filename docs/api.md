@@ -20,8 +20,8 @@ A token is `{uid, name, audience, lookup_id, username, created_at, last_used_at?
 appears once, in the create response. List returns each token with its public `lookup_id`
 and never the secret, the salt or the hash. Revoke addresses a token by `uid`.
 
-Validate answers with the owner, not the token: its `uid` is the owner's Auth0 user ID, captured at issuance, and
-its `audience` is the identifier of the Auth0 API the token's audience maps to in `AUDIENCE_API_IDENTIFIERS`.
+Validate returns the audience as the identifier of the Auth0 API it maps to in `AUDIENCE_API_IDENTIFIERS`, not as
+its slug.
 
 `name` is trimmed, 1 to 100 characters, free of control characters, and unique (case-insensitively) among the
 caller's active tokens for the audience. A revoked token's name can be reused. `audience` is a slug from the
@@ -39,10 +39,10 @@ forwards to its UI as `upstreamCode`:
 |--------|------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `409`  | `{"error": "token_name_taken", "message": "..."}`    | an active token with that name already exists for the caller and audience                                                                                        |
 | `409`  | `{"error": "token_limit_reached", "message": "..."}` | the caller already holds the maximum active tokens for the audience                                                                                              |
-| `404`  | `{"error": "invalid_token", "message": "..."}`       | validate: unknown, malformed, or revoked secret, a token issued without an owner Auth0 user ID, or a disabled audience                                           |
+| `404`  | `{"error": "invalid_token", "message": "..."}`       | validate: unknown, malformed, or revoked secret, or a disabled audience                                                                                          |
 | `400`  | message starts with `unknown_audience`               | create: unknown or disabled audience slug                                                                                                                        |
 | `400`  |                                                      | invalid body, unknown `v`, a `uid` that is not a UUID, or a `secret` that is missing, empty or longer than 128 characters (rejected before the credential check) |
-| `401`  |                                                      | missing, invalid or anonymous bearer token; on create, a JWT without the owner's Auth0 user ID                                                                   |
+| `401`  |                                                      | missing, invalid or anonymous bearer token                                                                                                                       |
 | `403`  |                                                      | a machine principal on a token route; on validate, Heimdall rejects callers outside the validator team                                                           |
 | `500`  |                                                      | validate: the token's audience has no API identifier configured                                                                                                  |
 | `503`  |                                                      | the database is unreachable                                                                                                                                      |
@@ -66,9 +66,8 @@ ownership policy above is what the gateway delegates to the service for those ro
 ## Validation flow
 
 The Auth0 action obtains a client-credentials token for the LFX v2 API, calls `POST /_tokens/validate` through the
-gateway with the secret the end user presented, and receives the owner's Auth0 user ID as `uid`, the `username`,
-the identifier of the Auth0 API the token was minted for as `audience`, and the `email` captured at issuance. The
-action compares `audience` with the API it is issuing for and signs in as `uid`. The create route's RuleSet
-forwards the Auth0 `sub` as a `user_id` claim; a token stored without one fails validation. A successful validation
-records `last_used_at` on a best-effort basis: a failure to record it is logged and the validation still succeeds.
-A failed validation records nothing.
+gateway with the secret the end user presented, and receives the owner's `username`, the identifier of the Auth0
+API the token was minted for as `audience`, and the `email` captured at issuance. The action compares `audience`
+with the API it is issuing for and resolves the Auth0 user from `username`. A successful validation records
+`last_used_at` on a best-effort basis: a failure to record it is logged and the validation still succeeds. A failed
+validation records nothing.

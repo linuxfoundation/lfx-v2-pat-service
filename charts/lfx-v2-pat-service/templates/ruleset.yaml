@@ -71,10 +71,6 @@ spec:
         - authorizer: allow_all
         - finalizer: create_jwt
           config:
-            # The platform claims plus user_id, the Auth0 sub, which the service stores so the token exchange can sign in
-            # as the owner. Keep the shared part in step with the platform's create_jwt finalizer.
-            claims: |
-              {{- .Files.Get "files/create-token-claims.tmpl" | nindent 14 }}
             values:
               aud: {{ .Values.app.audience | quote }}
 

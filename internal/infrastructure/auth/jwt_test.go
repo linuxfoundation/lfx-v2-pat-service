@@ -5,7 +5,6 @@ package auth
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -31,13 +30,6 @@ func TestHeimdallClaimsValidate(t *testing.T) {
 			assert.Equal(t, tt.valid, err == nil, "got %v", err)
 		})
 	}
-}
-
-func TestHeimdallClaimsReadTheUserIDClaim(t *testing.T) {
-	var claims HeimdallClaims
-	require.NoError(t, json.Unmarshal([]byte(`{"principal":"alice","user_id":"auth0|alice-id"}`), &claims))
-
-	assert.Equal(t, "auth0|alice-id", claims.UserID)
 }
 
 func TestNewJWTAuthRejectsBadURLs(t *testing.T) {

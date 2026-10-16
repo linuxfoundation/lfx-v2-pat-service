@@ -45,10 +45,6 @@ func (v *Validator) Validate(ctx context.Context, plain string) (model.TokenIden
 	if !secret.Verify(cred.Salt, cred.SecretHash, parts.Random) {
 		return model.TokenIdentity{}, invalid()
 	}
-	if cred.UserID == "" {
-		slog.WarnContext(ctx, "token predates owner user ID capture and cannot be exchanged", "uid", cred.UID)
-		return model.TokenIdentity{}, invalid()
-	}
 	apiIdentifier, ok := v.apiIdentifiers[cred.Audience]
 	if !ok {
 		return model.TokenIdentity{}, errors.NewUnexpected(fmt.Sprintf("audience %q has no API identifier configured", cred.Audience))
@@ -57,7 +53,7 @@ func (v *Validator) Validate(ctx context.Context, plain string) (model.TokenIden
 		slog.WarnContext(ctx, "recording token use failed", log.ErrKey, err, "uid", cred.UID)
 	}
 	return model.TokenIdentity{
-		UserID:   cred.UserID,
+		UID:      cred.UID,
 		Username: cred.Username,
 		Audience: apiIdentifier,
 		Email:    cred.Email,

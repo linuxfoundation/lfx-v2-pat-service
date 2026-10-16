@@ -64,10 +64,10 @@ func (r *TokenRepository) Create(ctx context.Context, t model.NewToken, maxActiv
 			fmt.Sprintf("limit of %d active tokens for audience %s reached", maxActive, t.Audience))
 	}
 
-	const insertQ = `INSERT INTO tokens (username, user_id, email, audience, name, lookup_id, salt, secret_hash)
-		VALUES ($1, $2, NULLIF($3, ''), $4, $5, $6, $7, $8)
+	const insertQ = `INSERT INTO tokens (username, email, audience, name, lookup_id, salt, secret_hash)
+		VALUES ($1, NULLIF($2, ''), $3, $4, $5, $6, $7)
 		RETURNING ` + tokenColumns
-	row := tx.QueryRow(ctx, insertQ, t.Username, t.UserID, t.Email, t.Audience, t.Name, t.LookupID, t.Salt, t.SecretHash)
+	row := tx.QueryRow(ctx, insertQ, t.Username, t.Email, t.Audience, t.Name, t.LookupID, t.Salt, t.SecretHash)
 	token, err := scanToken(row)
 	if err != nil {
 		return model.Token{}, createErr(t, err)
@@ -133,11 +133,11 @@ func (r *TokenRepository) Revoke(ctx context.Context, uid, username string) erro
 // FindActiveByLookupID implements port.CredentialReader: one indexed lookup joined on an enabled audience whose
 // prefix matches the one parsed from the presented secret.
 func (r *TokenRepository) FindActiveByLookupID(ctx context.Context, lookupID, prefix string) (model.Credential, error) {
-	const q = `SELECT t.uid, t.username, COALESCE(t.user_id, ''), COALESCE(t.email, ''), t.audience, t.salt, t.secret_hash
+	const q = `SELECT t.uid, t.username, COALESCE(t.email, ''), t.audience, t.salt, t.secret_hash
 		FROM tokens t JOIN audiences a ON a.slug = t.audience
 		WHERE t.lookup_id = $1 AND t.revoked_at IS NULL AND a.enabled AND a.token_prefix = $2`
 	var c model.Credential
-	err := r.pool.QueryRow(ctx, q, lookupID, prefix).Scan(&c.UID, &c.Username, &c.UserID, &c.Email, &c.Audience, &c.Salt, &c.SecretHash)
+	err := r.pool.QueryRow(ctx, q, lookupID, prefix).Scan(&c.UID, &c.Username, &c.Email, &c.Audience, &c.Salt, &c.SecretHash)
 	if err != nil {
 		if stderrors.Is(err, pgx.ErrNoRows) {
 			return model.Credential{}, errors.NewNotFound("no active token for lookup id")

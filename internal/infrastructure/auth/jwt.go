@@ -43,12 +43,10 @@ type Config struct {
 }
 
 // HeimdallClaims are the custom claims Heimdall's create_jwt finalizer emits. principal is the LFID username
-// for users, "<client_id>@clients" for machine tokens and "_anonymous" for the anonymous authenticator. user_id
-// is the Auth0 sub, added only on the create-token route (see the chart's RuleSet).
+// for users, "<client_id>@clients" for machine tokens and "_anonymous" for the anonymous authenticator.
 type HeimdallClaims struct {
 	Principal string `json:"principal"`
 	Email     string `json:"email,omitempty"`
-	UserID    string `json:"user_id,omitempty"`
 }
 
 // Validate rejects tokens that carry no usable principal. Heimdall's anonymous fallback still mints a valid JWT,
@@ -126,7 +124,7 @@ func (j *JWTAuth) Authenticate(ctx context.Context, token string) (domain.Caller
 	}
 
 	slog.DebugContext(ctx, "JWT principal parsed", "principal", heimdall.Principal)
-	return domain.Caller{Principal: heimdall.Principal, Email: heimdall.Email, UserID: heimdall.UserID}, nil
+	return domain.Caller{Principal: heimdall.Principal, Email: heimdall.Email}, nil
 }
 
 // sanitize drops the tertiary and deeper nested errors, using colons as an approximation of the wrapping

@@ -22,8 +22,8 @@ import (
 )
 
 var (
-	alice = domain.Caller{Principal: "alice", Email: "alice@example.com", UserID: "auth0|alice-id"}
-	bob   = domain.Caller{Principal: "bob", UserID: "auth0|bob-id"}
+	alice = domain.Caller{Principal: "alice", Email: "alice@example.com"}
+	bob   = domain.Caller{Principal: "bob"}
 	other = model.Audience{Slug: "other", DisplayName: "Other", TokenPrefix: "lfo_", Enabled: true}
 
 	apiIdentifiers = map[string]string{
@@ -95,19 +95,6 @@ func TestCreateIssuesSecretAndStoresOwner(t *testing.T) {
 	assert.True(t, created.Token.Active())
 
 	assert.Equal(t, created.Token, f.active(t, "alice", created.Token.UID))
-}
-
-func TestCreateRequiresTheCallerUserID(t *testing.T) {
-	f := newFixture(25)
-	anonymousID := alice
-	anonymousID.UserID = ""
-
-	_, err := f.manager.Create(context.Background(), anonymousID, "ci", constants.AudienceInsights)
-
-	assert.True(t, errors.IsUnauthorized(err), "got %v", err)
-	list, err := f.manager.List(context.Background(), "alice", "")
-	require.NoError(t, err)
-	assert.Empty(t, list)
 }
 
 func TestCreateUsesTheAudiencePrefix(t *testing.T) {

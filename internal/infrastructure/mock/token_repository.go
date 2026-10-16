@@ -20,9 +20,8 @@ import (
 
 type storedToken struct {
 	model.Token
-	userID string
-	salt   []byte
-	hash   []byte
+	salt []byte
+	hash []byte
 	// seq orders tokens created within the same clock tick so ListActiveByOwner is deterministic.
 	seq int
 }
@@ -112,10 +111,9 @@ func (r *TokenRepository) Create(_ context.Context, t model.NewToken, maxActive 
 			CreatedAt: now,
 			UpdatedAt: now,
 		},
-		userID: t.UserID,
-		salt:   append([]byte(nil), t.Salt...),
-		hash:   append([]byte(nil), t.SecretHash...),
-		seq:    r.seq,
+		salt: append([]byte(nil), t.Salt...),
+		hash: append([]byte(nil), t.SecretHash...),
+		seq:  r.seq,
 	}
 	r.byUID[s.UID] = s
 	return s.Token, nil
@@ -180,7 +178,6 @@ func (r *TokenRepository) FindActiveByLookupID(_ context.Context, lookupID, pref
 		return model.Credential{
 			UID:        s.UID,
 			Username:   s.Username,
-			UserID:     s.userID,
 			Email:      s.Email,
 			Audience:   s.Audience,
 			Salt:       append([]byte(nil), s.salt...),

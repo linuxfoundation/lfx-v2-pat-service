@@ -93,6 +93,10 @@ spec:
           {{- end }}
           - name: TOKEN_MAX_ACTIVE_PER_AUDIENCE
             value: {{ .Values.app.maxActivePerAudience | quote }}
+          {{- with .Values.app.audienceApiIdentifiers }}
+          - name: AUDIENCE_API_IDENTIFIERS
+            value: {{ toJson . | quote }}
+          {{- end }}
           - name: STORE
             value: {{ .Values.database.store | quote }}
           {{- if eq .Values.database.store "postgres" }}

@@ -105,6 +105,12 @@ app:
   validatorTeamName: "pat_validator"
   # maxActivePerAudience bounds the active tokens one user may hold per audience.
   maxActivePerAudience: 25
+  # audienceApiIdentifiers maps each audience slug to the identifier of the Auth0 API its tokens are exchanged for.
+  # Validate returns it as the audience, which the Auth0 action compares with the API it issues for; an audience
+  # missing here fails validation with a 500.
+  # Example:
+  #   insights: https://api.example.org/
+  audienceApiIdentifiers: {}
   # logLevel is debug, info, warn or error.
   logLevel: info
   # logAddSource adds the source location to log lines.

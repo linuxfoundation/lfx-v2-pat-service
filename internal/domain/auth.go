@@ -8,10 +8,11 @@ import "context"
 
 // Caller is the identity resolved from a Heimdall-issued JWT. Principal is the LFID username for users and
 // "<client_id>@clients" for machine tokens; Email is present only when Heimdall's contextualizer supplied a
-// verified one.
+// verified one. UserID is the Auth0 user ID, which only the create-token route's RuleSet forwards.
 type Caller struct {
 	Principal string
 	Email     string
+	UserID    string
 }
 
 // Authenticator verifies a bearer token and resolves the caller behind it.

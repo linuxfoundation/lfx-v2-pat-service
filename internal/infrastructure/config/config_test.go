@@ -32,6 +32,7 @@ func TestFromEnvDefaults(t *testing.T) {
 	assert.Equal(t, "postgres", cfg.Store)
 	assert.True(t, cfg.MigrateOnStart)
 	assert.Equal(t, 25, cfg.MaxActivePerAudience)
+	assert.Empty(t, cfg.AudienceAPIIdentifiers)
 	assert.False(t, cfg.DatabaseConfigured())
 }
 
@@ -42,8 +43,9 @@ func TestFromEnvReadsEverything(t *testing.T) {
 		"JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL": " alice ",
 		"PGHOST":                                 "db", "PGPORT": "5433", "PGUSER": "u", "PGPASSWORD": "p", "PGDATABASE": "d", "PGSSLMODE": "disable",
 		"PGSSLROOTCERT": "/etc/ca.pem",
-		"PG_MAX_CONNS": "3", "DB_MIGRATE_ON_START": "false", "STORE": "memory",
+		"PG_MAX_CONNS":  "3", "DB_MIGRATE_ON_START": "false", "STORE": "memory",
 		"TOKEN_MAX_ACTIVE_PER_AUDIENCE": "7",
+		"AUDIENCE_API_IDENTIFIERS":      `{"insights":"https://insights-api.test/"}`,
 	}))
 	require.NoError(t, err)
 
@@ -60,6 +62,7 @@ func TestFromEnvReadsEverything(t *testing.T) {
 	assert.False(t, cfg.MigrateOnStart)
 	assert.Equal(t, "memory", cfg.Store)
 	assert.Equal(t, 7, cfg.MaxActivePerAudience)
+	assert.Equal(t, map[string]string{"insights": "https://insights-api.test/"}, cfg.AudienceAPIIdentifiers)
 }
 
 func TestFromEnvRejectsBadNumbersAndBooleans(t *testing.T) {
@@ -75,6 +78,10 @@ func TestFromEnvRejectsBadNumbersAndBooleans(t *testing.T) {
 		{"STORE": "redis"},
 		{"PGSSLMODE": "verify-everything"},
 		{"PG_ALLOW_INSECURE_SSLMODE": "sure"},
+		{"AUDIENCE_API_IDENTIFIERS": "insights=https://insights-api.test/"},
+		{"AUDIENCE_API_IDENTIFIERS": `["https://insights-api.test/"]`},
+		{"AUDIENCE_API_IDENTIFIERS": `{"Insights":"https://insights-api.test/"}`},
+		{"AUDIENCE_API_IDENTIFIERS": `{"insights":" "}`},
 	} {
 		_, err := FromEnv(env(m))
 		assert.Error(t, err, "%v", m)

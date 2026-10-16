@@ -41,6 +41,10 @@ func NewManager(reader port.TokenReader, writer port.TokenWriter, audiences port
 // Create issues a token for the caller. The audience must exist and be enabled; the name is trimmed and must be
 // unique among the caller's active tokens for that audience.
 func (m *Manager) Create(ctx context.Context, caller domain.Caller, name, audienceSlug string) (CreatedToken, error) {
+	// The token exchange signs in as this user, so a token issued without it could never be exchanged.
+	if caller.UserID == "" {
+		return CreatedToken{}, errors.NewUnauthorized("caller identity carries no Auth0 user ID")
+	}
 	name, err := normalizeName(name)
 	if err != nil {
 		return CreatedToken{}, err
@@ -77,6 +81,7 @@ func (m *Manager) issue(ctx context.Context, caller domain.Caller, name string, 
 	}
 	token, err := m.writer.Create(ctx, model.NewToken{
 		Username:   caller.Principal,
+		UserID:     caller.UserID,
 		Email:      caller.Email,
 		Audience:   audience.Slug,
 		Name:       name,

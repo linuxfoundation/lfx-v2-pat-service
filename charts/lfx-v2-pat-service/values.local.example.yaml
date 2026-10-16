@@ -19,6 +19,9 @@ image:
 app:
   # Skip JWT verification and act as this user.
   jwtAuthDisabledMockLocalPrincipal: alice
+  # Any value works locally; deployed environments use the Insights API identifier of their Auth0 tenant.
+  audienceApiIdentifiers:
+    insights: https://insights-api.local/
 
 # Without OpenFGA the validate route accepts every authenticated caller, so the mock principal can validate too.
 openfga:

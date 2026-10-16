@@ -28,7 +28,7 @@ func (bearerAuth) Authenticate(_ context.Context, token string) (domain.Caller, 
 	if token == "" {
 		return domain.Caller{}, pkgerrors.NewUnauthorized("missing bearer token")
 	}
-	return domain.Caller{Principal: token, Email: token + "@example.com"}, nil
+	return domain.Caller{Principal: token, Email: token + "@example.com", UserID: "auth0|" + token + "-id"}, nil
 }
 
 func newDeps(ready bool, authenticator domain.Authenticator) (Deps, *mock.TokenRepository) {
@@ -38,7 +38,7 @@ func newDeps(ready bool, authenticator domain.Authenticator) (Deps, *mock.TokenR
 	return Deps{
 		Auth:      authenticator,
 		Manager:   service.NewManager(tokens, tokens, audiences, 3),
-		Validator: service.NewValidator(tokens),
+		Validator: service.NewValidator(tokens, map[string]string{constants.AudienceInsights: "https://insights-api.test/"}),
 		Ready:     tokens.Ready,
 	}, tokens
 }

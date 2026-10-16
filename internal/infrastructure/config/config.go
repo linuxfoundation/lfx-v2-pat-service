@@ -5,6 +5,7 @@
 package config
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -12,6 +13,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -45,6 +47,8 @@ type Config struct {
 	Store                string
 	MigrateOnStart       bool
 	MaxActivePerAudience int
+	// AudienceAPIIdentifiers maps an audience slug to the Auth0 API identifier validation reports for it.
+	AudienceAPIIdentifiers map[string]string
 }
 
 // LoadConfig loads configuration from CLI flags, then environment variables, then defaults.
@@ -108,6 +112,11 @@ func FromEnv(getenv func(string) string) (*Config, error) {
 			constants.EnvPGSSLMode, sslMode, constants.PGSSLModeVerifyFull, constants.EnvPGAllowInsecureSSLMode)
 	}
 
+	apiIdentifiers, err := audienceAPIIdentifiers(getenv(constants.EnvAudienceAPIIdentifiers))
+	if err != nil {
+		return nil, err
+	}
+
 	pgPort := get(constants.EnvPGPort, constants.DefaultPGPort)
 	if n, err := strconv.Atoi(pgPort); err != nil || n < 1 || n > 65535 {
 		return nil, fmt.Errorf("%s must be a TCP port, got %q", constants.EnvPGPort, pgPort)
@@ -132,9 +141,10 @@ func FromEnv(getenv func(string) string) (*Config, error) {
 		PGSSLRootCert: get(constants.EnvPGSSLRootCert, ""),
 		PGMaxConns:    maxConns,
 
-		Store:                store,
-		MigrateOnStart:       migrate,
-		MaxActivePerAudience: maxActive,
+		Store:                  store,
+		MigrateOnStart:         migrate,
+		MaxActivePerAudience:   maxActive,
+		AudienceAPIIdentifiers: apiIdentifiers,
 	}, nil
 }
 
@@ -170,6 +180,28 @@ func (c *Config) PostgresURL(scheme string) string {
 
 // pgSSLModes are the libpq sslmode values pgx accepts.
 var pgSSLModes = []string{"disable", "allow", "prefer", "require", "verify-ca", constants.PGSSLModeVerifyFull}
+
+// audienceSlug mirrors the audiences_slug_fmt check constraint.
+var audienceSlug = regexp.MustCompile(`^[a-z][a-z0-9-]{1,31}$`)
+
+func audienceAPIIdentifiers(raw string) (map[string]string, error) {
+	identifiers := map[string]string{}
+	if strings.TrimSpace(raw) == "" {
+		return identifiers, nil
+	}
+	if err := json.Unmarshal([]byte(raw), &identifiers); err != nil {
+		return nil, fmt.Errorf("%s must be a JSON object of audience slug to API identifier: %w", constants.EnvAudienceAPIIdentifiers, err)
+	}
+	for slug, identifier := range identifiers {
+		if !audienceSlug.MatchString(slug) {
+			return nil, fmt.Errorf("%s: %q is not an audience slug", constants.EnvAudienceAPIIdentifiers, slug)
+		}
+		if strings.TrimSpace(identifier) == "" {
+			return nil, fmt.Errorf("%s: audience %q has an empty API identifier", constants.EnvAudienceAPIIdentifiers, slug)
+		}
+	}
+	return identifiers, nil
+}
 
 func positiveInt(raw, key string) (int, error) {
 	n, err := strconv.Atoi(raw)

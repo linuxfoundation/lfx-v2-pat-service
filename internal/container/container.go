@@ -61,7 +61,7 @@ func NewContainer(ctx context.Context, cfg *config.Config) (*Container, error) {
 	}
 
 	c.Manager = service.NewManager(st.tokens, st.tokens, st.audiences, cfg.MaxActivePerAudience)
-	c.Validator = service.NewValidator(st.tokens)
+	c.Validator = service.NewValidator(st.tokens, cfg.AudienceAPIIdentifiers)
 	c.Readiness = st.readiness
 	c.Service = patsvc.New(patsvc.Deps{
 		Auth:      c.Auth,
@@ -121,7 +121,8 @@ func newAuthenticator(cfg *config.Config) (domain.Authenticator, error) {
 	if cfg.MockLocalPrincipal != "" {
 		slog.Warn("JWT verification is disabled: every request is attributed to the mock principal",
 			"principal", cfg.MockLocalPrincipal)
-		return auth.Static{Caller: domain.Caller{Principal: cfg.MockLocalPrincipal}}, nil
+		// Local runs have no Auth0 token to take a user ID from, so the mock caller gets a placeholder one.
+		return auth.Static{Caller: domain.Caller{Principal: cfg.MockLocalPrincipal, UserID: "auth0|" + cfg.MockLocalPrincipal}}, nil
 	}
 	jwtAuth, err := auth.NewJWTAuth(auth.Config{JWKSURL: cfg.JWKSUrl, Issuer: cfg.Issuer, Audience: cfg.Audience})
 	if err != nil {

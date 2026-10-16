@@ -31,6 +31,8 @@ const (
 	EnvStore                = "STORE"
 	EnvMigrateOnStart       = "DB_MIGRATE_ON_START"
 	EnvMaxActivePerAudience = "TOKEN_MAX_ACTIVE_PER_AUDIENCE"
+	// EnvAudienceAPIIdentifiers is a JSON object mapping each audience slug to its Auth0 API identifier.
+	EnvAudienceAPIIdentifiers = "AUDIENCE_API_IDENTIFIERS"
 
 	EnvKoDataPath = "KO_DATA_PATH"
 )

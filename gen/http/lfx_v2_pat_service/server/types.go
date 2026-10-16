@@ -50,12 +50,12 @@ type ListTokensResponseBody struct {
 // ValidateTokenResponseBody is the type of the "lfx_v2_pat_service" service
 // "validate-token" endpoint HTTP response body.
 type ValidateTokenResponseBody struct {
-	// Token UID
+	// Owner's Auth0 user ID, captured at issuance
 	UID string `form:"uid" json:"uid" xml:"uid"`
 	// Owner LFID username
 	Username string `form:"username" json:"username" xml:"username"`
-	// Audience the token was minted for. The caller must compare it with the
-	// audience it expects.
+	// Identifier of the Auth0 API the token was minted for. The caller must
+	// compare it with the audience it expects.
 	Audience string `form:"audience" json:"audience" xml:"audience"`
 	// Owner email captured at issuance, when the user JWT carried a verified one
 	Email *string `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`

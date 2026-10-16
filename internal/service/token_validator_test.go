@@ -21,15 +21,15 @@ import (
 func TestValidateResolvesOwnerAndRecordsUse(t *testing.T) {
 	f := newFixture(25)
 	created := f.create(t, alice, "ci", constants.AudienceInsights)
-	validator := service.NewValidator(f.tokens)
+	validator := service.NewValidator(f.tokens, apiIdentifiers)
 
 	identity, err := validator.Validate(context.Background(), created.Secret)
 
 	require.NoError(t, err)
 	assert.Equal(t, model.TokenIdentity{
-		UID:      created.Token.UID,
+		UserID:   "auth0|alice-id",
 		Username: "alice",
-		Audience: constants.AudienceInsights,
+		Audience: "https://insights-api.test/",
 		Email:    "alice@example.com",
 	}, identity)
 
@@ -46,7 +46,7 @@ func TestValidateRejections(t *testing.T) {
 	unstored, err := secret.Generate("lfi_")
 	require.NoError(t, err)
 	wrongRandom := created.Secret[:len(created.Secret)-1] + flip(created.Secret[len(created.Secret)-1])
-	validator := service.NewValidator(f.tokens)
+	validator := service.NewValidator(f.tokens, apiIdentifiers)
 
 	tests := []struct {
 		name   string
@@ -80,7 +80,7 @@ func TestValidateFailsClosedWhenAudienceDisabledAfterIssuance(t *testing.T) {
 	disabled.Enabled = false
 	f.audiences.Set(disabled)
 
-	_, err := service.NewValidator(f.tokens).Validate(context.Background(), created.Secret)
+	_, err := service.NewValidator(f.tokens, apiIdentifiers).Validate(context.Background(), created.Secret)
 
 	assert.True(t, errors.IsNotFound(err))
 }
@@ -98,10 +98,44 @@ func TestValidateSucceedsWhenRecordingUseFails(t *testing.T) {
 	f := newFixture(25)
 	created := f.create(t, alice, "ci", constants.AudienceInsights)
 
-	identity, err := service.NewValidator(flakyTouch{CredentialReader: f.tokens}).Validate(context.Background(), created.Secret)
+	identity, err := service.NewValidator(flakyTouch{CredentialReader: f.tokens}, apiIdentifiers).Validate(context.Background(), created.Secret)
 
 	require.NoError(t, err)
-	assert.Equal(t, created.Token.UID, identity.UID)
+	assert.Equal(t, "auth0|alice-id", identity.UserID)
+}
+
+func TestValidateRejectsATokenIssuedWithoutUserID(t *testing.T) {
+	f := newFixture(25)
+	parts, err := secret.Generate("lfi_")
+	require.NoError(t, err)
+	salt, err := secret.NewSalt()
+	require.NoError(t, err)
+	legacy, err := f.tokens.Create(context.Background(), model.NewToken{
+		Username:   "alice",
+		Audience:   constants.AudienceInsights,
+		Name:       "legacy",
+		LookupID:   parts.LookupID,
+		Salt:       salt,
+		SecretHash: secret.Hash(salt, parts.Random),
+	}, 25)
+	require.NoError(t, err)
+
+	_, err = service.NewValidator(f.tokens, apiIdentifiers).Validate(context.Background(), parts.String())
+
+	assert.True(t, errors.IsNotFound(err), "got %v", err)
+	assert.Nil(t, f.active(t, "alice", legacy.UID).LastUsedAt)
+}
+
+func TestValidateFailsWithoutAnAPIIdentifierForTheAudience(t *testing.T) {
+	f := newFixture(25)
+	created := f.create(t, alice, "ci", "other")
+	identifiers := map[string]string{constants.AudienceInsights: "https://insights-api.test/"}
+
+	_, err := service.NewValidator(f.tokens, identifiers).Validate(context.Background(), created.Secret)
+
+	require.Error(t, err)
+	assert.False(t, errors.IsNotFound(err), "a misconfiguration must not read as an invalid secret")
+	assert.Nil(t, f.active(t, "alice", created.Token.UID).LastUsedAt)
 }
 
 func flip(b byte) string {

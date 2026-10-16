@@ -124,12 +124,13 @@ func TestHTTPTokenLifecycle(t *testing.T) {
 	status, _, _ = do(t, ts, "bob", http.MethodDelete, "/tokens/"+uid, "")
 	assert.Equal(t, http.StatusNotFound, status)
 
-	// Validate as a machine principal: identity plus recorded use.
+	// Validate as a machine principal: the owner's Auth0 user ID and the audience's API identifier, plus a
+	// recorded use.
 	status, body, raw = do(t, ts, "abc123@clients", http.MethodPost, "/_tokens/validate?v=1", `{"secret":"`+secret+`"}`)
 	require.Equal(t, http.StatusOK, status, raw)
-	assert.Equal(t, uid, body["uid"])
+	assert.Equal(t, "auth0|alice-id", body["uid"])
 	assert.Equal(t, "alice", body["username"])
-	assert.Equal(t, "insights", body["audience"])
+	assert.Equal(t, "https://insights-api.test/", body["audience"])
 	assert.Equal(t, "alice@example.com", body["email"])
 	status, body, _ = do(t, ts, "alice", http.MethodGet, "/tokens", "")
 	require.Equal(t, http.StatusOK, status)

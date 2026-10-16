@@ -128,12 +128,12 @@ type ListTokensResult struct {
 // TokenIdentity is the result type of the lfx_v2_pat_service service
 // validate-token method.
 type TokenIdentity struct {
-	// Token UID
+	// Owner's Auth0 user ID, captured at issuance
 	UID string
 	// Owner LFID username
 	Username string
-	// Audience the token was minted for. The caller must compare it with the
-	// audience it expects.
+	// Identifier of the Auth0 API the token was minted for. The caller must
+	// compare it with the audience it expects.
 	Audience string
 	// Owner email captured at issuance, when the user JWT carried a verified one
 	Email *string

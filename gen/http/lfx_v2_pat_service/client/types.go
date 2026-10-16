@@ -50,12 +50,12 @@ type ListTokensResponseBody struct {
 // ValidateTokenResponseBody is the type of the "lfx_v2_pat_service" service
 // "validate-token" endpoint HTTP response body.
 type ValidateTokenResponseBody struct {
-	// Token UID
+	// Owner's Auth0 user ID, captured at issuance
 	UID *string `form:"uid,omitempty" json:"uid,omitempty" xml:"uid,omitempty"`
 	// Owner LFID username
 	Username *string `form:"username,omitempty" json:"username,omitempty" xml:"username,omitempty"`
-	// Audience the token was minted for. The caller must compare it with the
-	// audience it expects.
+	// Identifier of the Auth0 API the token was minted for. The caller must
+	// compare it with the audience it expects.
 	Audience *string `form:"audience,omitempty" json:"audience,omitempty" xml:"audience,omitempty"`
 	// Owner email captured at issuance, when the user JWT carried a verified one
 	Email *string `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`
@@ -967,12 +967,6 @@ func ValidateValidateTokenResponseBody(body *ValidateTokenResponseBody) (err err
 	}
 	if body.Audience == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("audience", "body"))
-	}
-	if body.UID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.uid", *body.UID, goa.FormatUUID))
-	}
-	if body.Audience != nil {
-		err = goa.MergeErrors(err, goa.ValidatePattern("body.audience", *body.Audience, "^[a-z][a-z0-9-]{1,31}$"))
 	}
 	if body.Email != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.email", *body.Email, goa.FormatEmail))

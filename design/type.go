@@ -80,12 +80,17 @@ var TokenResponse = dsl.Type("token-response", func() {
 	dsl.Required("uid", "name", "audience", "lookup_id", "username", "created_at")
 })
 
-// TokenIdentity is what the validate endpoint returns to the Auth0 Custom Token Exchange action.
+// TokenIdentity is what the validate endpoint returns to the Auth0 Custom Token Exchange action, which passes uid
+// to setUserById and requires audience to equal the identifier of the API it issues for.
 var TokenIdentity = dsl.Type("token-identity", func() {
 	dsl.Description("Owner identity resolved from a secret")
-	UIDAttribute()
+	dsl.Attribute("uid", dsl.String, "Owner's Auth0 user ID, captured at issuance", func() {
+		dsl.Example("auth0|jdoe")
+	})
 	UsernameAttribute()
-	AudienceAttribute("Audience the token was minted for. The caller must compare it with the audience it expects.")
+	dsl.Attribute("audience", dsl.String, "Identifier of the Auth0 API the token was minted for. The caller must compare it with the audience it expects.", func() {
+		dsl.Example("https://api.example.org/")
+	})
 	dsl.Attribute("email", dsl.String, "Owner email captured at issuance, when the user JWT carried a verified one", func() {
 		dsl.Format(dsl.FormatEmail)
 		dsl.Example("jdoe@example.com")

@@ -27,17 +27,21 @@ A token is `{uid, name, audience, lookup_id, username, created_at, last_used_at?
 appears once, in the create response. List returns each token with its public `lookup_id`
 and never the secret, the salt or the hash. Revoke addresses a token by `uid`.
 
+Validate answers with the owner, not the token: its `uid` is the owner's Auth0 user ID, captured at issuance, and
+its `audience` is the identifier of the Auth0 API the token's audience maps to in `AUDIENCE_API_IDENTIFIERS`.
+
 Errors use Goa's default body (`name`, `message`) except two that carry a stable `error` code next to `message`, which LFX One
 forwards to its UI:
 
-| Status | Body                                                 | When                                                                                                                                                                      |
-|--------|------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `409`  | `{"error": "token_name_taken", "message": "..."}`    | the caller already has an active token with that name for the audience (case-insensitive)                                                                                 |
-| `409`  | `{"error": "token_limit_reached", "message": "..."}` | the caller already holds `TOKEN_MAX_ACTIVE_PER_AUDIENCE` active tokens for the audience                                                                                   |
-| `404`  | `{"error": "invalid_token", "message": "..."}`       | validate: the secret is unknown, malformed, revoked, or its audience is disabled; a missing, empty or over-128-character `secret` is a `400` from body validation instead |
-| `400`  | message starts with `unknown_audience`               | create: the audience slug is unknown or disabled                                                                                                                          |
-| `401`  |                                                      | missing, invalid or anonymous bearer token                                                                                                                                |
-| `403`  |                                                      | a machine principal on a token route; on validate, Heimdall rejects callers outside the validator team before the service sees them                                       |
+| Status | Body                                                 | When                                                                                                                                                                                                             |
+|--------|------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `409`  | `{"error": "token_name_taken", "message": "..."}`    | the caller already has an active token with that name for the audience (case-insensitive)                                                                                                                        |
+| `409`  | `{"error": "token_limit_reached", "message": "..."}` | the caller already holds `TOKEN_MAX_ACTIVE_PER_AUDIENCE` active tokens for the audience                                                                                                                          |
+| `404`  | `{"error": "invalid_token", "message": "..."}`       | validate: the secret is unknown, malformed, revoked, issued without an owner Auth0 user ID, or its audience is disabled; a missing, empty or over-128-character `secret` is a `400` from body validation instead |
+| `400`  | message starts with `unknown_audience`               | create: the audience slug is unknown or disabled                                                                                                                                                                 |
+| `401`  |                                                      | missing, invalid or anonymous bearer token; on create, a JWT without the owner's Auth0 user ID                                                                                                                   |
+| `403`  |                                                      | a machine principal on a token route; on validate, Heimdall rejects callers outside the validator team before the service sees them                                                                              |
+| `500`  |                                                      | validate: the token's audience has no entry in `AUDIENCE_API_IDENTIFIERS`                                                                                                                                        |
 
 Owner scoping is enforced here rather than at the gateway: a token another user owns reads as `404`, revoke is
 idempotent (`204` once, `404` after), and every rejected secret on validate is the same `404` so callers cannot
@@ -46,11 +50,12 @@ tell an unknown secret from a revoked one.
 ### Who may call what
 
 Heimdall forwards a JWT whose `principal` claim is the LFID username for a user, or `<client_id>@clients` for an
-OAuth client-credentials token. Token routes accept user principals only. `POST /_tokens/validate` is authorized
-at the gateway: the chart's RuleSet runs an OpenFGA check that the caller is a `member` of the validator team
-(`app.validatorTeamName`, default `pat_validator`), which holds the Auth0 Actions client per environment. Until
-that team's member tuples exist in an environment's OpenFGA store the route denies every caller, so a missing
-grant fails closed.
+OAuth client-credentials token. On the create route the chart's RuleSet also adds `user_id`, the Auth0 `sub` of the
+caller's token, which the service stores so the token exchange can sign in as the owner. Token routes accept user
+principals only. `POST /_tokens/validate` is authorized at the gateway: the chart's RuleSet runs an OpenFGA check
+that the caller is a `member` of the validator team (`app.validatorTeamName`, default `pat_validator`), which holds
+the Auth0 Actions client per environment. Until that team's member tuples exist in an environment's OpenFGA store
+the route denies every caller, so a missing grant fails closed.
 
 ### Audiences
 
@@ -87,6 +92,7 @@ The service reads its configuration from environment variables (CLI flags `-p`, 
 | `PG_MAX_CONNS`                                 | `10`                                    | Connection pool size                                                                                |
 | `DB_MIGRATE_ON_START`                          | `true`                                  | Apply pending migrations before listening                                                           |
 | `TOKEN_MAX_ACTIVE_PER_AUDIENCE`                | `25`                                    | Active tokens one user may hold per audience                                                        |
+| `AUDIENCE_API_IDENTIFIERS`                     | `{}`                                    | JSON object mapping each audience slug to its Auth0 API identifier, which validate returns          |
 | `KO_DATA_PATH`                                 | `.`                                     | Directory holding `gen/http/openapi3.json`; set by ko and the Dockerfile                            |
 | `OTEL_*`                                       |                                         | OpenTelemetry exporter settings, see `pkg/telemetry`                                                |
 
@@ -107,11 +113,13 @@ Run the service against the local database with JWT verification disabled:
 
 ```bash
 PGHOST=localhost PGPORT=5433 PGUSER=pat PGPASSWORD=pat PGDATABASE=pat PGSSLMODE=disable PG_ALLOW_INSECURE_SSLMODE=true \
-JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=alice ./bin/lfx-v2-pat-service
+JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=alice AUDIENCE_API_IDENTIFIERS='{"insights":"https://insights-api.local/"}' \
+./bin/lfx-v2-pat-service
 ```
 
-Then walk the lifecycle (the bearer value is ignored while the mock principal is set; outside the cluster there is
-no Heimdall, so the validate call is open to the mock principal too):
+Then walk the lifecycle (the bearer value is ignored while the mock principal is set, and the mock caller's Auth0
+user ID is `auth0|<principal>`; outside the cluster there is no Heimdall, so the validate call is open to the mock
+principal too):
 
 ```bash
 curl -s -XPOST localhost:8080/tokens -H 'Authorization: Bearer x' -H 'Content-Type: application/json' \
@@ -146,7 +154,8 @@ charts/lfx-v2-pat-service/      Helm chart with the Heimdall RuleSet and HTTPRou
 The chart reads the Postgres credential from the Secret the ArgoCD ExternalSecret materialises
 (`database.external.secretName`, five keys). The validate route is gated by OpenFGA team membership: platform
 DevOps writes `user:<Auth0 Actions client_id>@clients member team:pat_validator` into each environment's store
-(the name comes from `app.validatorTeamName`). See `charts/lfx-v2-pat-service/values.yaml`.
+(the name comes from `app.validatorTeamName`). Each environment also sets `app.audienceApiIdentifiers` to the
+identifiers of its Auth0 tenant's APIs. See `charts/lfx-v2-pat-service/values.yaml`.
 
 The database link uses `sslmode=verify-full`, so the pod must trust the CA that signs the RDS certificate. The
 chart mounts it read-only at `/etc/pat/db-ca` and sets `PGSSLROOTCERT` to the file path: put the AWS RDS CA bundle in

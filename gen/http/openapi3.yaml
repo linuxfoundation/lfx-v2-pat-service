@@ -42,9 +42,9 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/TokenIdentity'
                             example:
-                                audience: insights
+                                audience: https://api.example.org/
                                 email: jdoe@example.com
-                                uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                                uid: auth0|jdoe
                                 username: jdoe
                 "400":
                     description: 'BadRequest: Malformed request body'
@@ -513,9 +513,8 @@ components:
             properties:
                 audience:
                     type: string
-                    description: Audience the token was minted for. The caller must compare it with the audience it expects.
-                    example: insights
-                    pattern: ^[a-z][a-z0-9-]{1,31}$
+                    description: Identifier of the Auth0 API the token was minted for. The caller must compare it with the audience it expects.
+                    example: https://api.example.org/
                 email:
                     type: string
                     description: Owner email captured at issuance, when the user JWT carried a verified one
@@ -523,18 +522,17 @@ components:
                     format: email
                 uid:
                     type: string
-                    description: Token UID
-                    example: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
-                    format: uuid
+                    description: Owner's Auth0 user ID, captured at issuance
+                    example: auth0|jdoe
                 username:
                     type: string
                     description: Owner LFID username
                     example: jdoe
             description: Owner identity resolved from a secret
             example:
-                audience: insights
+                audience: https://api.example.org/
                 email: jdoe@example.com
-                uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                uid: auth0|jdoe
                 username: jdoe
             required:
                 - uid

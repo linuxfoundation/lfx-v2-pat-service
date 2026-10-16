@@ -30,6 +30,7 @@ func TestNewContainerWithMockPrincipal(t *testing.T) {
 	caller, err := c.Auth.Authenticate(context.Background(), "ignored")
 	require.NoError(t, err)
 	assert.Equal(t, "alice", caller.Principal)
+	assert.NotEmpty(t, caller.UserID, "the mock caller must be able to issue tokens")
 	assert.True(t, c.Ready(context.Background()))
 	require.NotNil(t, c.Service)
 	out, err := c.Service.Readyz(context.Background())

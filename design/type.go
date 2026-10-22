@@ -6,6 +6,7 @@ package design
 import (
 	"github.com/linuxfoundation/lfx-v2-pat-service/pkg/constants"
 	"goa.design/goa/v3/dsl"
+	"goa.design/goa/v3/expr"
 )
 
 // BearerTokenAttribute declares the Heimdall-issued JWT carried in the Authorization header.
@@ -93,41 +94,61 @@ var TokenIdentity = dsl.Type("token-identity", func() {
 	dsl.Required("uid", "username", "audience")
 })
 
-// ConflictError carries a stable code so lfx-one can tell the two 409 causes apart. The attribute is named
-// "error" on the wire but "Code" in Go, because the generated type must also implement error.
-var ConflictError = dsl.Type("ConflictError", func() {
-	dsl.Description("Name already used, or active-token limit reached, for this audience")
-	dsl.Attribute("error", dsl.String, "Stable machine-readable code", func() {
-		dsl.Meta("struct:field:name", "Code")
-		dsl.Enum(constants.ErrCodeTokenNameTaken, constants.ErrCodeTokenLimitReached)
-		dsl.Example(constants.ErrCodeTokenNameTaken)
+// errorType declares an error body of the one shape every error uses, {error, message}, with its closed set of
+// codes. The attribute is named "error" on the wire but "Code" in Go, because the generated type must also
+// implement error.
+func errorType(name, description, message string, codes ...any) expr.UserType {
+	return dsl.Type(name, func() {
+		dsl.Description(description)
+		dsl.Attribute("error", dsl.String, "Stable machine-readable code", func() {
+			dsl.Meta("struct:field:name", "Code")
+			dsl.Enum(codes...)
+			dsl.Example(codes[0])
+		})
+		dsl.Attribute("message", dsl.String, "Human-readable explanation", func() {
+			dsl.Example(message)
+		})
+		dsl.Required("error", "message")
 	})
-	dsl.Attribute("message", dsl.String, "Human-readable explanation", func() {
-		dsl.Example("a token named \"ci-pipeline\" already exists for audience insights")
-	})
-	dsl.Required("error", "message")
-})
+}
+
+// BadRequestError covers the design's own validation and the use-case checks. Goa's validation errors reach it
+// through the error formatter, see cmd/pat-api/service/format_error.go.
+var BadRequestError = errorType("BadRequestError", "The request is invalid",
+	"value of version must be one of \"1\" but got value \"2\"",
+	constants.ErrCodeInvalidRequest, constants.ErrCodeInvalidName, constants.ErrCodeInvalidUID,
+	constants.ErrCodeUnknownAudience)
+
+// ConflictError lets lfx-one tell the two 409 causes apart.
+var ConflictError = errorType("ConflictError", "Name already used, or active-token limit reached, for this audience",
+	"a token named \"ci-pipeline\" already exists for audience insights",
+	constants.ErrCodeTokenNameTaken, constants.ErrCodeTokenLimitReached)
+
+// NotFoundError is returned for a uid the caller does not own as an active token.
+var NotFoundError = errorType("NotFoundError", "No active token with this uid is owned by the caller",
+	"no active token with this uid", constants.ErrCodeTokenNotFound)
 
 // InvalidTokenError is the single 404 body the validate endpoint returns for every rejected secret, so callers
 // cannot tell an unknown secret from a revoked one.
-var InvalidTokenError = dsl.Type("InvalidTokenError", func() {
-	dsl.Description("Secret is invalid or revoked")
-	dsl.Attribute("error", dsl.String, "Stable machine-readable code", func() {
-		dsl.Meta("struct:field:name", "Code")
-		dsl.Enum(constants.ErrCodeInvalidToken)
-		dsl.Example(constants.ErrCodeInvalidToken)
-	})
-	dsl.Attribute("message", dsl.String, "Human-readable explanation", func() {
-		dsl.Example("secret is invalid or revoked")
-	})
-	dsl.Required("error", "message")
-})
+var InvalidTokenError = errorType("InvalidTokenError", "Secret is invalid or revoked",
+	"secret is invalid or revoked", constants.ErrCodeInvalidToken)
+
+var (
+	UnauthorizedError = errorType("UnauthorizedError", "Missing, invalid or anonymous bearer token",
+		"missing bearer token", constants.ErrCodeUnauthorized)
+	ForbiddenError = errorType("ForbiddenError", "Principal is not allowed to call this endpoint",
+		"machine principals cannot manage personal access tokens", constants.ErrCodeForbidden)
+	InternalError = errorType("InternalError", "Internal server error",
+		"internal service error", constants.ErrCodeInternal)
+	ServiceUnavailableError = errorType("ServiceUnavailableError", "Service unavailable",
+		"the service is unavailable", constants.ErrCodeServiceUnavailable)
+)
 
 // AuthErrors declares the errors the JWTAuth security handler can return. Undeclared errors from a security
 // handler are rendered as 400 by Goa, so every secured method declares these.
 func AuthErrors() {
-	dsl.Error("Unauthorized", dsl.ErrorResult, "Missing, invalid or anonymous bearer token")
-	dsl.Error("Forbidden", dsl.ErrorResult, "Principal is not allowed to call this endpoint")
+	dsl.Error("Unauthorized", UnauthorizedError, "Missing, invalid or anonymous bearer token")
+	dsl.Error("Forbidden", ForbiddenError, "Principal is not allowed to call this endpoint")
 }
 
 // AuthResponses maps AuthErrors to HTTP statuses.
@@ -138,8 +159,8 @@ func AuthResponses() {
 
 // ServerErrors declares the errors every endpoint can produce regardless of input.
 func ServerErrors() {
-	dsl.Error("InternalServerError", dsl.ErrorResult, "Internal server error", func() { dsl.Fault() })
-	dsl.Error("ServiceUnavailable", dsl.ErrorResult, "Service unavailable", func() { dsl.Temporary() })
+	dsl.Error("InternalServerError", InternalError, "Internal server error", func() { dsl.Fault() })
+	dsl.Error("ServiceUnavailable", ServiceUnavailableError, "Service unavailable", func() { dsl.Temporary() })
 }
 
 // ServerResponses maps ServerErrors to HTTP statuses.

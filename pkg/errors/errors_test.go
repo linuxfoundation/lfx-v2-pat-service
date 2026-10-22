@@ -19,7 +19,7 @@ func TestMessagesKeepCauseOutOfMessage(t *testing.T) {
 		message string
 		full    string
 	}{
-		{"validation", NewValidation("bad name"), "bad name", "bad name"},
+		{"validation", NewValidation("invalid_name", "bad name"), "bad name", "bad name"},
 		{"not found with cause", NewNotFound("no token", cause), "no token", "no token: db down"},
 		{"conflict", NewConflict("token_name_taken", "name taken"), "name taken", "name taken"},
 		{"unauthorized", NewUnauthorized("no token"), "no token", "no token"},
@@ -42,14 +42,14 @@ func TestMessagesKeepCauseOutOfMessage(t *testing.T) {
 func TestPredicatesMatchThroughWrapping(t *testing.T) {
 	wrap := func(err error) error { return fmt.Errorf("outer: %w", err) }
 
-	assert.True(t, IsValidation(wrap(NewValidation("x"))))
+	assert.True(t, IsValidation(wrap(NewValidation("invalid_name", "x"))))
 	assert.True(t, IsNotFound(wrap(NewNotFound("x"))))
 	assert.True(t, IsConflict(wrap(NewConflict("c", "x"))))
 	assert.True(t, IsUnauthorized(wrap(NewUnauthorized("x"))))
 	assert.True(t, IsForbidden(wrap(NewForbidden("x"))))
 	assert.True(t, IsServiceUnavailable(wrap(NewServiceUnavailable("x"))))
 
-	assert.False(t, IsNotFound(NewValidation("x")))
+	assert.False(t, IsNotFound(NewValidation("invalid_name", "x")))
 	assert.False(t, IsValidation(nil))
 	assert.False(t, IsConflict(errors.New("plain")))
 }

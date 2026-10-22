@@ -70,13 +70,20 @@ const (
 // this seed, for examples and tests.
 const AudienceInsights = "insights"
 
-// Error codes carried in the "error" field of custom error bodies. lfx-one forwards them to its UI as upstreamCode,
-// which is the only way a 409 or 404 keeps a distinguishable cause.
+// Error codes carried in the "error" field of every error body. lfx-one forwards them to its UI as upstreamCode.
 const (
-	ErrCodeTokenNameTaken    = "token_name_taken"
-	ErrCodeTokenLimitReached = "token_limit_reached"
-	ErrCodeInvalidToken      = "invalid_token"
-	ErrCodeUnknownAudience   = "unknown_audience"
+	ErrCodeInvalidName        = "invalid_name"
+	ErrCodeInvalidUID         = "invalid_uid"
+	ErrCodeUnknownAudience    = "unknown_audience"
+	ErrCodeInvalidRequest     = "invalid_request"
+	ErrCodeUnauthorized       = "unauthorized"
+	ErrCodeForbidden          = "forbidden"
+	ErrCodeTokenNotFound      = "token_not_found"
+	ErrCodeInvalidToken       = "invalid_token"
+	ErrCodeTokenNameTaken     = "token_name_taken"
+	ErrCodeTokenLimitReached  = "token_limit_reached"
+	ErrCodeInternal           = "internal_error"
+	ErrCodeServiceUnavailable = "service_unavailable"
 )
 
 // TokenNameMaxLength bounds a token's display name; mirrors the tokens_name_len check constraint.

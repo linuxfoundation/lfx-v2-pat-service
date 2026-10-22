@@ -39,12 +39,12 @@ func NewClient(createToken, listTokens, deleteToken, validateToken, livez, ready
 // CreateToken calls the "create-token" endpoint of the "lfx_v2_pat_service"
 // service.
 // CreateToken may return the following errors:
-//   - "Unauthorized" (type *goa.ServiceError): Missing, invalid or anonymous bearer token
-//   - "Forbidden" (type *goa.ServiceError): Principal is not allowed to call this endpoint
-//   - "BadRequest" (type *goa.ServiceError): Invalid name, or unknown or disabled audience
+//   - "Unauthorized" (type *UnauthorizedError): Missing, invalid or anonymous bearer token
+//   - "Forbidden" (type *ForbiddenError): Principal is not allowed to call this endpoint
+//   - "BadRequest" (type *BadRequestError): Invalid name, or unknown or disabled audience
 //   - "Conflict" (type *ConflictError): Name already used, or active-token limit reached, for this audience
-//   - "InternalServerError" (type *goa.ServiceError): Internal server error
-//   - "ServiceUnavailable" (type *goa.ServiceError): Service unavailable
+//   - "InternalServerError" (type *InternalError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
 //   - error: internal error
 func (c *Client) CreateToken(ctx context.Context, p *CreateTokenPayload) (res *CreateTokenResult, err error) {
 	var ires any
@@ -58,11 +58,11 @@ func (c *Client) CreateToken(ctx context.Context, p *CreateTokenPayload) (res *C
 // ListTokens calls the "list-tokens" endpoint of the "lfx_v2_pat_service"
 // service.
 // ListTokens may return the following errors:
-//   - "Unauthorized" (type *goa.ServiceError): Missing, invalid or anonymous bearer token
-//   - "Forbidden" (type *goa.ServiceError): Principal is not allowed to call this endpoint
-//   - "BadRequest" (type *goa.ServiceError): Invalid filter
-//   - "InternalServerError" (type *goa.ServiceError): Internal server error
-//   - "ServiceUnavailable" (type *goa.ServiceError): Service unavailable
+//   - "Unauthorized" (type *UnauthorizedError): Missing, invalid or anonymous bearer token
+//   - "Forbidden" (type *ForbiddenError): Principal is not allowed to call this endpoint
+//   - "BadRequest" (type *BadRequestError): Invalid filter
+//   - "InternalServerError" (type *InternalError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
 //   - error: internal error
 func (c *Client) ListTokens(ctx context.Context, p *ListTokensPayload) (res *ListTokensResult, err error) {
 	var ires any
@@ -76,12 +76,12 @@ func (c *Client) ListTokens(ctx context.Context, p *ListTokensPayload) (res *Lis
 // DeleteToken calls the "delete-token" endpoint of the "lfx_v2_pat_service"
 // service.
 // DeleteToken may return the following errors:
-//   - "Unauthorized" (type *goa.ServiceError): Missing, invalid or anonymous bearer token
-//   - "Forbidden" (type *goa.ServiceError): Principal is not allowed to call this endpoint
-//   - "BadRequest" (type *goa.ServiceError): uid is not a UUID
-//   - "NotFound" (type *goa.ServiceError): No active token with this uid is owned by the caller
-//   - "InternalServerError" (type *goa.ServiceError): Internal server error
-//   - "ServiceUnavailable" (type *goa.ServiceError): Service unavailable
+//   - "Unauthorized" (type *UnauthorizedError): Missing, invalid or anonymous bearer token
+//   - "Forbidden" (type *ForbiddenError): Principal is not allowed to call this endpoint
+//   - "BadRequest" (type *BadRequestError): uid is not a UUID
+//   - "NotFound" (type *NotFoundError): No active token with this uid is owned by the caller
+//   - "InternalServerError" (type *InternalError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
 //   - error: internal error
 func (c *Client) DeleteToken(ctx context.Context, p *DeleteTokenPayload) (err error) {
 	_, err = c.DeleteTokenEndpoint(ctx, p)
@@ -91,12 +91,12 @@ func (c *Client) DeleteToken(ctx context.Context, p *DeleteTokenPayload) (err er
 // ValidateToken calls the "validate-token" endpoint of the
 // "lfx_v2_pat_service" service.
 // ValidateToken may return the following errors:
-//   - "Unauthorized" (type *goa.ServiceError): Missing, invalid or anonymous bearer token
-//   - "Forbidden" (type *goa.ServiceError): Principal is not allowed to call this endpoint
-//   - "BadRequest" (type *goa.ServiceError): Malformed request body
+//   - "Unauthorized" (type *UnauthorizedError): Missing, invalid or anonymous bearer token
+//   - "Forbidden" (type *ForbiddenError): Principal is not allowed to call this endpoint
+//   - "BadRequest" (type *BadRequestError): Malformed request body
 //   - "InvalidToken" (type *InvalidTokenError): Unknown, malformed, revoked, or disabled-audience secret
-//   - "InternalServerError" (type *goa.ServiceError): Internal server error
-//   - "ServiceUnavailable" (type *goa.ServiceError): Service unavailable
+//   - "InternalServerError" (type *InternalError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
 //   - error: internal error
 func (c *Client) ValidateToken(ctx context.Context, p *ValidateTokenPayload) (res *TokenIdentity, err error) {
 	var ires any
@@ -119,7 +119,7 @@ func (c *Client) Livez(ctx context.Context) (res []byte, err error) {
 
 // Readyz calls the "readyz" endpoint of the "lfx_v2_pat_service" service.
 // Readyz may return the following errors:
-//   - "ServiceUnavailable" (type *goa.ServiceError): Service unavailable
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
 //   - error: internal error
 func (c *Client) Readyz(ctx context.Context) (res []byte, err error) {
 	var ires any

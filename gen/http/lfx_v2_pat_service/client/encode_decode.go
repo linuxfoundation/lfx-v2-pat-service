@@ -67,12 +67,12 @@ func EncodeCreateTokenRequest(encoder func(*http.Request) goahttp.Encoder) func(
 // lfx_v2_pat_service create-token endpoint. restoreBody controls whether the
 // response body should be restored after having been read.
 // DecodeCreateTokenResponse may return the following errors:
-//   - "Unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
-//   - "Forbidden" (type *goa.ServiceError): http.StatusForbidden
-//   - "BadRequest" (type *goa.ServiceError): http.StatusBadRequest
-//   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
-//   - "ServiceUnavailable" (type *goa.ServiceError): http.StatusServiceUnavailable
+//   - "BadRequest" (type *lfxv2patservice.BadRequestError): http.StatusBadRequest
 //   - "Conflict" (type *lfxv2patservice.ConflictError): http.StatusConflict
+//   - "Forbidden" (type *lfxv2patservice.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *lfxv2patservice.InternalError): http.StatusInternalServerError
+//   - "ServiceUnavailable" (type *lfxv2patservice.ServiceUnavailableError): http.StatusServiceUnavailable
+//   - "Unauthorized" (type *lfxv2patservice.UnauthorizedError): http.StatusUnauthorized
 //   - error: internal error
 func DecodeCreateTokenResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
@@ -104,34 +104,6 @@ func DecodeCreateTokenResponse(decoder func(*http.Response) goahttp.Decoder, res
 			}
 			res := NewCreateTokenResultCreated(&body)
 			return res, nil
-		case http.StatusUnauthorized:
-			var (
-				body CreateTokenUnauthorizedResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "create-token", err)
-			}
-			err = ValidateCreateTokenUnauthorizedResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "create-token", err)
-			}
-			return nil, NewCreateTokenUnauthorized(&body)
-		case http.StatusForbidden:
-			var (
-				body CreateTokenForbiddenResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "create-token", err)
-			}
-			err = ValidateCreateTokenForbiddenResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "create-token", err)
-			}
-			return nil, NewCreateTokenForbidden(&body)
 		case http.StatusBadRequest:
 			var (
 				body CreateTokenBadRequestResponseBody
@@ -146,6 +118,34 @@ func DecodeCreateTokenResponse(decoder func(*http.Response) goahttp.Decoder, res
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "create-token", err)
 			}
 			return nil, NewCreateTokenBadRequest(&body)
+		case http.StatusConflict:
+			var (
+				body CreateTokenConflictResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "create-token", err)
+			}
+			err = ValidateCreateTokenConflictResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "create-token", err)
+			}
+			return nil, NewCreateTokenConflict(&body)
+		case http.StatusForbidden:
+			var (
+				body CreateTokenForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "create-token", err)
+			}
+			err = ValidateCreateTokenForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "create-token", err)
+			}
+			return nil, NewCreateTokenForbidden(&body)
 		case http.StatusInternalServerError:
 			var (
 				body CreateTokenInternalServerErrorResponseBody
@@ -174,20 +174,20 @@ func DecodeCreateTokenResponse(decoder func(*http.Response) goahttp.Decoder, res
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "create-token", err)
 			}
 			return nil, NewCreateTokenServiceUnavailable(&body)
-		case http.StatusConflict:
+		case http.StatusUnauthorized:
 			var (
-				body CreateTokenConflictResponseBody
+				body CreateTokenUnauthorizedResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "create-token", err)
 			}
-			err = ValidateCreateTokenConflictResponseBody(&body)
+			err = ValidateCreateTokenUnauthorizedResponseBody(&body)
 			if err != nil {
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "create-token", err)
 			}
-			return nil, NewCreateTokenConflict(&body)
+			return nil, NewCreateTokenUnauthorized(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("lfx_v2_pat_service", "create-token", resp.StatusCode, string(body))
@@ -242,11 +242,11 @@ func EncodeListTokensRequest(encoder func(*http.Request) goahttp.Encoder) func(*
 // lfx_v2_pat_service list-tokens endpoint. restoreBody controls whether the
 // response body should be restored after having been read.
 // DecodeListTokensResponse may return the following errors:
-//   - "Unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
-//   - "Forbidden" (type *goa.ServiceError): http.StatusForbidden
-//   - "BadRequest" (type *goa.ServiceError): http.StatusBadRequest
-//   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
-//   - "ServiceUnavailable" (type *goa.ServiceError): http.StatusServiceUnavailable
+//   - "BadRequest" (type *lfxv2patservice.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *lfxv2patservice.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *lfxv2patservice.InternalError): http.StatusInternalServerError
+//   - "ServiceUnavailable" (type *lfxv2patservice.ServiceUnavailableError): http.StatusServiceUnavailable
+//   - "Unauthorized" (type *lfxv2patservice.UnauthorizedError): http.StatusUnauthorized
 //   - error: internal error
 func DecodeListTokensResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
@@ -278,34 +278,6 @@ func DecodeListTokensResponse(decoder func(*http.Response) goahttp.Decoder, rest
 			}
 			res := NewListTokensResultOK(&body)
 			return res, nil
-		case http.StatusUnauthorized:
-			var (
-				body ListTokensUnauthorizedResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "list-tokens", err)
-			}
-			err = ValidateListTokensUnauthorizedResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "list-tokens", err)
-			}
-			return nil, NewListTokensUnauthorized(&body)
-		case http.StatusForbidden:
-			var (
-				body ListTokensForbiddenResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "list-tokens", err)
-			}
-			err = ValidateListTokensForbiddenResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "list-tokens", err)
-			}
-			return nil, NewListTokensForbidden(&body)
 		case http.StatusBadRequest:
 			var (
 				body ListTokensBadRequestResponseBody
@@ -320,6 +292,20 @@ func DecodeListTokensResponse(decoder func(*http.Response) goahttp.Decoder, rest
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "list-tokens", err)
 			}
 			return nil, NewListTokensBadRequest(&body)
+		case http.StatusForbidden:
+			var (
+				body ListTokensForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "list-tokens", err)
+			}
+			err = ValidateListTokensForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "list-tokens", err)
+			}
+			return nil, NewListTokensForbidden(&body)
 		case http.StatusInternalServerError:
 			var (
 				body ListTokensInternalServerErrorResponseBody
@@ -348,6 +334,20 @@ func DecodeListTokensResponse(decoder func(*http.Response) goahttp.Decoder, rest
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "list-tokens", err)
 			}
 			return nil, NewListTokensServiceUnavailable(&body)
+		case http.StatusUnauthorized:
+			var (
+				body ListTokensUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "list-tokens", err)
+			}
+			err = ValidateListTokensUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "list-tokens", err)
+			}
+			return nil, NewListTokensUnauthorized(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("lfx_v2_pat_service", "list-tokens", resp.StatusCode, string(body))
@@ -409,12 +409,12 @@ func EncodeDeleteTokenRequest(encoder func(*http.Request) goahttp.Encoder) func(
 // lfx_v2_pat_service delete-token endpoint. restoreBody controls whether the
 // response body should be restored after having been read.
 // DecodeDeleteTokenResponse may return the following errors:
-//   - "Unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
-//   - "Forbidden" (type *goa.ServiceError): http.StatusForbidden
-//   - "BadRequest" (type *goa.ServiceError): http.StatusBadRequest
-//   - "NotFound" (type *goa.ServiceError): http.StatusNotFound
-//   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
-//   - "ServiceUnavailable" (type *goa.ServiceError): http.StatusServiceUnavailable
+//   - "BadRequest" (type *lfxv2patservice.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *lfxv2patservice.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *lfxv2patservice.InternalError): http.StatusInternalServerError
+//   - "NotFound" (type *lfxv2patservice.NotFoundError): http.StatusNotFound
+//   - "ServiceUnavailable" (type *lfxv2patservice.ServiceUnavailableError): http.StatusServiceUnavailable
+//   - "Unauthorized" (type *lfxv2patservice.UnauthorizedError): http.StatusUnauthorized
 //   - error: internal error
 func DecodeDeleteTokenResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
@@ -433,34 +433,6 @@ func DecodeDeleteTokenResponse(decoder func(*http.Response) goahttp.Decoder, res
 		switch resp.StatusCode {
 		case http.StatusNoContent:
 			return nil, nil
-		case http.StatusUnauthorized:
-			var (
-				body DeleteTokenUnauthorizedResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "delete-token", err)
-			}
-			err = ValidateDeleteTokenUnauthorizedResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "delete-token", err)
-			}
-			return nil, NewDeleteTokenUnauthorized(&body)
-		case http.StatusForbidden:
-			var (
-				body DeleteTokenForbiddenResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "delete-token", err)
-			}
-			err = ValidateDeleteTokenForbiddenResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "delete-token", err)
-			}
-			return nil, NewDeleteTokenForbidden(&body)
 		case http.StatusBadRequest:
 			var (
 				body DeleteTokenBadRequestResponseBody
@@ -475,20 +447,20 @@ func DecodeDeleteTokenResponse(decoder func(*http.Response) goahttp.Decoder, res
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "delete-token", err)
 			}
 			return nil, NewDeleteTokenBadRequest(&body)
-		case http.StatusNotFound:
+		case http.StatusForbidden:
 			var (
-				body DeleteTokenNotFoundResponseBody
+				body DeleteTokenForbiddenResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "delete-token", err)
 			}
-			err = ValidateDeleteTokenNotFoundResponseBody(&body)
+			err = ValidateDeleteTokenForbiddenResponseBody(&body)
 			if err != nil {
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "delete-token", err)
 			}
-			return nil, NewDeleteTokenNotFound(&body)
+			return nil, NewDeleteTokenForbidden(&body)
 		case http.StatusInternalServerError:
 			var (
 				body DeleteTokenInternalServerErrorResponseBody
@@ -503,6 +475,20 @@ func DecodeDeleteTokenResponse(decoder func(*http.Response) goahttp.Decoder, res
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "delete-token", err)
 			}
 			return nil, NewDeleteTokenInternalServerError(&body)
+		case http.StatusNotFound:
+			var (
+				body DeleteTokenNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "delete-token", err)
+			}
+			err = ValidateDeleteTokenNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "delete-token", err)
+			}
+			return nil, NewDeleteTokenNotFound(&body)
 		case http.StatusServiceUnavailable:
 			var (
 				body DeleteTokenServiceUnavailableResponseBody
@@ -517,6 +503,20 @@ func DecodeDeleteTokenResponse(decoder func(*http.Response) goahttp.Decoder, res
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "delete-token", err)
 			}
 			return nil, NewDeleteTokenServiceUnavailable(&body)
+		case http.StatusUnauthorized:
+			var (
+				body DeleteTokenUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "delete-token", err)
+			}
+			err = ValidateDeleteTokenUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "delete-token", err)
+			}
+			return nil, NewDeleteTokenUnauthorized(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("lfx_v2_pat_service", "delete-token", resp.StatusCode, string(body))
@@ -572,12 +572,12 @@ func EncodeValidateTokenRequest(encoder func(*http.Request) goahttp.Encoder) fun
 // lfx_v2_pat_service validate-token endpoint. restoreBody controls whether the
 // response body should be restored after having been read.
 // DecodeValidateTokenResponse may return the following errors:
-//   - "Unauthorized" (type *goa.ServiceError): http.StatusUnauthorized
-//   - "Forbidden" (type *goa.ServiceError): http.StatusForbidden
-//   - "BadRequest" (type *goa.ServiceError): http.StatusBadRequest
-//   - "InternalServerError" (type *goa.ServiceError): http.StatusInternalServerError
-//   - "ServiceUnavailable" (type *goa.ServiceError): http.StatusServiceUnavailable
+//   - "BadRequest" (type *lfxv2patservice.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *lfxv2patservice.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *lfxv2patservice.InternalError): http.StatusInternalServerError
 //   - "InvalidToken" (type *lfxv2patservice.InvalidTokenError): http.StatusNotFound
+//   - "ServiceUnavailable" (type *lfxv2patservice.ServiceUnavailableError): http.StatusServiceUnavailable
+//   - "Unauthorized" (type *lfxv2patservice.UnauthorizedError): http.StatusUnauthorized
 //   - error: internal error
 func DecodeValidateTokenResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
@@ -609,34 +609,6 @@ func DecodeValidateTokenResponse(decoder func(*http.Response) goahttp.Decoder, r
 			}
 			res := NewValidateTokenTokenIdentityOK(&body)
 			return res, nil
-		case http.StatusUnauthorized:
-			var (
-				body ValidateTokenUnauthorizedResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "validate-token", err)
-			}
-			err = ValidateValidateTokenUnauthorizedResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "validate-token", err)
-			}
-			return nil, NewValidateTokenUnauthorized(&body)
-		case http.StatusForbidden:
-			var (
-				body ValidateTokenForbiddenResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "validate-token", err)
-			}
-			err = ValidateValidateTokenForbiddenResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "validate-token", err)
-			}
-			return nil, NewValidateTokenForbidden(&body)
 		case http.StatusBadRequest:
 			var (
 				body ValidateTokenBadRequestResponseBody
@@ -651,6 +623,20 @@ func DecodeValidateTokenResponse(decoder func(*http.Response) goahttp.Decoder, r
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "validate-token", err)
 			}
 			return nil, NewValidateTokenBadRequest(&body)
+		case http.StatusForbidden:
+			var (
+				body ValidateTokenForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "validate-token", err)
+			}
+			err = ValidateValidateTokenForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "validate-token", err)
+			}
+			return nil, NewValidateTokenForbidden(&body)
 		case http.StatusInternalServerError:
 			var (
 				body ValidateTokenInternalServerErrorResponseBody
@@ -665,20 +651,6 @@ func DecodeValidateTokenResponse(decoder func(*http.Response) goahttp.Decoder, r
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "validate-token", err)
 			}
 			return nil, NewValidateTokenInternalServerError(&body)
-		case http.StatusServiceUnavailable:
-			var (
-				body ValidateTokenServiceUnavailableResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "validate-token", err)
-			}
-			err = ValidateValidateTokenServiceUnavailableResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "validate-token", err)
-			}
-			return nil, NewValidateTokenServiceUnavailable(&body)
 		case http.StatusNotFound:
 			var (
 				body ValidateTokenInvalidTokenResponseBody
@@ -693,6 +665,34 @@ func DecodeValidateTokenResponse(decoder func(*http.Response) goahttp.Decoder, r
 				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "validate-token", err)
 			}
 			return nil, NewValidateTokenInvalidToken(&body)
+		case http.StatusServiceUnavailable:
+			var (
+				body ValidateTokenServiceUnavailableResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "validate-token", err)
+			}
+			err = ValidateValidateTokenServiceUnavailableResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "validate-token", err)
+			}
+			return nil, NewValidateTokenServiceUnavailable(&body)
+		case http.StatusUnauthorized:
+			var (
+				body ValidateTokenUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("lfx_v2_pat_service", "validate-token", err)
+			}
+			err = ValidateValidateTokenUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("lfx_v2_pat_service", "validate-token", err)
+			}
+			return nil, NewValidateTokenUnauthorized(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("lfx_v2_pat_service", "validate-token", resp.StatusCode, string(body))
@@ -769,7 +769,7 @@ func (c *Client) BuildReadyzRequest(ctx context.Context, v any) (*http.Request, 
 // lfx_v2_pat_service readyz endpoint. restoreBody controls whether the
 // response body should be restored after having been read.
 // DecodeReadyzResponse may return the following errors:
-//   - "ServiceUnavailable" (type *goa.ServiceError): http.StatusServiceUnavailable
+//   - "ServiceUnavailable" (type *lfxv2patservice.ServiceUnavailableError): http.StatusServiceUnavailable
 //   - error: internal error
 func DecodeReadyzResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {

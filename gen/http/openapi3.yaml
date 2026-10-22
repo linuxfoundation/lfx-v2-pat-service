@@ -49,21 +49,30 @@ paths:
                 "400":
                     description: 'BadRequest: Malformed request body'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/BadRequestError'
+                            example:
+                                error: invalid_request
+                                message: value of version must be one of "1" but got value "2"
                 "401":
                     description: 'Unauthorized: Missing, invalid or anonymous bearer token'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/UnauthorizedError'
+                            example:
+                                error: unauthorized
+                                message: missing bearer token
                 "403":
                     description: 'Forbidden: Principal is not allowed to call this endpoint'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/ForbiddenError'
+                            example:
+                                error: forbidden
+                                message: machine principals cannot manage personal access tokens
                 "404":
                     description: 'InvalidToken: Unknown, malformed, revoked, or disabled-audience secret'
                     content:
@@ -76,15 +85,21 @@ paths:
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/InternalError'
+                            example:
+                                error: internal_error
+                                message: internal service error
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/ServiceUnavailableError'
+                            example:
+                                error: service_unavailable
+                                message: the service is unavailable
             security:
                 - jwt_header_Authorization: []
     /tokens:
@@ -149,33 +164,48 @@ paths:
                 "400":
                     description: 'BadRequest: Invalid filter'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/BadRequestError'
+                            example:
+                                error: invalid_request
+                                message: value of version must be one of "1" but got value "2"
                 "401":
                     description: 'Unauthorized: Missing, invalid or anonymous bearer token'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/UnauthorizedError'
+                            example:
+                                error: unauthorized
+                                message: missing bearer token
                 "403":
                     description: 'Forbidden: Principal is not allowed to call this endpoint'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/ForbiddenError'
+                            example:
+                                error: forbidden
+                                message: machine principals cannot manage personal access tokens
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/InternalError'
+                            example:
+                                error: internal_error
+                                message: internal service error
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/ServiceUnavailableError'
+                            example:
+                                error: service_unavailable
+                                message: the service is unavailable
             security:
                 - jwt_header_Authorization: []
         post:
@@ -225,21 +255,30 @@ paths:
                 "400":
                     description: 'BadRequest: Invalid name, or unknown or disabled audience'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/BadRequestError'
+                            example:
+                                error: invalid_request
+                                message: value of version must be one of "1" but got value "2"
                 "401":
                     description: 'Unauthorized: Missing, invalid or anonymous bearer token'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/UnauthorizedError'
+                            example:
+                                error: unauthorized
+                                message: missing bearer token
                 "403":
                     description: 'Forbidden: Principal is not allowed to call this endpoint'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/ForbiddenError'
+                            example:
+                                error: forbidden
+                                message: machine principals cannot manage personal access tokens
                 "409":
                     description: 'Conflict: Name already used, or active-token limit reached, for this audience'
                     content:
@@ -252,15 +291,21 @@ paths:
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/InternalError'
+                            example:
+                                error: internal_error
+                                message: internal service error
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/ServiceUnavailableError'
+                            example:
+                                error: service_unavailable
+                                message: the service is unavailable
             security:
                 - jwt_header_Authorization: []
     /tokens/{uid}:
@@ -298,43 +343,84 @@ paths:
                 "400":
                     description: 'BadRequest: uid is not a UUID'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/BadRequestError'
+                            example:
+                                error: invalid_request
+                                message: value of version must be one of "1" but got value "2"
                 "401":
                     description: 'Unauthorized: Missing, invalid or anonymous bearer token'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/UnauthorizedError'
+                            example:
+                                error: unauthorized
+                                message: missing bearer token
                 "403":
                     description: 'Forbidden: Principal is not allowed to call this endpoint'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/ForbiddenError'
+                            example:
+                                error: forbidden
+                                message: machine principals cannot manage personal access tokens
                 "404":
                     description: 'NotFound: No active token with this uid is owned by the caller'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/NotFoundError'
+                            example:
+                                error: token_not_found
+                                message: no active token with this uid
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/InternalError'
+                            example:
+                                error: internal_error
+                                message: internal service error
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
-                        application/vnd.goa.error:
+                        application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                $ref: '#/components/schemas/ServiceUnavailableError'
+                            example:
+                                error: service_unavailable
+                                message: the service is unavailable
             security:
                 - jwt_header_Authorization: []
 components:
     schemas:
+        BadRequestError:
+            type: object
+            properties:
+                error:
+                    type: string
+                    description: Stable machine-readable code
+                    example: invalid_request
+                    enum:
+                        - invalid_request
+                        - invalid_name
+                        - invalid_uid
+                        - unknown_audience
+                message:
+                    type: string
+                    description: Human-readable explanation
+                    example: value of version must be one of "1" but got value "2"
+            description: The request is invalid
+            example:
+                error: invalid_request
+                message: value of version must be one of "1" but got value "2"
+            required:
+                - error
+                - message
         ConflictError:
             type: object
             properties:
@@ -398,48 +484,46 @@ components:
             required:
                 - secret
                 - token
-        Error:
+        ForbiddenError:
             type: object
             properties:
-                fault:
-                    type: boolean
-                    description: Is the error a server-side fault?
-                    example: false
-                id:
+                error:
                     type: string
-                    description: ID is a unique identifier for this particular occurrence of the problem.
-                    example: 123abc
+                    description: Stable machine-readable code
+                    example: forbidden
+                    enum:
+                        - forbidden
                 message:
                     type: string
-                    description: Message is a human-readable explanation specific to this occurrence of the problem.
-                    example: parameter 'p' must be an integer
-                name:
-                    type: string
-                    description: Name is the name of this class of errors.
-                    example: bad_request
-                temporary:
-                    type: boolean
-                    description: Is the error temporary?
-                    example: true
-                timeout:
-                    type: boolean
-                    description: Is the error a timeout?
-                    example: false
-            description: Missing, invalid or anonymous bearer token
+                    description: Human-readable explanation
+                    example: machine principals cannot manage personal access tokens
+            description: Principal is not allowed to call this endpoint
             example:
-                fault: true
-                id: 123abc
-                message: parameter 'p' must be an integer
-                name: bad_request
-                temporary: false
-                timeout: true
+                error: forbidden
+                message: machine principals cannot manage personal access tokens
             required:
-                - name
-                - id
+                - error
                 - message
-                - temporary
-                - timeout
-                - fault
+        InternalError:
+            type: object
+            properties:
+                error:
+                    type: string
+                    description: Stable machine-readable code
+                    example: internal_error
+                    enum:
+                        - internal_error
+                message:
+                    type: string
+                    description: Human-readable explanation
+                    example: internal service error
+            description: Internal server error
+            example:
+                error: internal_error
+                message: internal service error
+            required:
+                - error
+                - message
         InvalidTokenError:
             type: object
             properties:
@@ -483,6 +567,20 @@ components:
                           name: ci-pipeline
                           uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
                           username: jdoe
+                        - audience: insights
+                          created_at: "2026-09-21T12:00:00Z"
+                          last_used_at: "2026-09-22T08:30:00Z"
+                          lookup_id: Ab3kZ9QmT2xL
+                          name: ci-pipeline
+                          uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                          username: jdoe
+                        - audience: insights
+                          created_at: "2026-09-21T12:00:00Z"
+                          last_used_at: "2026-09-22T08:30:00Z"
+                          lookup_id: Ab3kZ9QmT2xL
+                          name: ci-pipeline
+                          uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
+                          username: jdoe
             example:
                 tokens:
                     - audience: insights
@@ -499,15 +597,48 @@ components:
                       name: ci-pipeline
                       uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
                       username: jdoe
-                    - audience: insights
-                      created_at: "2026-09-21T12:00:00Z"
-                      last_used_at: "2026-09-22T08:30:00Z"
-                      lookup_id: Ab3kZ9QmT2xL
-                      name: ci-pipeline
-                      uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
-                      username: jdoe
             required:
                 - tokens
+        NotFoundError:
+            type: object
+            properties:
+                error:
+                    type: string
+                    description: Stable machine-readable code
+                    example: token_not_found
+                    enum:
+                        - token_not_found
+                message:
+                    type: string
+                    description: Human-readable explanation
+                    example: no active token with this uid
+            description: No active token with this uid is owned by the caller
+            example:
+                error: token_not_found
+                message: no active token with this uid
+            required:
+                - error
+                - message
+        ServiceUnavailableError:
+            type: object
+            properties:
+                error:
+                    type: string
+                    description: Stable machine-readable code
+                    example: service_unavailable
+                    enum:
+                        - service_unavailable
+                message:
+                    type: string
+                    description: Human-readable explanation
+                    example: the service is unavailable
+            description: Service unavailable
+            example:
+                error: service_unavailable
+                message: the service is unavailable
+            required:
+                - error
+                - message
         TokenIdentity:
             type: object
             properties:
@@ -595,6 +726,26 @@ components:
                 - lookup_id
                 - username
                 - created_at
+        UnauthorizedError:
+            type: object
+            properties:
+                error:
+                    type: string
+                    description: Stable machine-readable code
+                    example: unauthorized
+                    enum:
+                        - unauthorized
+                message:
+                    type: string
+                    description: Human-readable explanation
+                    example: missing bearer token
+            description: Missing, invalid or anonymous bearer token
+            example:
+                error: unauthorized
+                message: missing bearer token
+            required:
+                - error
+                - message
         ValidateTokenRequestBody:
             type: object
             properties:

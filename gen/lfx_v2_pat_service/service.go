@@ -10,7 +10,6 @@ package lfxv2patservice
 import (
 	"context"
 
-	goa "goa.design/goa/v3/pkg"
 	"goa.design/goa/v3/security"
 )
 
@@ -57,6 +56,14 @@ const ServiceName = "lfx_v2_pat_service"
 // MethodKey key.
 var MethodNames = [6]string{"create-token", "list-tokens", "delete-token", "validate-token", "livez", "readyz"}
 
+// The request is invalid
+type BadRequestError struct {
+	// Stable machine-readable code
+	Code string
+	// Human-readable explanation
+	Message string
+}
+
 // Name already used, or active-token limit reached, for this audience
 type ConflictError struct {
 	// Stable machine-readable code
@@ -99,6 +106,22 @@ type DeleteTokenPayload struct {
 	UID string
 }
 
+// Principal is not allowed to call this endpoint
+type ForbiddenError struct {
+	// Stable machine-readable code
+	Code string
+	// Human-readable explanation
+	Message string
+}
+
+// Internal server error
+type InternalError struct {
+	// Stable machine-readable code
+	Code string
+	// Human-readable explanation
+	Message string
+}
+
 // Secret is invalid or revoked
 type InvalidTokenError struct {
 	// Stable machine-readable code
@@ -123,6 +146,22 @@ type ListTokensPayload struct {
 type ListTokensResult struct {
 	// Active tokens owned by the caller
 	Tokens []*TokenResponse
+}
+
+// No active token with this uid is owned by the caller
+type NotFoundError struct {
+	// Stable machine-readable code
+	Code string
+	// Human-readable explanation
+	Message string
+}
+
+// Service unavailable
+type ServiceUnavailableError struct {
+	// Stable machine-readable code
+	Code string
+	// Human-readable explanation
+	Message string
 }
 
 // TokenIdentity is the result type of the lfx_v2_pat_service service
@@ -159,6 +198,14 @@ type TokenResponse struct {
 	LastUsedAt *string
 }
 
+// Missing, invalid or anonymous bearer token
+type UnauthorizedError struct {
+	// Stable machine-readable code
+	Code string
+	// Human-readable explanation
+	Message string
+}
+
 // ValidateTokenPayload is the payload type of the lfx_v2_pat_service service
 // validate-token method.
 type ValidateTokenPayload struct {
@@ -168,6 +215,23 @@ type ValidateTokenPayload struct {
 	Version *string
 	// Opaque secret presented by the end user
 	Secret string
+}
+
+// Error returns an error description.
+func (e *BadRequestError) Error() string {
+	return "The request is invalid"
+}
+
+// ErrorName returns "BadRequestError".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *BadRequestError) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "BadRequestError".
+func (e *BadRequestError) GoaErrorName() string {
+	return "BadRequest"
 }
 
 // Error returns an error description.
@@ -188,6 +252,40 @@ func (e *ConflictError) GoaErrorName() string {
 }
 
 // Error returns an error description.
+func (e *ForbiddenError) Error() string {
+	return "Principal is not allowed to call this endpoint"
+}
+
+// ErrorName returns "ForbiddenError".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *ForbiddenError) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "ForbiddenError".
+func (e *ForbiddenError) GoaErrorName() string {
+	return "Forbidden"
+}
+
+// Error returns an error description.
+func (e *InternalError) Error() string {
+	return "Internal server error"
+}
+
+// ErrorName returns "InternalError".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *InternalError) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "InternalError".
+func (e *InternalError) GoaErrorName() string {
+	return "InternalServerError"
+}
+
+// Error returns an error description.
 func (e *InvalidTokenError) Error() string {
 	return "Secret is invalid or revoked"
 }
@@ -204,32 +302,53 @@ func (e *InvalidTokenError) GoaErrorName() string {
 	return "InvalidToken"
 }
 
-// MakeUnauthorized builds a goa.ServiceError from an error.
-func MakeUnauthorized(err error) *goa.ServiceError {
-	return goa.NewServiceError(err, "Unauthorized", false, false, false)
+// Error returns an error description.
+func (e *NotFoundError) Error() string {
+	return "No active token with this uid is owned by the caller"
 }
 
-// MakeForbidden builds a goa.ServiceError from an error.
-func MakeForbidden(err error) *goa.ServiceError {
-	return goa.NewServiceError(err, "Forbidden", false, false, false)
+// ErrorName returns "NotFoundError".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *NotFoundError) ErrorName() string {
+	return e.GoaErrorName()
 }
 
-// MakeBadRequest builds a goa.ServiceError from an error.
-func MakeBadRequest(err error) *goa.ServiceError {
-	return goa.NewServiceError(err, "BadRequest", false, false, false)
+// GoaErrorName returns "NotFoundError".
+func (e *NotFoundError) GoaErrorName() string {
+	return "NotFound"
 }
 
-// MakeInternalServerError builds a goa.ServiceError from an error.
-func MakeInternalServerError(err error) *goa.ServiceError {
-	return goa.NewServiceError(err, "InternalServerError", false, false, true)
+// Error returns an error description.
+func (e *ServiceUnavailableError) Error() string {
+	return "Service unavailable"
 }
 
-// MakeServiceUnavailable builds a goa.ServiceError from an error.
-func MakeServiceUnavailable(err error) *goa.ServiceError {
-	return goa.NewServiceError(err, "ServiceUnavailable", false, true, false)
+// ErrorName returns "ServiceUnavailableError".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *ServiceUnavailableError) ErrorName() string {
+	return e.GoaErrorName()
 }
 
-// MakeNotFound builds a goa.ServiceError from an error.
-func MakeNotFound(err error) *goa.ServiceError {
-	return goa.NewServiceError(err, "NotFound", false, false, false)
+// GoaErrorName returns "ServiceUnavailableError".
+func (e *ServiceUnavailableError) GoaErrorName() string {
+	return "ServiceUnavailable"
+}
+
+// Error returns an error description.
+func (e *UnauthorizedError) Error() string {
+	return "Missing, invalid or anonymous bearer token"
+}
+
+// ErrorName returns "UnauthorizedError".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *UnauthorizedError) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "UnauthorizedError".
+func (e *UnauthorizedError) GoaErrorName() string {
+	return "Unauthorized"
 }

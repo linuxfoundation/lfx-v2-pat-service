@@ -61,98 +61,14 @@ type ValidateTokenResponseBody struct {
 	Email *string `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`
 }
 
-// CreateTokenUnauthorizedResponseBody is the type of the "lfx_v2_pat_service"
-// service "create-token" endpoint HTTP response body for the "Unauthorized"
-// error.
-type CreateTokenUnauthorizedResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
-}
-
-// CreateTokenForbiddenResponseBody is the type of the "lfx_v2_pat_service"
-// service "create-token" endpoint HTTP response body for the "Forbidden" error.
-type CreateTokenForbiddenResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
-}
-
 // CreateTokenBadRequestResponseBody is the type of the "lfx_v2_pat_service"
 // service "create-token" endpoint HTTP response body for the "BadRequest"
 // error.
 type CreateTokenBadRequestResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
-}
-
-// CreateTokenInternalServerErrorResponseBody is the type of the
-// "lfx_v2_pat_service" service "create-token" endpoint HTTP response body for
-// the "InternalServerError" error.
-type CreateTokenInternalServerErrorResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
-}
-
-// CreateTokenServiceUnavailableResponseBody is the type of the
-// "lfx_v2_pat_service" service "create-token" endpoint HTTP response body for
-// the "ServiceUnavailable" error.
-type CreateTokenServiceUnavailableResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
 // CreateTokenConflictResponseBody is the type of the "lfx_v2_pat_service"
@@ -164,304 +80,179 @@ type CreateTokenConflictResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
-// ListTokensUnauthorizedResponseBody is the type of the "lfx_v2_pat_service"
-// service "list-tokens" endpoint HTTP response body for the "Unauthorized"
-// error.
-type ListTokensUnauthorizedResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+// CreateTokenForbiddenResponseBody is the type of the "lfx_v2_pat_service"
+// service "create-token" endpoint HTTP response body for the "Forbidden" error.
+type CreateTokenForbiddenResponseBody struct {
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
-// ListTokensForbiddenResponseBody is the type of the "lfx_v2_pat_service"
-// service "list-tokens" endpoint HTTP response body for the "Forbidden" error.
-type ListTokensForbiddenResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+// CreateTokenInternalServerErrorResponseBody is the type of the
+// "lfx_v2_pat_service" service "create-token" endpoint HTTP response body for
+// the "InternalServerError" error.
+type CreateTokenInternalServerErrorResponseBody struct {
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// CreateTokenServiceUnavailableResponseBody is the type of the
+// "lfx_v2_pat_service" service "create-token" endpoint HTTP response body for
+// the "ServiceUnavailable" error.
+type CreateTokenServiceUnavailableResponseBody struct {
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// CreateTokenUnauthorizedResponseBody is the type of the "lfx_v2_pat_service"
+// service "create-token" endpoint HTTP response body for the "Unauthorized"
+// error.
+type CreateTokenUnauthorizedResponseBody struct {
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
+	Message string `form:"message" json:"message" xml:"message"`
 }
 
 // ListTokensBadRequestResponseBody is the type of the "lfx_v2_pat_service"
 // service "list-tokens" endpoint HTTP response body for the "BadRequest" error.
 type ListTokensBadRequestResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// ListTokensForbiddenResponseBody is the type of the "lfx_v2_pat_service"
+// service "list-tokens" endpoint HTTP response body for the "Forbidden" error.
+type ListTokensForbiddenResponseBody struct {
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
+	Message string `form:"message" json:"message" xml:"message"`
 }
 
 // ListTokensInternalServerErrorResponseBody is the type of the
 // "lfx_v2_pat_service" service "list-tokens" endpoint HTTP response body for
 // the "InternalServerError" error.
 type ListTokensInternalServerErrorResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
 // ListTokensServiceUnavailableResponseBody is the type of the
 // "lfx_v2_pat_service" service "list-tokens" endpoint HTTP response body for
 // the "ServiceUnavailable" error.
 type ListTokensServiceUnavailableResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
-// DeleteTokenUnauthorizedResponseBody is the type of the "lfx_v2_pat_service"
-// service "delete-token" endpoint HTTP response body for the "Unauthorized"
+// ListTokensUnauthorizedResponseBody is the type of the "lfx_v2_pat_service"
+// service "list-tokens" endpoint HTTP response body for the "Unauthorized"
 // error.
-type DeleteTokenUnauthorizedResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+type ListTokensUnauthorizedResponseBody struct {
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
-}
-
-// DeleteTokenForbiddenResponseBody is the type of the "lfx_v2_pat_service"
-// service "delete-token" endpoint HTTP response body for the "Forbidden" error.
-type DeleteTokenForbiddenResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
 // DeleteTokenBadRequestResponseBody is the type of the "lfx_v2_pat_service"
 // service "delete-token" endpoint HTTP response body for the "BadRequest"
 // error.
 type DeleteTokenBadRequestResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
-// DeleteTokenNotFoundResponseBody is the type of the "lfx_v2_pat_service"
-// service "delete-token" endpoint HTTP response body for the "NotFound" error.
-type DeleteTokenNotFoundResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+// DeleteTokenForbiddenResponseBody is the type of the "lfx_v2_pat_service"
+// service "delete-token" endpoint HTTP response body for the "Forbidden" error.
+type DeleteTokenForbiddenResponseBody struct {
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
 // DeleteTokenInternalServerErrorResponseBody is the type of the
 // "lfx_v2_pat_service" service "delete-token" endpoint HTTP response body for
 // the "InternalServerError" error.
 type DeleteTokenInternalServerErrorResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// DeleteTokenNotFoundResponseBody is the type of the "lfx_v2_pat_service"
+// service "delete-token" endpoint HTTP response body for the "NotFound" error.
+type DeleteTokenNotFoundResponseBody struct {
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
+	Message string `form:"message" json:"message" xml:"message"`
 }
 
 // DeleteTokenServiceUnavailableResponseBody is the type of the
 // "lfx_v2_pat_service" service "delete-token" endpoint HTTP response body for
 // the "ServiceUnavailable" error.
 type DeleteTokenServiceUnavailableResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
-// ValidateTokenUnauthorizedResponseBody is the type of the
-// "lfx_v2_pat_service" service "validate-token" endpoint HTTP response body
-// for the "Unauthorized" error.
-type ValidateTokenUnauthorizedResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
-}
-
-// ValidateTokenForbiddenResponseBody is the type of the "lfx_v2_pat_service"
-// service "validate-token" endpoint HTTP response body for the "Forbidden"
+// DeleteTokenUnauthorizedResponseBody is the type of the "lfx_v2_pat_service"
+// service "delete-token" endpoint HTTP response body for the "Unauthorized"
 // error.
-type ValidateTokenForbiddenResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+type DeleteTokenUnauthorizedResponseBody struct {
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
 // ValidateTokenBadRequestResponseBody is the type of the "lfx_v2_pat_service"
 // service "validate-token" endpoint HTTP response body for the "BadRequest"
 // error.
 type ValidateTokenBadRequestResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// ValidateTokenForbiddenResponseBody is the type of the "lfx_v2_pat_service"
+// service "validate-token" endpoint HTTP response body for the "Forbidden"
+// error.
+type ValidateTokenForbiddenResponseBody struct {
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
+	Message string `form:"message" json:"message" xml:"message"`
 }
 
 // ValidateTokenInternalServerErrorResponseBody is the type of the
 // "lfx_v2_pat_service" service "validate-token" endpoint HTTP response body
 // for the "InternalServerError" error.
 type ValidateTokenInternalServerErrorResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
-}
-
-// ValidateTokenServiceUnavailableResponseBody is the type of the
-// "lfx_v2_pat_service" service "validate-token" endpoint HTTP response body
-// for the "ServiceUnavailable" error.
-type ValidateTokenServiceUnavailableResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
-	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
 // ValidateTokenInvalidTokenResponseBody is the type of the
@@ -474,23 +265,34 @@ type ValidateTokenInvalidTokenResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
+// ValidateTokenServiceUnavailableResponseBody is the type of the
+// "lfx_v2_pat_service" service "validate-token" endpoint HTTP response body
+// for the "ServiceUnavailable" error.
+type ValidateTokenServiceUnavailableResponseBody struct {
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ValidateTokenUnauthorizedResponseBody is the type of the
+// "lfx_v2_pat_service" service "validate-token" endpoint HTTP response body
+// for the "Unauthorized" error.
+type ValidateTokenUnauthorizedResponseBody struct {
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
 // ReadyzServiceUnavailableResponseBody is the type of the "lfx_v2_pat_service"
 // service "readyz" endpoint HTTP response body for the "ServiceUnavailable"
 // error.
 type ReadyzServiceUnavailableResponseBody struct {
-	// Name is the name of this class of errors.
-	Name string `form:"name" json:"name" xml:"name"`
-	// ID is a unique identifier for this particular occurrence of the problem.
-	ID string `form:"id" json:"id" xml:"id"`
-	// Message is a human-readable explanation specific to this occurrence of the
-	// problem.
+	// Stable machine-readable code
+	Code string `form:"error" json:"error" xml:"error"`
+	// Human-readable explanation
 	Message string `form:"message" json:"message" xml:"message"`
-	// Is the error temporary?
-	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
-	// Is the error a timeout?
-	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
-	// Is the error a server-side fault?
-	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
 // TokenResponseResponseBody is used to define fields on response body types.
@@ -555,75 +357,12 @@ func NewValidateTokenResponseBody(res *lfxv2patservice.TokenIdentity) *ValidateT
 	return body
 }
 
-// NewCreateTokenUnauthorizedResponseBody builds the HTTP response body from
-// the result of the "create-token" endpoint of the "lfx_v2_pat_service"
-// service.
-func NewCreateTokenUnauthorizedResponseBody(res *goa.ServiceError) *CreateTokenUnauthorizedResponseBody {
-	body := &CreateTokenUnauthorizedResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
-	}
-	return body
-}
-
-// NewCreateTokenForbiddenResponseBody builds the HTTP response body from the
-// result of the "create-token" endpoint of the "lfx_v2_pat_service" service.
-func NewCreateTokenForbiddenResponseBody(res *goa.ServiceError) *CreateTokenForbiddenResponseBody {
-	body := &CreateTokenForbiddenResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
-	}
-	return body
-}
-
 // NewCreateTokenBadRequestResponseBody builds the HTTP response body from the
 // result of the "create-token" endpoint of the "lfx_v2_pat_service" service.
-func NewCreateTokenBadRequestResponseBody(res *goa.ServiceError) *CreateTokenBadRequestResponseBody {
+func NewCreateTokenBadRequestResponseBody(res *lfxv2patservice.BadRequestError) *CreateTokenBadRequestResponseBody {
 	body := &CreateTokenBadRequestResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
-	}
-	return body
-}
-
-// NewCreateTokenInternalServerErrorResponseBody builds the HTTP response body
-// from the result of the "create-token" endpoint of the "lfx_v2_pat_service"
-// service.
-func NewCreateTokenInternalServerErrorResponseBody(res *goa.ServiceError) *CreateTokenInternalServerErrorResponseBody {
-	body := &CreateTokenInternalServerErrorResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
-	}
-	return body
-}
-
-// NewCreateTokenServiceUnavailableResponseBody builds the HTTP response body
-// from the result of the "create-token" endpoint of the "lfx_v2_pat_service"
-// service.
-func NewCreateTokenServiceUnavailableResponseBody(res *goa.ServiceError) *CreateTokenServiceUnavailableResponseBody {
-	body := &CreateTokenServiceUnavailableResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }
@@ -638,44 +377,65 @@ func NewCreateTokenConflictResponseBody(res *lfxv2patservice.ConflictError) *Cre
 	return body
 }
 
-// NewListTokensUnauthorizedResponseBody builds the HTTP response body from the
-// result of the "list-tokens" endpoint of the "lfx_v2_pat_service" service.
-func NewListTokensUnauthorizedResponseBody(res *goa.ServiceError) *ListTokensUnauthorizedResponseBody {
-	body := &ListTokensUnauthorizedResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+// NewCreateTokenForbiddenResponseBody builds the HTTP response body from the
+// result of the "create-token" endpoint of the "lfx_v2_pat_service" service.
+func NewCreateTokenForbiddenResponseBody(res *lfxv2patservice.ForbiddenError) *CreateTokenForbiddenResponseBody {
+	body := &CreateTokenForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }
 
-// NewListTokensForbiddenResponseBody builds the HTTP response body from the
-// result of the "list-tokens" endpoint of the "lfx_v2_pat_service" service.
-func NewListTokensForbiddenResponseBody(res *goa.ServiceError) *ListTokensForbiddenResponseBody {
-	body := &ListTokensForbiddenResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+// NewCreateTokenInternalServerErrorResponseBody builds the HTTP response body
+// from the result of the "create-token" endpoint of the "lfx_v2_pat_service"
+// service.
+func NewCreateTokenInternalServerErrorResponseBody(res *lfxv2patservice.InternalError) *CreateTokenInternalServerErrorResponseBody {
+	body := &CreateTokenInternalServerErrorResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewCreateTokenServiceUnavailableResponseBody builds the HTTP response body
+// from the result of the "create-token" endpoint of the "lfx_v2_pat_service"
+// service.
+func NewCreateTokenServiceUnavailableResponseBody(res *lfxv2patservice.ServiceUnavailableError) *CreateTokenServiceUnavailableResponseBody {
+	body := &CreateTokenServiceUnavailableResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewCreateTokenUnauthorizedResponseBody builds the HTTP response body from
+// the result of the "create-token" endpoint of the "lfx_v2_pat_service"
+// service.
+func NewCreateTokenUnauthorizedResponseBody(res *lfxv2patservice.UnauthorizedError) *CreateTokenUnauthorizedResponseBody {
+	body := &CreateTokenUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }
 
 // NewListTokensBadRequestResponseBody builds the HTTP response body from the
 // result of the "list-tokens" endpoint of the "lfx_v2_pat_service" service.
-func NewListTokensBadRequestResponseBody(res *goa.ServiceError) *ListTokensBadRequestResponseBody {
+func NewListTokensBadRequestResponseBody(res *lfxv2patservice.BadRequestError) *ListTokensBadRequestResponseBody {
 	body := &ListTokensBadRequestResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListTokensForbiddenResponseBody builds the HTTP response body from the
+// result of the "list-tokens" endpoint of the "lfx_v2_pat_service" service.
+func NewListTokensForbiddenResponseBody(res *lfxv2patservice.ForbiddenError) *ListTokensForbiddenResponseBody {
+	body := &ListTokensForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }
@@ -683,14 +443,10 @@ func NewListTokensBadRequestResponseBody(res *goa.ServiceError) *ListTokensBadRe
 // NewListTokensInternalServerErrorResponseBody builds the HTTP response body
 // from the result of the "list-tokens" endpoint of the "lfx_v2_pat_service"
 // service.
-func NewListTokensInternalServerErrorResponseBody(res *goa.ServiceError) *ListTokensInternalServerErrorResponseBody {
+func NewListTokensInternalServerErrorResponseBody(res *lfxv2patservice.InternalError) *ListTokensInternalServerErrorResponseBody {
 	body := &ListTokensInternalServerErrorResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }
@@ -698,71 +454,40 @@ func NewListTokensInternalServerErrorResponseBody(res *goa.ServiceError) *ListTo
 // NewListTokensServiceUnavailableResponseBody builds the HTTP response body
 // from the result of the "list-tokens" endpoint of the "lfx_v2_pat_service"
 // service.
-func NewListTokensServiceUnavailableResponseBody(res *goa.ServiceError) *ListTokensServiceUnavailableResponseBody {
+func NewListTokensServiceUnavailableResponseBody(res *lfxv2patservice.ServiceUnavailableError) *ListTokensServiceUnavailableResponseBody {
 	body := &ListTokensServiceUnavailableResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }
 
-// NewDeleteTokenUnauthorizedResponseBody builds the HTTP response body from
-// the result of the "delete-token" endpoint of the "lfx_v2_pat_service"
-// service.
-func NewDeleteTokenUnauthorizedResponseBody(res *goa.ServiceError) *DeleteTokenUnauthorizedResponseBody {
-	body := &DeleteTokenUnauthorizedResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
-	}
-	return body
-}
-
-// NewDeleteTokenForbiddenResponseBody builds the HTTP response body from the
-// result of the "delete-token" endpoint of the "lfx_v2_pat_service" service.
-func NewDeleteTokenForbiddenResponseBody(res *goa.ServiceError) *DeleteTokenForbiddenResponseBody {
-	body := &DeleteTokenForbiddenResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+// NewListTokensUnauthorizedResponseBody builds the HTTP response body from the
+// result of the "list-tokens" endpoint of the "lfx_v2_pat_service" service.
+func NewListTokensUnauthorizedResponseBody(res *lfxv2patservice.UnauthorizedError) *ListTokensUnauthorizedResponseBody {
+	body := &ListTokensUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }
 
 // NewDeleteTokenBadRequestResponseBody builds the HTTP response body from the
 // result of the "delete-token" endpoint of the "lfx_v2_pat_service" service.
-func NewDeleteTokenBadRequestResponseBody(res *goa.ServiceError) *DeleteTokenBadRequestResponseBody {
+func NewDeleteTokenBadRequestResponseBody(res *lfxv2patservice.BadRequestError) *DeleteTokenBadRequestResponseBody {
 	body := &DeleteTokenBadRequestResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }
 
-// NewDeleteTokenNotFoundResponseBody builds the HTTP response body from the
+// NewDeleteTokenForbiddenResponseBody builds the HTTP response body from the
 // result of the "delete-token" endpoint of the "lfx_v2_pat_service" service.
-func NewDeleteTokenNotFoundResponseBody(res *goa.ServiceError) *DeleteTokenNotFoundResponseBody {
-	body := &DeleteTokenNotFoundResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+func NewDeleteTokenForbiddenResponseBody(res *lfxv2patservice.ForbiddenError) *DeleteTokenForbiddenResponseBody {
+	body := &DeleteTokenForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }
@@ -770,14 +495,20 @@ func NewDeleteTokenNotFoundResponseBody(res *goa.ServiceError) *DeleteTokenNotFo
 // NewDeleteTokenInternalServerErrorResponseBody builds the HTTP response body
 // from the result of the "delete-token" endpoint of the "lfx_v2_pat_service"
 // service.
-func NewDeleteTokenInternalServerErrorResponseBody(res *goa.ServiceError) *DeleteTokenInternalServerErrorResponseBody {
+func NewDeleteTokenInternalServerErrorResponseBody(res *lfxv2patservice.InternalError) *DeleteTokenInternalServerErrorResponseBody {
 	body := &DeleteTokenInternalServerErrorResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewDeleteTokenNotFoundResponseBody builds the HTTP response body from the
+// result of the "delete-token" endpoint of the "lfx_v2_pat_service" service.
+func NewDeleteTokenNotFoundResponseBody(res *lfxv2patservice.NotFoundError) *DeleteTokenNotFoundResponseBody {
+	body := &DeleteTokenNotFoundResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }
@@ -785,43 +516,21 @@ func NewDeleteTokenInternalServerErrorResponseBody(res *goa.ServiceError) *Delet
 // NewDeleteTokenServiceUnavailableResponseBody builds the HTTP response body
 // from the result of the "delete-token" endpoint of the "lfx_v2_pat_service"
 // service.
-func NewDeleteTokenServiceUnavailableResponseBody(res *goa.ServiceError) *DeleteTokenServiceUnavailableResponseBody {
+func NewDeleteTokenServiceUnavailableResponseBody(res *lfxv2patservice.ServiceUnavailableError) *DeleteTokenServiceUnavailableResponseBody {
 	body := &DeleteTokenServiceUnavailableResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }
 
-// NewValidateTokenUnauthorizedResponseBody builds the HTTP response body from
-// the result of the "validate-token" endpoint of the "lfx_v2_pat_service"
+// NewDeleteTokenUnauthorizedResponseBody builds the HTTP response body from
+// the result of the "delete-token" endpoint of the "lfx_v2_pat_service"
 // service.
-func NewValidateTokenUnauthorizedResponseBody(res *goa.ServiceError) *ValidateTokenUnauthorizedResponseBody {
-	body := &ValidateTokenUnauthorizedResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
-	}
-	return body
-}
-
-// NewValidateTokenForbiddenResponseBody builds the HTTP response body from the
-// result of the "validate-token" endpoint of the "lfx_v2_pat_service" service.
-func NewValidateTokenForbiddenResponseBody(res *goa.ServiceError) *ValidateTokenForbiddenResponseBody {
-	body := &ValidateTokenForbiddenResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+func NewDeleteTokenUnauthorizedResponseBody(res *lfxv2patservice.UnauthorizedError) *DeleteTokenUnauthorizedResponseBody {
+	body := &DeleteTokenUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }
@@ -829,14 +538,20 @@ func NewValidateTokenForbiddenResponseBody(res *goa.ServiceError) *ValidateToken
 // NewValidateTokenBadRequestResponseBody builds the HTTP response body from
 // the result of the "validate-token" endpoint of the "lfx_v2_pat_service"
 // service.
-func NewValidateTokenBadRequestResponseBody(res *goa.ServiceError) *ValidateTokenBadRequestResponseBody {
+func NewValidateTokenBadRequestResponseBody(res *lfxv2patservice.BadRequestError) *ValidateTokenBadRequestResponseBody {
 	body := &ValidateTokenBadRequestResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewValidateTokenForbiddenResponseBody builds the HTTP response body from the
+// result of the "validate-token" endpoint of the "lfx_v2_pat_service" service.
+func NewValidateTokenForbiddenResponseBody(res *lfxv2patservice.ForbiddenError) *ValidateTokenForbiddenResponseBody {
+	body := &ValidateTokenForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }
@@ -844,29 +559,10 @@ func NewValidateTokenBadRequestResponseBody(res *goa.ServiceError) *ValidateToke
 // NewValidateTokenInternalServerErrorResponseBody builds the HTTP response
 // body from the result of the "validate-token" endpoint of the
 // "lfx_v2_pat_service" service.
-func NewValidateTokenInternalServerErrorResponseBody(res *goa.ServiceError) *ValidateTokenInternalServerErrorResponseBody {
+func NewValidateTokenInternalServerErrorResponseBody(res *lfxv2patservice.InternalError) *ValidateTokenInternalServerErrorResponseBody {
 	body := &ValidateTokenInternalServerErrorResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
-	}
-	return body
-}
-
-// NewValidateTokenServiceUnavailableResponseBody builds the HTTP response body
-// from the result of the "validate-token" endpoint of the "lfx_v2_pat_service"
-// service.
-func NewValidateTokenServiceUnavailableResponseBody(res *goa.ServiceError) *ValidateTokenServiceUnavailableResponseBody {
-	body := &ValidateTokenServiceUnavailableResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }
@@ -882,16 +578,34 @@ func NewValidateTokenInvalidTokenResponseBody(res *lfxv2patservice.InvalidTokenE
 	return body
 }
 
+// NewValidateTokenServiceUnavailableResponseBody builds the HTTP response body
+// from the result of the "validate-token" endpoint of the "lfx_v2_pat_service"
+// service.
+func NewValidateTokenServiceUnavailableResponseBody(res *lfxv2patservice.ServiceUnavailableError) *ValidateTokenServiceUnavailableResponseBody {
+	body := &ValidateTokenServiceUnavailableResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewValidateTokenUnauthorizedResponseBody builds the HTTP response body from
+// the result of the "validate-token" endpoint of the "lfx_v2_pat_service"
+// service.
+func NewValidateTokenUnauthorizedResponseBody(res *lfxv2patservice.UnauthorizedError) *ValidateTokenUnauthorizedResponseBody {
+	body := &ValidateTokenUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
 // NewReadyzServiceUnavailableResponseBody builds the HTTP response body from
 // the result of the "readyz" endpoint of the "lfx_v2_pat_service" service.
-func NewReadyzServiceUnavailableResponseBody(res *goa.ServiceError) *ReadyzServiceUnavailableResponseBody {
+func NewReadyzServiceUnavailableResponseBody(res *lfxv2patservice.ServiceUnavailableError) *ReadyzServiceUnavailableResponseBody {
 	body := &ReadyzServiceUnavailableResponseBody{
-		Name:      res.Name,
-		ID:        res.ID,
-		Message:   res.Message,
-		Temporary: res.Temporary,
-		Timeout:   res.Timeout,
-		Fault:     res.Fault,
+		Code:    res.Code,
+		Message: res.Message,
 	}
 	return body
 }

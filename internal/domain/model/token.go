@@ -19,11 +19,19 @@ type Token struct {
 	UpdatedAt  time.Time
 	LastUsedAt *time.Time
 	RevokedAt  *time.Time
+	// ExpiresAt is when the token stops validating, or nil when it never expires.
+	ExpiresAt *time.Time
 }
 
-// Active reports whether the token has not been revoked.
+// Active reports whether the token has not been revoked. An expired token stays active, so it is still listed
+// and keeps its name until the owner revokes it.
 func (t Token) Active() bool {
 	return t.RevokedAt == nil
+}
+
+// Expired reports whether the token no longer validates at now.
+func (t Token) Expired(now time.Time) bool {
+	return t.ExpiresAt != nil && !now.Before(*t.ExpiresAt)
 }
 
 // NewToken is the write model for issuing a token: everything the store needs, with the secret already reduced
@@ -36,6 +44,7 @@ type NewToken struct {
 	LookupID   string
 	Salt       []byte
 	SecretHash []byte
+	ExpiresAt  *time.Time
 }
 
 // Credential is the verification material of one active token. Only the validator reads it.

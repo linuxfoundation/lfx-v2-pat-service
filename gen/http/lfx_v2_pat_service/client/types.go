@@ -22,6 +22,8 @@ type CreateTokenRequestBody struct {
 	Name string `form:"name" json:"name" xml:"name"`
 	// Audience to mint the token for
 	Audience string `form:"audience" json:"audience" xml:"audience"`
+	// How long the token stays valid, counted from creation; none never expires
+	Expiration string `form:"expiration" json:"expiration" xml:"expiration"`
 }
 
 // ValidateTokenRequestBody is the type of the "lfx_v2_pat_service" service
@@ -312,14 +314,23 @@ type TokenResponseResponseBody struct {
 	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 	// Time of the last successful validation; absent until first use
 	LastUsedAt *string `form:"last_used_at,omitempty" json:"last_used_at,omitempty" xml:"last_used_at,omitempty"`
+	// Time the token stops validating; absent when it never expires
+	ExpiresAt *string `form:"expires_at,omitempty" json:"expires_at,omitempty" xml:"expires_at,omitempty"`
 }
 
 // NewCreateTokenRequestBody builds the HTTP request body from the payload of
 // the "create-token" endpoint of the "lfx_v2_pat_service" service.
 func NewCreateTokenRequestBody(p *lfxv2patservice.CreateTokenPayload) *CreateTokenRequestBody {
 	body := &CreateTokenRequestBody{
-		Name:     p.Name,
-		Audience: p.Audience,
+		Name:       p.Name,
+		Audience:   p.Audience,
+		Expiration: p.Expiration,
+	}
+	{
+		var zero string
+		if body.Expiration == zero {
+			body.Expiration = "none"
+		}
 	}
 	return body
 }
@@ -704,8 +715,8 @@ func ValidateCreateTokenBadRequestResponseBody(body *CreateTokenBadRequestRespon
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	if body.Code != nil {
-		if !(*body.Code == "invalid_request" || *body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_request", "invalid_name", "invalid_uid", "unknown_audience"}))
+		if !(*body.Code == "invalid_request" || *body.Code == "invalid_name" || *body.Code == "invalid_expiration" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_request", "invalid_name", "invalid_expiration", "invalid_uid", "unknown_audience"}))
 		}
 	}
 	return
@@ -806,8 +817,8 @@ func ValidateListTokensBadRequestResponseBody(body *ListTokensBadRequestResponse
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	if body.Code != nil {
-		if !(*body.Code == "invalid_request" || *body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_request", "invalid_name", "invalid_uid", "unknown_audience"}))
+		if !(*body.Code == "invalid_request" || *body.Code == "invalid_name" || *body.Code == "invalid_expiration" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_request", "invalid_name", "invalid_expiration", "invalid_uid", "unknown_audience"}))
 		}
 	}
 	return
@@ -891,8 +902,8 @@ func ValidateDeleteTokenBadRequestResponseBody(body *DeleteTokenBadRequestRespon
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	if body.Code != nil {
-		if !(*body.Code == "invalid_request" || *body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_request", "invalid_name", "invalid_uid", "unknown_audience"}))
+		if !(*body.Code == "invalid_request" || *body.Code == "invalid_name" || *body.Code == "invalid_expiration" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_request", "invalid_name", "invalid_expiration", "invalid_uid", "unknown_audience"}))
 		}
 	}
 	return
@@ -993,8 +1004,8 @@ func ValidateValidateTokenBadRequestResponseBody(body *ValidateTokenBadRequestRe
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	if body.Code != nil {
-		if !(*body.Code == "invalid_request" || *body.Code == "invalid_name" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_request", "invalid_name", "invalid_uid", "unknown_audience"}))
+		if !(*body.Code == "invalid_request" || *body.Code == "invalid_name" || *body.Code == "invalid_expiration" || *body.Code == "invalid_uid" || *body.Code == "unknown_audience") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.error", *body.Code, []any{"invalid_request", "invalid_name", "invalid_expiration", "invalid_uid", "unknown_audience"}))
 		}
 	}
 	return
@@ -1154,6 +1165,9 @@ func ValidateTokenResponseResponseBody(body *TokenResponseResponseBody) (err err
 	}
 	if body.LastUsedAt != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.last_used_at", *body.LastUsedAt, goa.FormatDateTime))
+	}
+	if body.ExpiresAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.expires_at", *body.ExpiresAt, goa.FormatDateTime))
 	}
 	return
 }

@@ -22,6 +22,8 @@ type CreateTokenRequestBody struct {
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Audience to mint the token for
 	Audience *string `form:"audience,omitempty" json:"audience,omitempty" xml:"audience,omitempty"`
+	// How long the token stays valid, counted from creation; none never expires
+	Expiration *string `form:"expiration,omitempty" json:"expiration,omitempty" xml:"expiration,omitempty"`
 }
 
 // ValidateTokenRequestBody is the type of the "lfx_v2_pat_service" service
@@ -312,6 +314,8 @@ type TokenResponseResponseBody struct {
 	CreatedAt string `form:"created_at" json:"created_at" xml:"created_at"`
 	// Time of the last successful validation; absent until first use
 	LastUsedAt *string `form:"last_used_at,omitempty" json:"last_used_at,omitempty" xml:"last_used_at,omitempty"`
+	// Time the token stops validating; absent when it never expires
+	ExpiresAt *string `form:"expires_at,omitempty" json:"expires_at,omitempty" xml:"expires_at,omitempty"`
 }
 
 // NewCreateTokenResponseBody builds the HTTP response body from the result of
@@ -617,6 +621,12 @@ func NewCreateTokenPayload(body *CreateTokenRequestBody, version *string, bearer
 		Name:     *body.Name,
 		Audience: *body.Audience,
 	}
+	if body.Expiration != nil {
+		v.Expiration = *body.Expiration
+	}
+	if body.Expiration == nil {
+		v.Expiration = "none"
+	}
 	v.Version = version
 	v.BearerToken = bearerToken
 
@@ -678,6 +688,11 @@ func ValidateCreateTokenRequestBody(body *CreateTokenRequestBody) (err error) {
 	}
 	if body.Audience != nil {
 		err = goa.MergeErrors(err, goa.ValidatePattern("body.audience", *body.Audience, "^[a-z][a-z0-9-]{1,31}$"))
+	}
+	if body.Expiration != nil {
+		if !(*body.Expiration == "30d" || *body.Expiration == "60d" || *body.Expiration == "90d" || *body.Expiration == "1y" || *body.Expiration == "none") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.expiration", *body.Expiration, []any{"30d", "60d", "90d", "1y", "none"}))
+		}
 	}
 	return
 }

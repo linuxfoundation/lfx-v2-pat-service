@@ -6,11 +6,13 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	svcsvr "github.com/linuxfoundation/lfx-v2-pat-service/gen/http/lfx_v2_pat_service/server"
 	svc "github.com/linuxfoundation/lfx-v2-pat-service/gen/lfx_v2_pat_service"
@@ -105,9 +107,25 @@ func TestHTTPTokenLifecycle(t *testing.T) {
 	assert.Len(t, token["lookup_id"], 12)
 	assert.Contains(t, token, "created_at")
 	assert.NotContains(t, token, "last_used_at")
+	assert.NotContains(t, token, "expires_at", "omitting expiration means the token never expires")
 	for _, forbidden := range []string{"salt", "secret_hash", "updated_at", "revoked_at"} {
 		assert.NotContains(t, token, forbidden)
 	}
+
+	// An expiring token reports when it stops validating, counted from creation.
+	status, body, raw = do(t, ts, "alice", http.MethodPost, "/tokens", `{"name":"ci-90","audience":"insights","expiration":"90d"}`)
+	require.Equal(t, http.StatusCreated, status, raw)
+	expiring, _ := body["token"].(map[string]any)
+	expiresAt, err := time.Parse(time.RFC3339, fmt.Sprint(expiring["expires_at"]))
+	require.NoError(t, err, raw)
+	assert.WithinDuration(t, time.Now().AddDate(0, 0, 90), expiresAt, time.Minute)
+	status, body, _ = do(t, ts, "alice", http.MethodGet, "/tokens", "")
+	require.Equal(t, http.StatusOK, status)
+	listed, _ := body["tokens"].([]any)
+	require.Len(t, listed, 2)
+	assert.Equal(t, expiring["expires_at"], listed[0].(map[string]any)["expires_at"], "list returns the same expiry, newest first")
+	status, _, _ = do(t, ts, "alice", http.MethodDelete, "/tokens/"+fmt.Sprint(expiring["uid"]), "")
+	require.Equal(t, http.StatusNoContent, status)
 
 	// List exposes the lookup id and never the secret.
 	status, body, raw = do(t, ts, "alice", http.MethodGet, "/tokens?v=1", "")
@@ -172,6 +190,7 @@ func TestHTTPErrorBodies(t *testing.T) {
 		{"unknown audience", "alice", http.MethodPost, "/tokens", `{"name":"x","audience":"nope"}`, http.StatusBadRequest, constants.ErrCodeUnknownAudience},
 		{"audience shape", "alice", http.MethodPost, "/tokens", `{"name":"x","audience":"Not Valid"}`, http.StatusBadRequest, constants.ErrCodeUnknownAudience},
 		{"blank name", "alice", http.MethodPost, "/tokens", `{"name":"   ","audience":"insights"}`, http.StatusBadRequest, constants.ErrCodeInvalidName},
+		{"unknown expiration", "alice", http.MethodPost, "/tokens", `{"name":"x","audience":"insights","expiration":"7d"}`, http.StatusBadRequest, constants.ErrCodeInvalidExpiration},
 		{"unknown version", "alice", http.MethodGet, "/tokens?v=2", "", http.StatusBadRequest, constants.ErrCodeInvalidRequest},
 		{"non-uuid uid", "alice", http.MethodDelete, "/tokens/not-a-uuid", "", http.StatusBadRequest, constants.ErrCodeInvalidUID},
 		{"get by uid is not routed", "alice", http.MethodGet, "/tokens/00000000-0000-4000-8000-000000000000", "", http.StatusMethodNotAllowed, ""},

@@ -51,6 +51,16 @@ func AudienceAttribute(description string) {
 	})
 }
 
+// ExpirationAttribute declares how long a new token stays valid.
+func ExpirationAttribute() {
+	dsl.Attribute("expiration", dsl.String, "How long the token stays valid, counted from creation; none never expires", func() {
+		dsl.Enum(constants.Expiration30Days, constants.Expiration60Days, constants.Expiration90Days,
+			constants.Expiration1Year, constants.ExpirationNone)
+		dsl.Default(constants.ExpirationNone)
+		dsl.Example(constants.Expiration90Days)
+	})
+}
+
 // UsernameAttribute declares the owner's LFID username.
 func UsernameAttribute() {
 	dsl.Attribute("username", dsl.String, "Owner LFID username", func() {
@@ -77,6 +87,10 @@ var TokenResponse = dsl.Type("token-response", func() {
 	dsl.Attribute("last_used_at", dsl.String, "Time of the last successful validation; absent until first use", func() {
 		dsl.Format(dsl.FormatDateTime)
 		dsl.Example("2026-09-22T08:30:00Z")
+	})
+	dsl.Attribute("expires_at", dsl.String, "Time the token stops validating; absent when it never expires", func() {
+		dsl.Format(dsl.FormatDateTime)
+		dsl.Example("2026-12-20T12:00:00Z")
 	})
 	dsl.Required("uid", "name", "audience", "lookup_id", "username", "created_at")
 })
@@ -116,8 +130,8 @@ func errorType(name, description, message string, codes ...any) expr.UserType {
 // through the error formatter, see cmd/pat-api/service/format_error.go.
 var BadRequestError = errorType("BadRequestError", "The request is invalid",
 	"value of version must be one of \"1\" but got value \"2\"",
-	constants.ErrCodeInvalidRequest, constants.ErrCodeInvalidName, constants.ErrCodeInvalidUID,
-	constants.ErrCodeUnknownAudience)
+	constants.ErrCodeInvalidRequest, constants.ErrCodeInvalidName, constants.ErrCodeInvalidExpiration,
+	constants.ErrCodeInvalidUID, constants.ErrCodeUnknownAudience)
 
 // ConflictError lets lfx-one tell the two 409 causes apart.
 var ConflictError = errorType("ConflictError", "Name already used, or active-token limit reached, for this audience",
@@ -129,9 +143,9 @@ var NotFoundError = errorType("NotFoundError", "No active token with this uid is
 	"no active token with this uid", constants.ErrCodeTokenNotFound)
 
 // InvalidTokenError is the single 404 body the validate endpoint returns for every rejected secret, so callers
-// cannot tell an unknown secret from a revoked one.
-var InvalidTokenError = errorType("InvalidTokenError", "Secret is invalid or revoked",
-	"secret is invalid or revoked", constants.ErrCodeInvalidToken)
+// cannot tell an unknown secret from a revoked or expired one.
+var InvalidTokenError = errorType("InvalidTokenError", "Secret is invalid, expired or revoked",
+	"secret is invalid, expired or revoked", constants.ErrCodeInvalidToken)
 
 var (
 	UnauthorizedError = errorType("UnauthorizedError", "Missing, invalid or anonymous bearer token",

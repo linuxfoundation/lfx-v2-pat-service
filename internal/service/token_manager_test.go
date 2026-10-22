@@ -45,7 +45,20 @@ func newFixture(maxActive int) fixture {
 
 func (f fixture) create(t *testing.T, caller domain.Caller, name, audience string) service.CreatedToken {
 	t.Helper()
-	created, err := f.manager.Create(context.Background(), caller, name, audience)
+	created, err := f.manager.Create(context.Background(), caller, name, audience, "")
+	require.NoError(t, err)
+	return created
+}
+
+// at fixes the clock the manager counts expirations from and the store checks them against.
+func (f fixture) at(now time.Time) {
+	f.manager.SetClock(func() time.Time { return now })
+	f.tokens.SetClock(func() time.Time { return now })
+}
+
+func (f fixture) createExpiring(t *testing.T, caller domain.Caller, name, expiration string) service.CreatedToken {
+	t.Helper()
+	created, err := f.manager.Create(context.Background(), caller, name, constants.AudienceInsights, expiration)
 	require.NoError(t, err)
 	return created
 }
@@ -121,7 +134,7 @@ func TestCreateNameValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			created, err := f.manager.Create(context.Background(), alice, tt.input, constants.AudienceInsights)
+			created, err := f.manager.Create(context.Background(), alice, tt.input, constants.AudienceInsights, "")
 			if !tt.valid {
 				assertValidation(t, err, constants.ErrCodeInvalidName)
 				return
@@ -142,13 +155,13 @@ func assertValidation(t *testing.T, err error, code string) {
 func TestCreateRejectsUnknownOrDisabledAudience(t *testing.T) {
 	f := newFixture(25)
 
-	_, err := f.manager.Create(context.Background(), alice, "ci", "nope")
+	_, err := f.manager.Create(context.Background(), alice, "ci", "nope", "")
 	assertValidation(t, err, constants.ErrCodeUnknownAudience)
 
 	disabled := mock.SeedAudience
 	disabled.Enabled = false
 	f.audiences.Set(disabled)
-	_, err = f.manager.Create(context.Background(), alice, "ci", constants.AudienceInsights)
+	_, err = f.manager.Create(context.Background(), alice, "ci", constants.AudienceInsights, "")
 	assertValidation(t, err, constants.ErrCodeUnknownAudience)
 }
 
@@ -156,7 +169,7 @@ func TestCreateRejectsDuplicateNameCaseInsensitively(t *testing.T) {
 	f := newFixture(25)
 	f.create(t, alice, "ci", constants.AudienceInsights)
 
-	_, err := f.manager.Create(context.Background(), alice, "CI", constants.AudienceInsights)
+	_, err := f.manager.Create(context.Background(), alice, "CI", constants.AudienceInsights, "")
 	assert.Equal(t, constants.ErrCodeTokenNameTaken, conflictCode(t, err))
 
 	// Uniqueness is per owner and per audience.
@@ -169,13 +182,70 @@ func TestCreateEnforcesActiveLimitPerAudience(t *testing.T) {
 	first := f.create(t, alice, "one", constants.AudienceInsights)
 	f.create(t, alice, "two", constants.AudienceInsights)
 
-	_, err := f.manager.Create(context.Background(), alice, "three", constants.AudienceInsights)
+	_, err := f.manager.Create(context.Background(), alice, "three", constants.AudienceInsights, "")
 	assert.Equal(t, constants.ErrCodeTokenLimitReached, conflictCode(t, err))
 
 	// Another audience has its own budget, and revoking frees a slot.
 	f.create(t, alice, "three", "other")
 	require.NoError(t, f.manager.Revoke(context.Background(), first.Token.UID, "alice"))
 	f.create(t, alice, "three", constants.AudienceInsights)
+}
+
+func TestCreateCountsExpiryFromCreation(t *testing.T) {
+	created := time.Date(2026, 9, 7, 10, 30, 0, 0, time.UTC)
+	at := func(y int, m time.Month, d int) *time.Time {
+		t := time.Date(y, m, d, 10, 30, 0, 0, time.UTC)
+		return &t
+	}
+	tests := []struct {
+		expiration string
+		want       *time.Time
+	}{
+		{constants.Expiration30Days, at(2026, time.October, 7)},
+		{constants.Expiration60Days, at(2026, time.November, 6)},
+		{constants.Expiration90Days, at(2026, time.December, 6)},
+		{constants.Expiration1Year, at(2027, time.September, 7)},
+		{constants.ExpirationNone, nil},
+		{"", nil},
+	}
+
+	for _, tt := range tests {
+		t.Run("expiration "+tt.expiration, func(t *testing.T) {
+			f := newFixture(25)
+			f.at(created)
+
+			token := f.createExpiring(t, alice, "ci", tt.expiration).Token
+
+			assert.Equal(t, tt.want, token.ExpiresAt)
+			assert.Equal(t, tt.want, f.active(t, "alice", token.UID).ExpiresAt)
+		})
+	}
+}
+
+func TestCreateRejectsUnknownExpiration(t *testing.T) {
+	f := newFixture(25)
+
+	_, err := f.manager.Create(context.Background(), alice, "ci", constants.AudienceInsights, "7d")
+
+	assertValidation(t, err, constants.ErrCodeInvalidExpiration)
+}
+
+func TestExpiredTokenStaysListedAndHoldsItsNameAndSlotUntilRevoked(t *testing.T) {
+	f := newFixture(1)
+	start := time.Date(2026, 9, 7, 10, 30, 0, 0, time.UTC)
+	f.at(start)
+	expired := f.createExpiring(t, alice, "ci", constants.Expiration30Days)
+	f.at(start.AddDate(0, 0, 31))
+
+	listed := f.active(t, "alice", expired.Token.UID)
+	assert.True(t, listed.Expired(start.AddDate(0, 0, 31)))
+	_, err := f.manager.Create(context.Background(), alice, "CI", constants.AudienceInsights, "")
+	assert.Equal(t, constants.ErrCodeTokenNameTaken, conflictCode(t, err))
+	_, err = f.manager.Create(context.Background(), alice, "other", constants.AudienceInsights, "")
+	assert.Equal(t, constants.ErrCodeTokenLimitReached, conflictCode(t, err))
+
+	require.NoError(t, f.manager.Revoke(context.Background(), expired.Token.UID, "alice"))
+	f.createExpiring(t, alice, "ci", constants.ExpirationNone)
 }
 
 func TestRevokedNameIsReusable(t *testing.T) {
@@ -244,12 +314,12 @@ func TestCreateRetriesOnceOnLookupIDCollision(t *testing.T) {
 	tokens := mock.NewTokenRepository(audiences)
 
 	once := &collidingWriter{TokenWriter: tokens, remaining: 1}
-	_, err := service.NewManager(tokens, once, audiences, 25).Create(context.Background(), alice, "ci", constants.AudienceInsights)
+	_, err := service.NewManager(tokens, once, audiences, 25).Create(context.Background(), alice, "ci", constants.AudienceInsights, "")
 	require.NoError(t, err)
 	assert.Equal(t, 2, once.calls)
 
 	twice := &collidingWriter{TokenWriter: tokens, remaining: 2}
-	_, err = service.NewManager(tokens, twice, audiences, 25).Create(context.Background(), alice, "ci2", constants.AudienceInsights)
+	_, err = service.NewManager(tokens, twice, audiences, 25).Create(context.Background(), alice, "ci2", constants.AudienceInsights, "")
 	assert.ErrorIs(t, err, port.ErrLookupIDTaken)
 	assert.Equal(t, 2, twice.calls)
 }

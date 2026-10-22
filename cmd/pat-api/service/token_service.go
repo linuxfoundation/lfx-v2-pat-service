@@ -59,7 +59,7 @@ func (s *Service) CreateToken(ctx context.Context, p *svc.CreateTokenPayload) (*
 	if err != nil {
 		return nil, err
 	}
-	created, err := s.deps.Manager.Create(ctx, caller, p.Name, p.Audience)
+	created, err := s.deps.Manager.Create(ctx, caller, p.Name, p.Audience, p.Expiration)
 	if err != nil {
 		return nil, wrapError(ctx, err)
 	}
@@ -103,7 +103,7 @@ func (s *Service) ValidateToken(ctx context.Context, p *svc.ValidateTokenPayload
 	identity, err := s.deps.Validator.Validate(ctx, p.Secret)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			return nil, &svc.InvalidTokenError{Code: constants.ErrCodeInvalidToken, Message: "secret is invalid or revoked"}
+			return nil, &svc.InvalidTokenError{Code: constants.ErrCodeInvalidToken, Message: "secret is invalid, expired or revoked"}
 		}
 		return nil, wrapError(ctx, err)
 	}

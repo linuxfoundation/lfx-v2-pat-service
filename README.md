@@ -1,9 +1,9 @@
 # LFX V2 Personal Access Token Service
 
-Issues, lists, revokes and validates long-lived personal access tokens, scoped to an audience. The first audience
-is LFX Insights, whose secrets start with `lfi_`. LFX One's Developer Settings manages tokens on the user's behalf
-through the platform gateway, and an Auth0 Custom Token Exchange action validates them when the Insights
-Cloudflare Worker exchanges a secret for a short-lived JWT.
+Issues, lists, revokes and validates personal access tokens, scoped to an audience, that expire after a period the
+owner picks or never. The first audience is LFX Insights, whose secrets start with `lfi_`. LFX One's Developer
+Settings manages tokens on the user's behalf through the platform gateway, and an Auth0 Custom Token Exchange
+action validates them when the Insights Cloudflare Worker exchanges a secret for a short-lived JWT.
 
 The design is recorded in the Insights repository: ADR-0006 (token exchange), ADR-0015 (issuance in LFX One)
 and ADR-0020 (this service on the platform cluster).
@@ -15,17 +15,22 @@ their bodies and responses are JSON in snake_case, and the optional `?v=1` query
 is accepted on each of them. The probes answer plain text to the kubelet, and the OpenAPI document, generated
 from `design/`, is served at `/_tokens/openapi3.json` without a token.
 
-| Method   | Path                           | Caller                                  | Success                                 |
-|----------|--------------------------------|-----------------------------------------|-----------------------------------------|
-| `POST`   | `/tokens` `{name, audience}`   | user                                    | `201 {secret, token}`                   |
-| `GET`    | `/tokens?audience=`            | user                                    | `200 {tokens: [...]}`, newest first     |
-| `DELETE` | `/tokens/{uid}`                | user                                    | `204`                                   |
-| `POST`   | `/_tokens/validate` `{secret}` | machine principal in the validator team | `200 {uid, username, audience, email?}` |
-| `GET`    | `/livez`, `/readyz`            | probes                                  | `200`                                   |
+| Method   | Path                                      | Caller                                  | Success                                 |
+|----------|-------------------------------------------|-----------------------------------------|-----------------------------------------|
+| `POST`   | `/tokens` `{name, audience, expiration?}` | user                                    | `201 {secret, token}`                   |
+| `GET`    | `/tokens?audience=`                       | user                                    | `200 {tokens: [...]}`, newest first     |
+| `DELETE` | `/tokens/{uid}`                           | user                                    | `204`                                   |
+| `POST`   | `/_tokens/validate` `{secret}`            | machine principal in the validator team | `200 {uid, username, audience, email?}` |
+| `GET`    | `/livez`, `/readyz`                       | probes                                  | `200`                                   |
 
-A token is `{uid, name, audience, lookup_id, username, created_at, last_used_at?}`. The plaintext `secret`
-appears once, in the create response. List returns each token with its public `lookup_id`
-and never the secret, the salt or the hash. Revoke addresses a token by `uid`.
+A token is `{uid, name, audience, lookup_id, username, created_at, last_used_at?, expires_at?}`. The plaintext
+`secret` appears once, in the create response. List returns each token with its public `lookup_id` and never the
+secret, the salt or the hash. Revoke addresses a token by `uid`.
+
+`expiration` is `30d`, `60d`, `90d`, `1y` or `none`, the default. The service counts it from creation, a year being
+a calendar year, and returns the result as `expires_at`, which is absent for a token that never expires. An expired
+token stops validating at `expires_at` but stays in the list, keeping its name and its slot under the limit, until
+it is revoked.
 
 Every error an endpoint returns has the same body, `{"error": "<code>", "message": "..."}`. Requests that match
 no route are rejected by Heimdall before they reach the service. The `error` code is stable and LFX One
@@ -35,13 +40,14 @@ correlates a failure with the server logs.
 | Status | `error`               | When                                                                                                                                |
 |--------|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------|
 | `400`  | `invalid_name`        | create: `name` is empty, blank, longer than 100 characters, or contains control characters                                          |
+| `400`  | `invalid_expiration`  | create: `expiration` is not one of `30d`, `60d`, `90d`, `1y` or `none`                                                              |
 | `400`  | `invalid_uid`         | revoke: `uid` is not a UUID                                                                                                         |
 | `400`  | `unknown_audience`    | create: the audience slug is malformed, unknown or disabled; list: the audience filter is malformed                                 |
 | `400`  | `invalid_request`     | any other malformed input: invalid JSON, unknown `v`, or a `secret` that is missing, empty or longer than 128 characters            |
 | `401`  | `unauthorized`        | missing, invalid or anonymous bearer token                                                                                          |
 | `403`  | `forbidden`           | a machine principal on a token route; on validate, Heimdall rejects callers outside the validator team before the service sees them |
 | `404`  | `token_not_found`     | revoke: no active token with that `uid` is owned by the caller                                                                      |
-| `404`  | `invalid_token`       | validate: the secret is unknown, malformed, revoked, or its audience is disabled                                                    |
+| `404`  | `invalid_token`       | validate: the secret is unknown, malformed, expired, revoked, or its audience is disabled                                           |
 | `409`  | `token_name_taken`    | the caller already has an active token with that name for the audience (case-insensitive)                                           |
 | `409`  | `token_limit_reached` | the caller already holds `TOKEN_MAX_ACTIVE_PER_AUDIENCE` active tokens for the audience                                             |
 | `500`  | `internal_error`      | an unexpected failure; the cause is only in the server log                                                                          |
@@ -49,7 +55,7 @@ correlates a failure with the server logs.
 
 Owner scoping is enforced here rather than at the gateway: a token another user owns reads as `404`, revoke is
 idempotent (`204` once, `404` after), and every rejected secret on validate is the same `404` so callers cannot
-tell an unknown secret from a revoked one.
+tell an unknown secret from a revoked or expired one.
 
 ### Who may call what
 
@@ -123,7 +129,7 @@ no Heimdall, so the validate call is open to the mock principal too):
 
 ```bash
 curl -s -XPOST localhost:8080/tokens -H 'Authorization: Bearer x' -H 'Content-Type: application/json' \
-  -d '{"name":"ci","audience":"insights"}'                       # 201: note the secret and the uid
+  -d '{"name":"ci","audience":"insights","expiration":"90d"}'    # 201: note the secret, the uid and expires_at
 curl -s localhost:8080/tokens -H 'Authorization: Bearer x'      # 200: lookup_id, never the secret
 curl -s -XPOST localhost:8080/_tokens/validate -H 'Authorization: Bearer x' -H 'Content-Type: application/json' \
   -d '{"secret":"lfi_..."}'                                      # 200: {uid, username, audience}; email only when the JWT carried one

@@ -66,6 +66,8 @@ func badRequestCode(serr *goa.ServiceError) string {
 	switch strings.TrimPrefix(*serr.Field, "body.") {
 	case "name":
 		return constants.ErrCodeInvalidName
+	case "expiration":
+		return constants.ErrCodeInvalidExpiration
 	case "uid":
 		return constants.ErrCodeInvalidUID
 	case "audience":

@@ -74,14 +74,14 @@ paths:
                                 error: forbidden
                                 message: machine principals cannot manage personal access tokens
                 "404":
-                    description: 'InvalidToken: Unknown, malformed, revoked, or disabled-audience secret'
+                    description: 'InvalidToken: Unknown, malformed, expired, revoked, or disabled-audience secret'
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/InvalidTokenError'
                             example:
                                 error: invalid_token
-                                message: secret is invalid or revoked
+                                message: secret is invalid, expired or revoked
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -107,7 +107,7 @@ paths:
             tags:
                 - lfx_v2_pat_service
             summary: list-tokens lfx_v2_pat_service
-            description: 'List the caller''s active tokens, newest first. Not paginated: the per-audience limit bounds the size.'
+            description: 'List the caller''s active tokens, newest first. Expired tokens stay listed until revoked. Not paginated: the per-audience limit bounds the size.'
             operationId: lfx_v2_pat_service#list-tokens
             parameters:
                 - name: v
@@ -142,6 +142,7 @@ paths:
                                 tokens:
                                     - audience: insights
                                       created_at: "2026-09-21T12:00:00Z"
+                                      expires_at: "2026-12-20T12:00:00Z"
                                       last_used_at: "2026-09-22T08:30:00Z"
                                       lookup_id: Ab3kZ9QmT2xL
                                       name: ci-pipeline
@@ -149,6 +150,7 @@ paths:
                                       username: jdoe
                                     - audience: insights
                                       created_at: "2026-09-21T12:00:00Z"
+                                      expires_at: "2026-12-20T12:00:00Z"
                                       last_used_at: "2026-09-22T08:30:00Z"
                                       lookup_id: Ab3kZ9QmT2xL
                                       name: ci-pipeline
@@ -156,6 +158,7 @@ paths:
                                       username: jdoe
                                     - audience: insights
                                       created_at: "2026-09-21T12:00:00Z"
+                                      expires_at: "2026-12-20T12:00:00Z"
                                       last_used_at: "2026-09-22T08:30:00Z"
                                       lookup_id: Ab3kZ9QmT2xL
                                       name: ci-pipeline
@@ -234,6 +237,7 @@ paths:
                             $ref: '#/components/schemas/CreateTokenRequestBody'
                         example:
                             audience: insights
+                            expiration: 90d
                             name: ci-pipeline
             responses:
                 "201":
@@ -247,13 +251,14 @@ paths:
                                 token:
                                     audience: insights
                                     created_at: "2026-09-21T12:00:00Z"
+                                    expires_at: "2026-12-20T12:00:00Z"
                                     last_used_at: "2026-09-22T08:30:00Z"
                                     lookup_id: Ab3kZ9QmT2xL
                                     name: ci-pipeline
                                     uid: 8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f
                                     username: jdoe
                 "400":
-                    description: 'BadRequest: Invalid name, or unknown or disabled audience'
+                    description: 'BadRequest: Invalid name or expiration, or unknown or disabled audience'
                     content:
                         application/json:
                             schema:
@@ -408,6 +413,7 @@ components:
                     enum:
                         - invalid_request
                         - invalid_name
+                        - invalid_expiration
                         - invalid_uid
                         - unknown_audience
                 message:
@@ -450,6 +456,17 @@ components:
                     description: Audience to mint the token for
                     example: insights
                     pattern: ^[a-z][a-z0-9-]{1,31}$
+                expiration:
+                    type: string
+                    description: How long the token stays valid, counted from creation; none never expires
+                    default: none
+                    example: 90d
+                    enum:
+                        - 30d
+                        - 60d
+                        - 90d
+                        - 1y
+                        - none
                 name:
                     type: string
                     description: Display name, unique (case-insensitive) among the caller's active tokens for the audience
@@ -458,6 +475,7 @@ components:
                     maxLength: 100
             example:
                 audience: insights
+                expiration: 90d
                 name: ci-pipeline
             required:
                 - name
@@ -476,6 +494,7 @@ components:
                 token:
                     audience: insights
                     created_at: "2026-09-21T12:00:00Z"
+                    expires_at: "2026-12-20T12:00:00Z"
                     last_used_at: "2026-09-22T08:30:00Z"
                     lookup_id: Ab3kZ9QmT2xL
                     name: ci-pipeline
@@ -536,11 +555,11 @@ components:
                 message:
                     type: string
                     description: Human-readable explanation
-                    example: secret is invalid or revoked
-            description: Secret is invalid or revoked
+                    example: secret is invalid, expired or revoked
+            description: Secret is invalid, expired or revoked
             example:
                 error: invalid_token
-                message: secret is invalid or revoked
+                message: secret is invalid, expired or revoked
             required:
                 - error
                 - message
@@ -555,6 +574,7 @@ components:
                     example:
                         - audience: insights
                           created_at: "2026-09-21T12:00:00Z"
+                          expires_at: "2026-12-20T12:00:00Z"
                           last_used_at: "2026-09-22T08:30:00Z"
                           lookup_id: Ab3kZ9QmT2xL
                           name: ci-pipeline
@@ -562,6 +582,7 @@ components:
                           username: jdoe
                         - audience: insights
                           created_at: "2026-09-21T12:00:00Z"
+                          expires_at: "2026-12-20T12:00:00Z"
                           last_used_at: "2026-09-22T08:30:00Z"
                           lookup_id: Ab3kZ9QmT2xL
                           name: ci-pipeline
@@ -569,6 +590,7 @@ components:
                           username: jdoe
                         - audience: insights
                           created_at: "2026-09-21T12:00:00Z"
+                          expires_at: "2026-12-20T12:00:00Z"
                           last_used_at: "2026-09-22T08:30:00Z"
                           lookup_id: Ab3kZ9QmT2xL
                           name: ci-pipeline
@@ -576,6 +598,7 @@ components:
                           username: jdoe
                         - audience: insights
                           created_at: "2026-09-21T12:00:00Z"
+                          expires_at: "2026-12-20T12:00:00Z"
                           last_used_at: "2026-09-22T08:30:00Z"
                           lookup_id: Ab3kZ9QmT2xL
                           name: ci-pipeline
@@ -585,6 +608,7 @@ components:
                 tokens:
                     - audience: insights
                       created_at: "2026-09-21T12:00:00Z"
+                      expires_at: "2026-12-20T12:00:00Z"
                       last_used_at: "2026-09-22T08:30:00Z"
                       lookup_id: Ab3kZ9QmT2xL
                       name: ci-pipeline
@@ -592,6 +616,7 @@ components:
                       username: jdoe
                     - audience: insights
                       created_at: "2026-09-21T12:00:00Z"
+                      expires_at: "2026-12-20T12:00:00Z"
                       last_used_at: "2026-09-22T08:30:00Z"
                       lookup_id: Ab3kZ9QmT2xL
                       name: ci-pipeline
@@ -684,6 +709,11 @@ components:
                     description: Creation time
                     example: "2026-09-21T12:00:00Z"
                     format: date-time
+                expires_at:
+                    type: string
+                    description: Time the token stops validating; absent when it never expires
+                    example: "2026-12-20T12:00:00Z"
+                    format: date-time
                 last_used_at:
                     type: string
                     description: Time of the last successful validation; absent until first use
@@ -714,6 +744,7 @@ components:
             example:
                 audience: insights
                 created_at: "2026-09-21T12:00:00Z"
+                expires_at: "2026-12-20T12:00:00Z"
                 last_used_at: "2026-09-22T08:30:00Z"
                 lookup_id: Ab3kZ9QmT2xL
                 name: ci-pipeline

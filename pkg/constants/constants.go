@@ -73,6 +73,7 @@ const AudienceInsights = "insights"
 // Error codes carried in the "error" field of every error body. lfx-one forwards them to its UI as upstreamCode.
 const (
 	ErrCodeInvalidName        = "invalid_name"
+	ErrCodeInvalidExpiration  = "invalid_expiration"
 	ErrCodeInvalidUID         = "invalid_uid"
 	ErrCodeUnknownAudience    = "unknown_audience"
 	ErrCodeInvalidRequest     = "invalid_request"
@@ -88,6 +89,15 @@ const (
 
 // TokenNameMaxLength bounds a token's display name; mirrors the tokens_name_len check constraint.
 const TokenNameMaxLength = 100
+
+// Expirations a caller picks at creation, counted from creation. ExpirationNone, the default, never expires.
+const (
+	Expiration30Days = "30d"
+	Expiration60Days = "60d"
+	Expiration90Days = "90d"
+	Expiration1Year  = "1y"
+	ExpirationNone   = "none"
+)
 
 // Principal forms Heimdall's create_jwt finalizer emits besides plain LFID usernames.
 const (

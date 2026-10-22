@@ -100,7 +100,7 @@ paths:
             tags:
                 - lfx_v2_pat_service
             summary: list-tokens lfx_v2_pat_service
-            description: 'List the caller''s active tokens, newest first. Not paginated: the per-audience limit bounds the size.'
+            description: 'List the caller''s active tokens, newest first. Expired tokens stay listed until revoked. Not paginated: the per-audience limit bounds the size.'
             operationId: lfx_v2_pat_service#list-tokens
             parameters:
                 - name: v
@@ -335,13 +335,14 @@ definitions:
                 enum:
                     - invalid_request
                     - invalid_name
+                    - invalid_expiration
                     - invalid_uid
                     - unknown_audience
             message:
                 type: string
                 description: Human-readable explanation
                 example: value of version must be one of "1" but got value "2"
-        description: Invalid name, or unknown or disabled audience
+        description: Invalid name or expiration, or unknown or disabled audience
         example:
             error: invalid_request
             message: value of version must be one of "1" but got value "2"
@@ -425,11 +426,11 @@ definitions:
             message:
                 type: string
                 description: Human-readable explanation
-                example: secret is invalid or revoked
-        description: Unknown, malformed, revoked, or disabled-audience secret
+                example: secret is invalid, expired or revoked
+        description: Unknown, malformed, expired, revoked, or disabled-audience secret
         example:
             error: invalid_token
-            message: secret is invalid or revoked
+            message: secret is invalid, expired or revoked
         required:
             - error
             - message
@@ -442,6 +443,17 @@ definitions:
                 description: Audience to mint the token for
                 example: insights
                 pattern: ^[a-z][a-z0-9-]{1,31}$
+            expiration:
+                type: string
+                description: How long the token stays valid, counted from creation; none never expires
+                default: none
+                example: 90d
+                enum:
+                    - 30d
+                    - 60d
+                    - 90d
+                    - 1y
+                    - none
             name:
                 type: string
                 description: Display name, unique (case-insensitive) among the caller's active tokens for the audience
@@ -450,6 +462,7 @@ definitions:
                 maxLength: 100
         example:
             audience: insights
+            expiration: 90d
             name: ci-pipeline
         required:
             - name
@@ -469,6 +482,7 @@ definitions:
             token:
                 audience: insights
                 created_at: "2026-09-21T12:00:00Z"
+                expires_at: "2026-12-20T12:00:00Z"
                 last_used_at: "2026-09-22T08:30:00Z"
                 lookup_id: Ab3kZ9QmT2xL
                 name: ci-pipeline
@@ -489,6 +503,7 @@ definitions:
                 example:
                     - audience: insights
                       created_at: "2026-09-21T12:00:00Z"
+                      expires_at: "2026-12-20T12:00:00Z"
                       last_used_at: "2026-09-22T08:30:00Z"
                       lookup_id: Ab3kZ9QmT2xL
                       name: ci-pipeline
@@ -496,6 +511,7 @@ definitions:
                       username: jdoe
                     - audience: insights
                       created_at: "2026-09-21T12:00:00Z"
+                      expires_at: "2026-12-20T12:00:00Z"
                       last_used_at: "2026-09-22T08:30:00Z"
                       lookup_id: Ab3kZ9QmT2xL
                       name: ci-pipeline
@@ -503,6 +519,7 @@ definitions:
                       username: jdoe
                     - audience: insights
                       created_at: "2026-09-21T12:00:00Z"
+                      expires_at: "2026-12-20T12:00:00Z"
                       last_used_at: "2026-09-22T08:30:00Z"
                       lookup_id: Ab3kZ9QmT2xL
                       name: ci-pipeline
@@ -512,6 +529,7 @@ definitions:
             tokens:
                 - audience: insights
                   created_at: "2026-09-21T12:00:00Z"
+                  expires_at: "2026-12-20T12:00:00Z"
                   last_used_at: "2026-09-22T08:30:00Z"
                   lookup_id: Ab3kZ9QmT2xL
                   name: ci-pipeline
@@ -519,6 +537,7 @@ definitions:
                   username: jdoe
                 - audience: insights
                   created_at: "2026-09-21T12:00:00Z"
+                  expires_at: "2026-12-20T12:00:00Z"
                   last_used_at: "2026-09-22T08:30:00Z"
                   lookup_id: Ab3kZ9QmT2xL
                   name: ci-pipeline
@@ -526,6 +545,7 @@ definitions:
                   username: jdoe
                 - audience: insights
                   created_at: "2026-09-21T12:00:00Z"
+                  expires_at: "2026-12-20T12:00:00Z"
                   last_used_at: "2026-09-22T08:30:00Z"
                   lookup_id: Ab3kZ9QmT2xL
                   name: ci-pipeline
@@ -635,6 +655,11 @@ definitions:
                 description: Creation time
                 example: "2026-09-21T12:00:00Z"
                 format: date-time
+            expires_at:
+                type: string
+                description: Time the token stops validating; absent when it never expires
+                example: "2026-12-20T12:00:00Z"
+                format: date-time
             last_used_at:
                 type: string
                 description: Time of the last successful validation; absent until first use
@@ -665,6 +690,7 @@ definitions:
         example:
             audience: insights
             created_at: "2026-09-21T12:00:00Z"
+            expires_at: "2026-12-20T12:00:00Z"
             last_used_at: "2026-09-22T08:30:00Z"
             lookup_id: Ab3kZ9QmT2xL
             name: ci-pipeline

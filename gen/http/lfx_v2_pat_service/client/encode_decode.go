@@ -829,6 +829,7 @@ func unmarshalTokenResponseResponseBodyToLfxv2patserviceTokenResponse(v *TokenRe
 		Username:   *v.Username,
 		CreatedAt:  *v.CreatedAt,
 		LastUsedAt: v.LastUsedAt,
+		ExpiresAt:  v.ExpiresAt,
 	}
 
 	return res

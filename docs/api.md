@@ -9,16 +9,21 @@ on each of them. The OpenAPI document at `/_tokens/openapi3.json` is served with
 
 ## Endpoints
 
-| Method   | Path                           | Caller                                  | Success                                 |
-|----------|--------------------------------|-----------------------------------------|-----------------------------------------|
-| `POST`   | `/tokens` `{name, audience}`   | user                                    | `201 {secret, token}`                   |
-| `GET`    | `/tokens?audience=`            | user                                    | `200 {tokens: [...]}`, newest first     |
-| `DELETE` | `/tokens/{uid}`                | user                                    | `204`                                   |
-| `POST`   | `/_tokens/validate` `{secret}` | machine principal in the validator team | `200 {uid, username, audience, email?}` |
+| Method   | Path                                      | Caller                                  | Success                                 |
+|----------|-------------------------------------------|-----------------------------------------|-----------------------------------------|
+| `POST`   | `/tokens` `{name, audience, expiration?}` | user                                    | `201 {secret, token}`                   |
+| `GET`    | `/tokens?audience=`                       | user                                    | `200 {tokens: [...]}`, newest first     |
+| `DELETE` | `/tokens/{uid}`                           | user                                    | `204`                                   |
+| `POST`   | `/_tokens/validate` `{secret}`            | machine principal in the validator team | `200 {uid, username, audience, email?}` |
 
-A token is `{uid, name, audience, lookup_id, username, created_at, last_used_at?}`. The plaintext `secret`
-appears once, in the create response. List returns each token with its public `lookup_id`
-and never the secret, the salt or the hash. Revoke addresses a token by `uid`.
+A token is `{uid, name, audience, lookup_id, username, created_at, last_used_at?, expires_at?}`. The plaintext
+`secret` appears once, in the create response. List returns each token with its public `lookup_id` and never the
+secret, the salt or the hash. Revoke addresses a token by `uid`.
+
+`expiration` is `30d`, `60d`, `90d`, `1y` or `none`, the default. The service counts it from creation, a year being
+a calendar year, and returns the result as `expires_at`, which is absent for a token that never expires. An expired
+token stops validating at `expires_at` but stays in the list, keeping its name and its slot under the limit, until
+it is revoked.
 
 `name` is trimmed, 1 to 100 characters, free of control characters, and unique (case-insensitively) among the
 caller's active tokens for the audience. A revoked token's name can be reused. `audience` is a slug from the
@@ -37,13 +42,14 @@ correlates a failure with the server logs.
 | Status | `error`               | When                                                                                                                                |
 |--------|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------|
 | `400`  | `invalid_name`        | create: `name` is empty, blank, longer than 100 characters, or contains control characters                                          |
+| `400`  | `invalid_expiration`  | create: `expiration` is not one of `30d`, `60d`, `90d`, `1y` or `none`                                                              |
 | `400`  | `invalid_uid`         | revoke: `uid` is not a UUID                                                                                                         |
 | `400`  | `unknown_audience`    | create: the audience slug is malformed, unknown or disabled; list: the audience filter is malformed                                 |
 | `400`  | `invalid_request`     | any other malformed input: invalid JSON, unknown `v`, or a `secret` that is missing, empty or longer than 128 characters            |
 | `401`  | `unauthorized`        | missing, invalid or anonymous bearer token                                                                                          |
 | `403`  | `forbidden`           | a machine principal on a token route; on validate, Heimdall rejects callers outside the validator team before the service sees them |
 | `404`  | `token_not_found`     | revoke: no active token with that `uid` is owned by the caller                                                                      |
-| `404`  | `invalid_token`       | validate: the secret is unknown, malformed, revoked, or its audience is disabled                                                    |
+| `404`  | `invalid_token`       | validate: the secret is unknown, malformed, expired, revoked, or its audience is disabled                                           |
 | `409`  | `token_name_taken`    | the caller already has an active token with that name for the audience (case-insensitive)                                           |
 | `409`  | `token_limit_reached` | the caller already holds `TOKEN_MAX_ACTIVE_PER_AUDIENCE` active tokens for the audience                                             |
 | `500`  | `internal_error`      | an unexpected failure; the cause is only in the server log                                                                          |
@@ -51,7 +57,7 @@ correlates a failure with the server logs.
 
 Owner scoping is enforced by the service: a token another user owns reads as `404`, and revoke is idempotent
 (`204` once, `404` after). Every rejected secret on validate is the same `404` body, so a caller cannot tell an
-unknown secret from a revoked one.
+unknown secret from a revoked or expired one.
 
 ## Principal policy
 

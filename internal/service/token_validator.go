@@ -15,7 +15,7 @@ import (
 )
 
 // Validator resolves a presented secret to its owner. Every rejection is the same NotFound so callers cannot
-// tell an unknown secret from a revoked one.
+// tell an unknown secret from a revoked or expired one.
 type Validator struct {
 	creds port.CredentialReader
 }
@@ -54,5 +54,5 @@ func (v *Validator) Validate(ctx context.Context, plain string) (model.TokenIden
 }
 
 func invalid() error {
-	return errors.NewNotFound("secret is invalid or revoked")
+	return errors.NewNotFound("secret is invalid, expired or revoked")
 }

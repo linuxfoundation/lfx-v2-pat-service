@@ -445,8 +445,7 @@ definitions:
                 pattern: ^[a-z][a-z0-9-]{1,31}$
             expiration:
                 type: string
-                description: How long the token stays valid, counted from creation; none never expires
-                default: none
+                description: How long the token stays valid, counted from creation; omitted or none never expires
                 example: 90d
                 enum:
                     - 30d

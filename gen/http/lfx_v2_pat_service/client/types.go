@@ -22,8 +22,9 @@ type CreateTokenRequestBody struct {
 	Name string `form:"name" json:"name" xml:"name"`
 	// Audience to mint the token for
 	Audience string `form:"audience" json:"audience" xml:"audience"`
-	// How long the token stays valid, counted from creation; none never expires
-	Expiration string `form:"expiration" json:"expiration" xml:"expiration"`
+	// How long the token stays valid, counted from creation; omitted or none never
+	// expires
+	Expiration *string `form:"expiration,omitempty" json:"expiration,omitempty" xml:"expiration,omitempty"`
 }
 
 // ValidateTokenRequestBody is the type of the "lfx_v2_pat_service" service
@@ -325,12 +326,6 @@ func NewCreateTokenRequestBody(p *lfxv2patservice.CreateTokenPayload) *CreateTok
 		Name:       p.Name,
 		Audience:   p.Audience,
 		Expiration: p.Expiration,
-	}
-	{
-		var zero string
-		if body.Expiration == zero {
-			body.Expiration = "none"
-		}
 	}
 	return body
 }

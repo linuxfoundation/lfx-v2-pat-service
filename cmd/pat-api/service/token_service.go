@@ -59,7 +59,11 @@ func (s *Service) CreateToken(ctx context.Context, p *svc.CreateTokenPayload) (*
 	if err != nil {
 		return nil, err
 	}
-	created, err := s.deps.Manager.Create(ctx, caller, p.Name, p.Audience, p.Expiration)
+	var expiration string
+	if p.Expiration != nil {
+		expiration = *p.Expiration
+	}
+	created, err := s.deps.Manager.Create(ctx, caller, p.Name, p.Audience, expiration)
 	if err != nil {
 		return nil, wrapError(ctx, err)
 	}

@@ -33,8 +33,10 @@ func BuildCreateTokenPayload(lfxV2PatServiceCreateTokenBody string, lfxV2PatServ
 			err = goa.MergeErrors(err, goa.InvalidLengthError("body.name", body.Name, utf8.RuneCountInString(body.Name), 100, false))
 		}
 		err = goa.MergeErrors(err, goa.ValidatePattern("body.audience", body.Audience, "^[a-z][a-z0-9-]{1,31}$"))
-		if !(body.Expiration == "30d" || body.Expiration == "60d" || body.Expiration == "90d" || body.Expiration == "1y" || body.Expiration == "none") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.expiration", body.Expiration, []any{"30d", "60d", "90d", "1y", "none"}))
+		if body.Expiration != nil {
+			if !(*body.Expiration == "30d" || *body.Expiration == "60d" || *body.Expiration == "90d" || *body.Expiration == "1y" || *body.Expiration == "none") {
+				err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.expiration", *body.Expiration, []any{"30d", "60d", "90d", "1y", "none"}))
+			}
 		}
 		if err != nil {
 			return nil, err
@@ -62,12 +64,6 @@ func BuildCreateTokenPayload(lfxV2PatServiceCreateTokenBody string, lfxV2PatServ
 		Name:       body.Name,
 		Audience:   body.Audience,
 		Expiration: body.Expiration,
-	}
-	{
-		var zero string
-		if v.Expiration == zero {
-			v.Expiration = "none"
-		}
 	}
 	v.Version = version
 	v.BearerToken = bearerToken

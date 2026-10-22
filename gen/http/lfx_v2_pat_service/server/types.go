@@ -22,7 +22,8 @@ type CreateTokenRequestBody struct {
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Audience to mint the token for
 	Audience *string `form:"audience,omitempty" json:"audience,omitempty" xml:"audience,omitempty"`
-	// How long the token stays valid, counted from creation; none never expires
+	// How long the token stays valid, counted from creation; omitted or none never
+	// expires
 	Expiration *string `form:"expiration,omitempty" json:"expiration,omitempty" xml:"expiration,omitempty"`
 }
 
@@ -618,14 +619,9 @@ func NewReadyzServiceUnavailableResponseBody(res *lfxv2patservice.ServiceUnavail
 // endpoint payload.
 func NewCreateTokenPayload(body *CreateTokenRequestBody, version *string, bearerToken *string) *lfxv2patservice.CreateTokenPayload {
 	v := &lfxv2patservice.CreateTokenPayload{
-		Name:     *body.Name,
-		Audience: *body.Audience,
-	}
-	if body.Expiration != nil {
-		v.Expiration = *body.Expiration
-	}
-	if body.Expiration == nil {
-		v.Expiration = "none"
+		Name:       *body.Name,
+		Audience:   *body.Audience,
+		Expiration: body.Expiration,
 	}
 	v.Version = version
 	v.BearerToken = bearerToken

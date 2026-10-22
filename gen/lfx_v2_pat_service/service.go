@@ -84,8 +84,9 @@ type CreateTokenPayload struct {
 	Name string
 	// Audience to mint the token for
 	Audience string
-	// How long the token stays valid, counted from creation; none never expires
-	Expiration string
+	// How long the token stays valid, counted from creation; omitted or none never
+	// expires
+	Expiration *string
 }
 
 // CreateTokenResult is the result type of the lfx_v2_pat_service service

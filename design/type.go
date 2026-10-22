@@ -53,10 +53,11 @@ func AudienceAttribute(description string) {
 
 // ExpirationAttribute declares how long a new token stays valid.
 func ExpirationAttribute() {
-	dsl.Attribute("expiration", dsl.String, "How long the token stays valid, counted from creation; none never expires", func() {
+	// No dsl.Default: Goa's generated CLI validates the enum before applying a default, so it would reject an
+	// omitted value. The service treats an absent expiration as none.
+	dsl.Attribute("expiration", dsl.String, "How long the token stays valid, counted from creation; omitted or none never expires", func() {
 		dsl.Enum(constants.Expiration30Days, constants.Expiration60Days, constants.Expiration90Days,
 			constants.Expiration1Year, constants.ExpirationNone)
-		dsl.Default(constants.ExpirationNone)
 		dsl.Example(constants.Expiration90Days)
 	})
 }

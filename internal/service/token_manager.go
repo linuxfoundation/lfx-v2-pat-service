@@ -45,9 +45,8 @@ func (m *Manager) SetClock(now func() time.Time) {
 	m.now = now
 }
 
-// Create issues a token for the caller. The audience must exist and be enabled; the name is trimmed and must be
-// unique among the caller's active tokens for that audience. expiration is one of the constants.Expiration*
-// values, and empty means none.
+// Create issues a token for the caller in an enabled audience; the trimmed name must be unique among the caller's
+// active tokens there. An empty expiration means none (see constants.Expiration*).
 func (m *Manager) Create(ctx context.Context, caller domain.Caller, name, audienceSlug, expiration string) (CreatedToken, error) {
 	name, err := normalizeName(name)
 	if err != nil {
@@ -131,7 +130,8 @@ func expiresAt(now time.Time, expiration string) (*time.Time, error) {
 	default:
 		return nil, errors.NewValidation(constants.ErrCodeInvalidExpiration, fmt.Sprintf("expiration %q is not supported", expiration))
 	}
-	at = at.UTC()
+	// Responses render RFC3339 whole seconds, so the enforced deadline carries none either.
+	at = at.Truncate(time.Second).UTC()
 	return &at, nil
 }
 

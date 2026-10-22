@@ -222,6 +222,16 @@ func TestCreateCountsExpiryFromCreation(t *testing.T) {
 	}
 }
 
+func TestCreateTruncatesExpiryToWholeSeconds(t *testing.T) {
+	f := newFixture(25)
+	f.at(time.Date(2026, 9, 7, 10, 30, 0, 500_000_000, time.UTC))
+
+	token := f.createExpiring(t, alice, "ci", constants.Expiration30Days).Token
+
+	want := time.Date(2026, 10, 7, 10, 30, 0, 0, time.UTC)
+	assert.Equal(t, &want, token.ExpiresAt)
+}
+
 func TestCreateRejectsUnknownExpiration(t *testing.T) {
 	f := newFixture(25)
 

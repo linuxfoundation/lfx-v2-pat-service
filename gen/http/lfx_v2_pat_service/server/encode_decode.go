@@ -702,6 +702,7 @@ func marshalLfxv2patserviceTokenResponseToTokenResponseResponseBody(v *lfxv2pats
 		Username:   v.Username,
 		CreatedAt:  v.CreatedAt,
 		LastUsedAt: v.LastUsedAt,
+		ExpiresAt:  v.ExpiresAt,
 	}
 
 	return res

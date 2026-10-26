@@ -20,6 +20,7 @@ func toTokenResponse(t model.Token) *svc.TokenResponse {
 		Username:   t.Username,
 		CreatedAt:  formatTime(t.CreatedAt),
 		LastUsedAt: formatOptionalTime(t.LastUsedAt),
+		ExpiresAt:  formatOptionalTime(t.ExpiresAt),
 	}
 }
 

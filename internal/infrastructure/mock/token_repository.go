@@ -110,6 +110,7 @@ func (r *TokenRepository) Create(_ context.Context, t model.NewToken, maxActive 
 			LookupID:  t.LookupID,
 			CreatedAt: now,
 			UpdatedAt: now,
+			ExpiresAt: copyTime(t.ExpiresAt),
 		},
 		salt: append([]byte(nil), t.Salt...),
 		hash: append([]byte(nil), t.SecretHash...),
@@ -158,8 +159,8 @@ func (r *TokenRepository) Revoke(_ context.Context, uid, username string) error 
 	return nil
 }
 
-// FindActiveByLookupID implements port.CredentialReader, including the join on an enabled audience with the
-// given prefix.
+// FindActiveByLookupID implements port.CredentialReader, including the expiry check and the join on an enabled
+// audience with the given prefix.
 func (r *TokenRepository) FindActiveByLookupID(_ context.Context, lookupID, prefix string) (model.Credential, error) {
 	audience, ok := r.audiences.enabledByPrefix(prefix)
 	if !ok {
@@ -172,7 +173,7 @@ func (r *TokenRepository) FindActiveByLookupID(_ context.Context, lookupID, pref
 		if s.LookupID != lookupID {
 			continue
 		}
-		if !s.Active() || s.Audience != audience.Slug {
+		if !s.Active() || s.Expired(r.now()) || s.Audience != audience.Slug {
 			break
 		}
 		return model.Credential{
@@ -193,14 +194,22 @@ func (r *TokenRepository) TouchLastUsed(_ context.Context, uid string) error {
 	defer r.mu.Unlock()
 
 	s, ok := r.byUID[uid]
-	if !ok || !s.Active() {
+	now := r.now()
+	if !ok || !s.Active() || s.Expired(now) {
 		return notFound(uid)
 	}
-	now := r.now()
 	s.LastUsedAt = &now
 	return nil
 }
 
 func notFound(uid string) error {
 	return errors.NewNotFound(fmt.Sprintf("no active token %s owned by the caller", uid))
+}
+
+func copyTime(t *time.Time) *time.Time {
+	if t == nil {
+		return nil
+	}
+	c := *t
+	return &c
 }

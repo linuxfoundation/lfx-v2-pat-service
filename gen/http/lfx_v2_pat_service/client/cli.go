@@ -24,7 +24,7 @@ func BuildCreateTokenPayload(lfxV2PatServiceCreateTokenBody string, lfxV2PatServ
 	{
 		err = json.Unmarshal([]byte(lfxV2PatServiceCreateTokenBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"audience\": \"insights\",\n      \"name\": \"ci-pipeline\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"audience\": \"insights\",\n      \"expiration\": \"90d\",\n      \"name\": \"ci-pipeline\"\n   }'")
 		}
 		if utf8.RuneCountInString(body.Name) < 1 {
 			err = goa.MergeErrors(err, goa.InvalidLengthError("body.name", body.Name, utf8.RuneCountInString(body.Name), 1, true))
@@ -33,6 +33,11 @@ func BuildCreateTokenPayload(lfxV2PatServiceCreateTokenBody string, lfxV2PatServ
 			err = goa.MergeErrors(err, goa.InvalidLengthError("body.name", body.Name, utf8.RuneCountInString(body.Name), 100, false))
 		}
 		err = goa.MergeErrors(err, goa.ValidatePattern("body.audience", body.Audience, "^[a-z][a-z0-9-]{1,31}$"))
+		if body.Expiration != nil {
+			if !(*body.Expiration == "30d" || *body.Expiration == "60d" || *body.Expiration == "90d" || *body.Expiration == "1y" || *body.Expiration == "none") {
+				err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.expiration", *body.Expiration, []any{"30d", "60d", "90d", "1y", "none"}))
+			}
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -56,8 +61,9 @@ func BuildCreateTokenPayload(lfxV2PatServiceCreateTokenBody string, lfxV2PatServ
 		}
 	}
 	v := &lfxv2patservice.CreateTokenPayload{
-		Name:     body.Name,
-		Audience: body.Audience,
+		Name:       body.Name,
+		Audience:   body.Audience,
+		Expiration: body.Expiration,
 	}
 	v.Version = version
 	v.BearerToken = bearerToken

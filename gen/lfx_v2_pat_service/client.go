@@ -41,7 +41,7 @@ func NewClient(createToken, listTokens, deleteToken, validateToken, livez, ready
 // CreateToken may return the following errors:
 //   - "Unauthorized" (type *UnauthorizedError): Missing, invalid or anonymous bearer token
 //   - "Forbidden" (type *ForbiddenError): Principal is not allowed to call this endpoint
-//   - "BadRequest" (type *BadRequestError): Invalid name, or unknown or disabled audience
+//   - "BadRequest" (type *BadRequestError): Invalid name or expiration, or unknown or disabled audience
 //   - "Conflict" (type *ConflictError): Name already used, or active-token limit reached, for this audience
 //   - "InternalServerError" (type *InternalError): Internal server error
 //   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
@@ -94,7 +94,7 @@ func (c *Client) DeleteToken(ctx context.Context, p *DeleteTokenPayload) (err er
 //   - "Unauthorized" (type *UnauthorizedError): Missing, invalid or anonymous bearer token
 //   - "Forbidden" (type *ForbiddenError): Principal is not allowed to call this endpoint
 //   - "BadRequest" (type *BadRequestError): Malformed request body
-//   - "InvalidToken" (type *InvalidTokenError): Unknown, malformed, revoked, or disabled-audience secret
+//   - "InvalidToken" (type *InvalidTokenError): Unknown, malformed, expired, revoked, or disabled-audience secret
 //   - "InternalServerError" (type *InternalError): Internal server error
 //   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
 //   - error: internal error

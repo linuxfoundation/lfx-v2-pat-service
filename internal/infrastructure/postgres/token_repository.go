@@ -22,7 +22,7 @@ const (
 	foreignKeyViolation = "23503"
 
 	// tokenColumns is the owner-visible projection: never salt or secret_hash.
-	tokenColumns = `uid, username, COALESCE(email, ''), audience, name, lookup_id, created_at, updated_at, last_used_at, revoked_at`
+	tokenColumns = `uid, username, COALESCE(email, ''), audience, name, lookup_id, created_at, updated_at, last_used_at, revoked_at, expires_at`
 )
 
 // TokenRepository is the Postgres TokenReader, TokenWriter and CredentialReader.
@@ -64,10 +64,10 @@ func (r *TokenRepository) Create(ctx context.Context, t model.NewToken, maxActiv
 			fmt.Sprintf("limit of %d active tokens for audience %s reached", maxActive, t.Audience))
 	}
 
-	const insertQ = `INSERT INTO tokens (username, email, audience, name, lookup_id, salt, secret_hash)
-		VALUES ($1, NULLIF($2, ''), $3, $4, $5, $6, $7)
+	const insertQ = `INSERT INTO tokens (username, email, audience, name, lookup_id, salt, secret_hash, expires_at)
+		VALUES ($1, NULLIF($2, ''), $3, $4, $5, $6, $7, $8)
 		RETURNING ` + tokenColumns
-	row := tx.QueryRow(ctx, insertQ, t.Username, t.Email, t.Audience, t.Name, t.LookupID, t.Salt, t.SecretHash)
+	row := tx.QueryRow(ctx, insertQ, t.Username, t.Email, t.Audience, t.Name, t.LookupID, t.Salt, t.SecretHash, t.ExpiresAt)
 	token, err := scanToken(row)
 	if err != nil {
 		return model.Token{}, createErr(t, err)
@@ -130,12 +130,13 @@ func (r *TokenRepository) Revoke(ctx context.Context, uid, username string) erro
 	return nil
 }
 
-// FindActiveByLookupID implements port.CredentialReader: one indexed lookup joined on an enabled audience whose
-// prefix matches the one parsed from the presented secret.
+// FindActiveByLookupID implements port.CredentialReader: one indexed lookup of an unexpired token joined on an
+// enabled audience whose prefix matches the one parsed from the presented secret.
 func (r *TokenRepository) FindActiveByLookupID(ctx context.Context, lookupID, prefix string) (model.Credential, error) {
 	const q = `SELECT t.uid, t.username, COALESCE(t.email, ''), t.audience, t.salt, t.secret_hash
 		FROM tokens t JOIN audiences a ON a.slug = t.audience
-		WHERE t.lookup_id = $1 AND t.revoked_at IS NULL AND a.enabled AND a.token_prefix = $2`
+		WHERE t.lookup_id = $1 AND t.revoked_at IS NULL AND (t.expires_at IS NULL OR t.expires_at > now())
+			AND a.enabled AND a.token_prefix = $2`
 	var c model.Credential
 	err := r.pool.QueryRow(ctx, q, lookupID, prefix).Scan(&c.UID, &c.Username, &c.Email, &c.Audience, &c.Salt, &c.SecretHash)
 	if err != nil {
@@ -149,7 +150,9 @@ func (r *TokenRepository) FindActiveByLookupID(ctx context.Context, lookupID, pr
 
 // TouchLastUsed implements port.CredentialReader. It deliberately leaves updated_at alone.
 func (r *TokenRepository) TouchLastUsed(ctx context.Context, uid string) error {
-	tag, err := r.pool.Exec(ctx, `UPDATE tokens SET last_used_at = now() WHERE uid = $1 AND revoked_at IS NULL`, uid)
+	const q = `UPDATE tokens SET last_used_at = now()
+		WHERE uid = $1 AND revoked_at IS NULL AND (expires_at IS NULL OR expires_at > now())`
+	tag, err := r.pool.Exec(ctx, q, uid)
 	if err != nil {
 		return storeErr("touch last used", err)
 	}
@@ -166,8 +169,9 @@ func scanToken(row pgx.Row) (model.Token, error) {
 		updated   time.Time
 		lastUsed  *time.Time
 		revokedAt *time.Time
+		expiresAt *time.Time
 	)
-	err := row.Scan(&t.UID, &t.Username, &t.Email, &t.Audience, &t.Name, &t.LookupID, &created, &updated, &lastUsed, &revokedAt)
+	err := row.Scan(&t.UID, &t.Username, &t.Email, &t.Audience, &t.Name, &t.LookupID, &created, &updated, &lastUsed, &revokedAt, &expiresAt)
 	if err != nil {
 		return model.Token{}, err
 	}
@@ -175,6 +179,7 @@ func scanToken(row pgx.Row) (model.Token, error) {
 	t.UpdatedAt = updated.UTC()
 	t.LastUsedAt = utcPtr(lastUsed)
 	t.RevokedAt = utcPtr(revokedAt)
+	t.ExpiresAt = utcPtr(expiresAt)
 	return t, nil
 }
 

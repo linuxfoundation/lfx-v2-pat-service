@@ -18,8 +18,8 @@ type Service interface {
 	// Create a token for the caller. The secret is returned once and is never
 	// retrievable again.
 	CreateToken(context.Context, *CreateTokenPayload) (res *CreateTokenResult, err error)
-	// List the caller's active tokens, newest first. Not paginated: the
-	// per-audience limit bounds the size.
+	// List the caller's active tokens, newest first. Expired tokens stay listed
+	// until revoked. Not paginated: the per-audience limit bounds the size.
 	ListTokens(context.Context, *ListTokensPayload) (res *ListTokensResult, err error)
 	// Revoke one of the caller's tokens. The row is kept for audit; later reads
 	// return 404 and validation fails.
@@ -84,6 +84,9 @@ type CreateTokenPayload struct {
 	Name string
 	// Audience to mint the token for
 	Audience string
+	// How long the token stays valid, counted from creation; omitted or none never
+	// expires
+	Expiration *string
 }
 
 // CreateTokenResult is the result type of the lfx_v2_pat_service service
@@ -122,7 +125,7 @@ type InternalError struct {
 	Message string
 }
 
-// Secret is invalid or revoked
+// Secret is invalid, expired or revoked
 type InvalidTokenError struct {
 	// Stable machine-readable code
 	Code string
@@ -196,6 +199,8 @@ type TokenResponse struct {
 	CreatedAt string
 	// Time of the last successful validation; absent until first use
 	LastUsedAt *string
+	// Time the token stops validating; absent when it never expires
+	ExpiresAt *string
 }
 
 // Missing, invalid or anonymous bearer token
@@ -287,7 +292,7 @@ func (e *InternalError) GoaErrorName() string {
 
 // Error returns an error description.
 func (e *InvalidTokenError) Error() string {
-	return "Secret is invalid or revoked"
+	return "Secret is invalid, expired or revoked"
 }
 
 // ErrorName returns "InvalidTokenError".

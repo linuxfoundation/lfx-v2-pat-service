@@ -31,6 +31,7 @@ var _ = dsl.Service("lfx_v2_pat_service", func() {
 			VersionAttribute()
 			NameAttribute()
 			AudienceAttribute("Audience to mint the token for")
+			ExpirationAttribute()
 			dsl.Required("name", "audience")
 		})
 		dsl.Result(func() {
@@ -41,7 +42,7 @@ var _ = dsl.Service("lfx_v2_pat_service", func() {
 			dsl.Required("secret", "token")
 		})
 		AuthErrors()
-		dsl.Error("BadRequest", BadRequestError, "Invalid name, or unknown or disabled audience")
+		dsl.Error("BadRequest", BadRequestError, "Invalid name or expiration, or unknown or disabled audience")
 		dsl.Error("Conflict", ConflictError, "Name already used, or active-token limit reached, for this audience")
 		ServerErrors()
 		dsl.HTTP(func() {
@@ -57,7 +58,7 @@ var _ = dsl.Service("lfx_v2_pat_service", func() {
 	})
 
 	dsl.Method("list-tokens", func() {
-		dsl.Description("List the caller's active tokens, newest first. Not paginated: the per-audience limit bounds the size.")
+		dsl.Description("List the caller's active tokens, newest first. Expired tokens stay listed until revoked. Not paginated: the per-audience limit bounds the size.")
 		dsl.Security(JWTAuth)
 		dsl.Payload(func() {
 			BearerTokenAttribute()
@@ -125,7 +126,7 @@ var _ = dsl.Service("lfx_v2_pat_service", func() {
 		dsl.Result(TokenIdentity)
 		AuthErrors()
 		dsl.Error("BadRequest", BadRequestError, "Malformed request body")
-		dsl.Error("InvalidToken", InvalidTokenError, "Unknown, malformed, revoked, or disabled-audience secret")
+		dsl.Error("InvalidToken", InvalidTokenError, "Unknown, malformed, expired, revoked, or disabled-audience secret")
 		ServerErrors()
 		dsl.HTTP(func() {
 			dsl.POST("/_tokens/validate")

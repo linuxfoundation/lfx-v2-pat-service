@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -31,17 +32,27 @@ type Manager struct {
 	writer    port.TokenWriter
 	audiences port.AudienceReader
 	maxActive int
+	now       func() time.Time
 }
 
 // NewManager wires the manager. maxActive bounds active tokens per owner and audience.
 func NewManager(reader port.TokenReader, writer port.TokenWriter, audiences port.AudienceReader, maxActive int) *Manager {
-	return &Manager{reader: reader, writer: writer, audiences: audiences, maxActive: maxActive}
+	return &Manager{reader: reader, writer: writer, audiences: audiences, maxActive: maxActive, now: time.Now}
 }
 
-// Create issues a token for the caller. The audience must exist and be enabled; the name is trimmed and must be
-// unique among the caller's active tokens for that audience.
-func (m *Manager) Create(ctx context.Context, caller domain.Caller, name, audienceSlug string) (CreatedToken, error) {
+// SetClock replaces the clock expirations are counted from, for tests that move time.
+func (m *Manager) SetClock(now func() time.Time) {
+	m.now = now
+}
+
+// Create issues a token for the caller in an enabled audience; the trimmed name must be unique among the caller's
+// active tokens there. An empty expiration means none (see constants.Expiration*).
+func (m *Manager) Create(ctx context.Context, caller domain.Caller, name, audienceSlug, expiration string) (CreatedToken, error) {
 	name, err := normalizeName(name)
+	if err != nil {
+		return CreatedToken{}, err
+	}
+	expiresAt, err := expiresAt(m.now(), expiration)
 	if err != nil {
 		return CreatedToken{}, err
 	}
@@ -56,7 +67,7 @@ func (m *Manager) Create(ctx context.Context, caller domain.Caller, name, audien
 
 	// A lookup id collision is astronomically unlikely but cheap to survive: mint again once.
 	for attempt := 0; ; attempt++ {
-		created, err := m.issue(ctx, caller, name, audience)
+		created, err := m.issue(ctx, caller, name, audience, expiresAt)
 		if err == nil {
 			return created, nil
 		}
@@ -66,7 +77,7 @@ func (m *Manager) Create(ctx context.Context, caller domain.Caller, name, audien
 	}
 }
 
-func (m *Manager) issue(ctx context.Context, caller domain.Caller, name string, audience model.Audience) (CreatedToken, error) {
+func (m *Manager) issue(ctx context.Context, caller domain.Caller, name string, audience model.Audience, expiresAt *time.Time) (CreatedToken, error) {
 	parts, err := secret.Generate(audience.TokenPrefix)
 	if err != nil {
 		return CreatedToken{}, errors.NewUnexpected("generate secret", err)
@@ -83,6 +94,7 @@ func (m *Manager) issue(ctx context.Context, caller domain.Caller, name string, 
 		LookupID:   parts.LookupID,
 		Salt:       salt,
 		SecretHash: secret.Hash(salt, parts.Random),
+		ExpiresAt:  expiresAt,
 	}, m.maxActive)
 	if err != nil {
 		return CreatedToken{}, err
@@ -98,6 +110,29 @@ func (m *Manager) List(ctx context.Context, username, audience string) ([]model.
 // Revoke soft-deletes one of the caller's active tokens.
 func (m *Manager) Revoke(ctx context.Context, uid, username string) error {
 	return m.writer.Revoke(ctx, uid, username)
+}
+
+// expiresAt returns when a token created at now expires, or nil when it never does. A year is a calendar year,
+// so a token created on 7 September expires on 7 September.
+func expiresAt(now time.Time, expiration string) (*time.Time, error) {
+	var at time.Time
+	switch expiration {
+	case "", constants.ExpirationNone:
+		return nil, nil
+	case constants.Expiration30Days:
+		at = now.AddDate(0, 0, 30)
+	case constants.Expiration60Days:
+		at = now.AddDate(0, 0, 60)
+	case constants.Expiration90Days:
+		at = now.AddDate(0, 0, 90)
+	case constants.Expiration1Year:
+		at = now.AddDate(1, 0, 0)
+	default:
+		return nil, errors.NewValidation(constants.ErrCodeInvalidExpiration, fmt.Sprintf("expiration %q is not supported", expiration))
+	}
+	// Responses render RFC3339 whole seconds, so the enforced deadline carries none either.
+	at = at.Truncate(time.Second).UTC()
+	return &at, nil
 }
 
 func normalizeName(raw string) (string, error) {

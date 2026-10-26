@@ -6,6 +6,7 @@ package service_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/linuxfoundation/lfx-v2-pat-service/internal/domain/model"
 	"github.com/linuxfoundation/lfx-v2-pat-service/internal/domain/port"
@@ -71,6 +72,30 @@ func TestValidateRejections(t *testing.T) {
 	// None of the rejections recorded a use.
 	still := f.active(t, "alice", created.Token.UID)
 	assert.Nil(t, still.LastUsedAt)
+}
+
+func TestValidateRejectsExpiredToken(t *testing.T) {
+	f := newFixture(25)
+	f.at(time.Date(2026, 9, 7, 10, 30, 0, 0, time.UTC))
+	expiring := f.createExpiring(t, alice, "expiring", constants.Expiration30Days)
+	forever := f.createExpiring(t, alice, "forever", constants.ExpirationNone)
+	validator := service.NewValidator(f.tokens)
+	expiry := *expiring.Token.ExpiresAt
+
+	f.at(expiry.Add(-time.Second))
+	_, err := validator.Validate(context.Background(), expiring.Secret)
+	require.NoError(t, err, "valid until its expiry time")
+
+	f.at(expiry)
+	_, err = validator.Validate(context.Background(), expiring.Secret)
+	assert.True(t, errors.IsNotFound(err), "expired at its expiry time, got %v", err)
+	_, err = validator.Validate(context.Background(), forever.Secret)
+	require.NoError(t, err)
+
+	// The rejection did not record a use.
+	used := f.active(t, "alice", expiring.Token.UID).LastUsedAt
+	require.NotNil(t, used)
+	assert.Equal(t, expiry.Add(-time.Second), *used)
 }
 
 func TestValidateFailsClosedWhenAudienceDisabledAfterIssuance(t *testing.T) {

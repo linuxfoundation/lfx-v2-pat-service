@@ -29,7 +29,7 @@ func UsageCommands() []string {
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + " " + "lfx-v2-pat-service create-token --body '{\n      \"audience\": \"insights\",\n      \"name\": \"ci-pipeline\"\n   }' --version \"1\" --bearer-token \"eyJhbGci...\"" + "\n" +
+	return os.Args[0] + " " + "lfx-v2-pat-service create-token --body '{\n      \"audience\": \"insights\",\n      \"expiration\": \"90d\",\n      \"name\": \"ci-pipeline\"\n   }' --version \"1\" --bearer-token \"eyJhbGci...\"" + "\n" +
 		""
 }
 
@@ -187,7 +187,7 @@ func lfxV2PatServiceUsage() {
 	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] lfx-v2-pat-service COMMAND [flags]\n\n", os.Args[0])
 	fmt.Fprintln(os.Stderr, "COMMAND:")
 	fmt.Fprintln(os.Stderr, `    create-token: Create a token for the caller. The secret is returned once and is never retrievable again.`)
-	fmt.Fprintln(os.Stderr, `    list-tokens: List the caller's active tokens, newest first. Not paginated: the per-audience limit bounds the size.`)
+	fmt.Fprintln(os.Stderr, `    list-tokens: List the caller's active tokens, newest first. Expired tokens stay listed until revoked. Not paginated: the per-audience limit bounds the size.`)
 	fmt.Fprintln(os.Stderr, `    delete-token: Revoke one of the caller's tokens. The row is kept for audit; later reads return 404 and validation fails.`)
 	fmt.Fprintln(os.Stderr, `    validate-token: Resolve a secret to its owner identity and record the use. Machine-to-machine: the gateway admits only members of the validator OpenFGA team. The caller must check the returned audience against the one it expects.`)
 	fmt.Fprintln(os.Stderr, `    livez: Liveness probe.`)
@@ -215,7 +215,7 @@ func lfxV2PatServiceCreateTokenUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "lfx-v2-pat-service create-token --body '{\n      \"audience\": \"insights\",\n      \"name\": \"ci-pipeline\"\n   }' --version \"1\" --bearer-token \"eyJhbGci...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "lfx-v2-pat-service create-token --body '{\n      \"audience\": \"insights\",\n      \"expiration\": \"90d\",\n      \"name\": \"ci-pipeline\"\n   }' --version \"1\" --bearer-token \"eyJhbGci...\"")
 }
 
 func lfxV2PatServiceListTokensUsage() {
@@ -228,7 +228,7 @@ func lfxV2PatServiceListTokensUsage() {
 
 	// Description
 	fmt.Fprintln(os.Stderr)
-	fmt.Fprintln(os.Stderr, `List the caller's active tokens, newest first. Not paginated: the per-audience limit bounds the size.`)
+	fmt.Fprintln(os.Stderr, `List the caller's active tokens, newest first. Expired tokens stay listed until revoked. Not paginated: the per-audience limit bounds the size.`)
 
 	// Flags list
 	fmt.Fprintln(os.Stderr, `    -version STRING: `)

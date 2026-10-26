@@ -17,7 +17,8 @@ var ErrLookupIDTaken = errors.New("lookup id already exists")
 // TokenReader reads the owner's view of tokens. Every method is scoped to an owner; a token owned by someone
 // else is reported as NotFound.
 type TokenReader interface {
-	// ListActiveByOwner returns the owner's active tokens, newest first. An empty audience means all audiences.
+	// ListActiveByOwner returns the owner's active tokens, expired ones included, newest first. An empty audience
+	// means all audiences.
 	ListActiveByOwner(ctx context.Context, username, audience string) ([]model.Token, error)
 }
 
@@ -34,10 +35,10 @@ type TokenWriter interface {
 
 // CredentialReader serves the validation hot path.
 type CredentialReader interface {
-	// FindActiveByLookupID returns the credential for an active token whose audience is enabled and uses the
-	// given prefix, or a NotFound error.
+	// FindActiveByLookupID returns the credential for an active, unexpired token whose audience is enabled and
+	// uses the given prefix, or a NotFound error.
 	FindActiveByLookupID(ctx context.Context, lookupID, prefix string) (model.Credential, error)
-	// TouchLastUsed records a successful validation. It must not change UpdatedAt.
+	// TouchLastUsed records a successful validation of an active, unexpired token. It must not change UpdatedAt.
 	TouchLastUsed(ctx context.Context, uid string) error
 }
 

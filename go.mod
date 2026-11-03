@@ -3,10 +3,7 @@
 
 module github.com/linuxfoundation/lfx-v2-pat-service
 
-go 1.26.0
-
-// x/crypto needs 1.26 as the language floor; builds use a supported toolchain.
-toolchain go1.27.1
+go 1.27.3
 
 require (
 	github.com/auth0/go-jwt-middleware/v2 v2.3.1

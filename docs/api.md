@@ -34,29 +34,35 @@ an unfiltered list is bounded by that limit times the number of audiences.
 
 ## Examples
 
-The examples use the dev host and a `$JWT` bearer token.
+The examples use the dev host. The token calls send `$JWT`, the user's own bearer token.
+The validate call sends `$M2M_TOKEN`, a client-credentials token for a machine principal in the validator team;
+a user's JWT gets a `403` there.
 
 Create a token:
 
 ```bash
 curl -X POST https://lfx-api.dev.v2.cluster.linuxfound.info/tokens \
   -H "Authorization: Bearer $JWT" -H 'Content-Type: application/json' \
-  -d '{"name": "ci-pipeline", "audience": "insights"}'
+  -d '{"name": "ci-pipeline", "audience": "insights", "expiration": "90d"}'
 ```
 
 ```json
 {
-  "secret": "lfi_Ab3kZ9QmT2xL...",
+  "secret": "lfi_Ab3kZ9QmT2xLbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   "token": {
     "uid": "8d4c5a2e-3b1f-4c6d-9e7a-1f2b3c4d5e6f",
     "name": "ci-pipeline",
     "audience": "insights",
     "lookup_id": "Ab3kZ9QmT2xL",
     "username": "jdoe",
-    "created_at": "2026-09-21T12:00:00Z"
+    "created_at": "2026-09-21T12:00:00Z",
+    "expires_at": "2026-12-20T12:00:00Z"
   }
 }
 ```
+
+The secret is `lfi_`, the 12-character `lookup_id`, then 32 random base62 characters (see
+[secret-format.md](secret-format.md)); the example repeats `b` for the random part.
 
 List tokens for an audience:
 
@@ -75,7 +81,8 @@ curl https://lfx-api.dev.v2.cluster.linuxfound.info/tokens?audience=insights \
       "lookup_id": "Ab3kZ9QmT2xL",
       "username": "jdoe",
       "created_at": "2026-09-21T12:00:00Z",
-      "last_used_at": "2026-09-22T08:30:00Z"
+      "last_used_at": "2026-09-22T08:30:00Z",
+      "expires_at": "2026-12-20T12:00:00Z"
     }
   ]
 }
@@ -93,7 +100,7 @@ Validate a secret, called by the Auth0 action with a client-credentials token:
 ```bash
 curl -X POST https://lfx-api.dev.v2.cluster.linuxfound.info/_tokens/validate \
   -H "Authorization: Bearer $M2M_TOKEN" -H 'Content-Type: application/json' \
-  -d '{"secret": "lfi_Ab3kZ9QmT2xL..."}'
+  -d '{"secret": "lfi_Ab3kZ9QmT2xLbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}'
 ```
 
 ```json

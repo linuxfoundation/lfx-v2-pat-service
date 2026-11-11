@@ -18,7 +18,7 @@ HELM_NAMESPACE=lfx
 HELM_VALUES_FILE=$(HELM_CHART_PATH)/values.local.yaml
 
 # Go
-GO_VERSION := 1.27.3
+GO_VERSION := 1.27.4
 GOOS := linux
 GOARCH := amd64
 GOA_VERSION := v3.25.3

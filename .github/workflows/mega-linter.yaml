@@ -44,3 +44,11 @@ jobs:
           # The image defaults to GOTOOLCHAIN=local with Go 1.26. This lets the
           # Go linters download the go.mod toolchain (Go 1.27).
           GOTOOLCHAIN: auto
+          # Mark the bind-mounted workspace as a git safe.directory for the git
+          # subprocesses betterleaks spawns to scan PR commits. MegaLinter runs
+          # each linter with its own HOME, so a global git config file is not
+          # read; GIT_CONFIG_* env vars are. .mega-linter.yml passes them to
+          # betterleaks through REPOSITORY_BETTERLEAKS_UNSECURED_ENV_VARIABLES.
+          GIT_CONFIG_COUNT: "1"
+          GIT_CONFIG_KEY_0: safe.directory
+          GIT_CONFIG_VALUE_0: /github/workspace

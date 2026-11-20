@@ -30,8 +30,8 @@ RUN go build -o /go/bin/lfx-v2-pat-service -trimpath -ldflags="-w -s" github.com
 # Run our go binary standalone
 FROM cgr.dev/chainguard/static:latest
 
-# Implicit with base image; setting explicitly for linters.
-USER nonroot
+# Numeric UID of the Chainguard nonroot user, matching the chart's runAsUser.
+USER 65532
 
 # Location for runtime data such as the OpenAPI spec served at /_tokens/openapi3.json.
 ENV KO_DATA_PATH=/var/run

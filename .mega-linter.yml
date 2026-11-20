@@ -17,8 +17,10 @@ DISABLE_LINTERS:
   - SPELL_CSPELL
   # yamllint is sufficient for us.
   - YAML_PRETTIER
-  # Go version compatibility issue with MegaLinter Docker container
-  ## stderr: go: go.mod requires go >= 1.24.2 (running go 1.23.8; GOTOOLCHAIN=local)
+  # golangci-lint loads this Go 1.27 module but reports findings in existing
+  # code: gocritic exitAfterDefer in cmd/pat-api/main.go, gofmt in
+  # internal/infrastructure/config/config_test.go, and staticcheck SA1019 on
+  # otel log/global in pkg/telemetry/otel.go. Re-enable once those are fixed.
   - GO_GOLANGCI_LINT
 DISABLE_ERRORS_LINTERS:
   # This may be informative but doesn't need to break the build.
@@ -28,14 +30,22 @@ DISABLE_ERRORS_LINTERS:
   - REPOSITORY_CHECKOV
   - REPOSITORY_DEVSKIM
 # Only scan commits introduced by the PR. MegaLinter requires VALIDATE_ALL_CODEBASE
-# false together with REPOSITORY_GITLEAKS_PR_COMMITS_SCAN, otherwise gitleaks
+# false together with REPOSITORY_BETTERLEAKS_PR_COMMITS_SCAN, otherwise betterleaks
 # still walks full history (example secrets on other branches).
 VALIDATE_ALL_CODEBASE: false
-REPOSITORY_GITLEAKS_PR_COMMITS_SCAN: true
+REPOSITORY_BETTERLEAKS_PR_COMMITS_SCAN: true
+# betterleaks' git scan needs the workspace marked as a git safe.directory.
+# The workflow sets these GIT_CONFIG_* variables; pass them to betterleaks.
+REPOSITORY_BETTERLEAKS_UNSECURED_ENV_VARIABLES:
+  - GIT_CONFIG_COUNT
+  - GIT_CONFIG_KEY_0
+  - GIT_CONFIG_VALUE_0
 COPYPASTE_JSCPD_CONFIG_FILE: .jscpd.json
 YAML_YAMLLINT_CONFIG_FILE: .yamllint
-REPOSITORY_KICS_ARGUMENTS: >-
-  scan --no-progress --exclude-severities="medium,low,info,trace" --exclude-paths="gen/*"
+# zizmor's online audits (ref-version-mismatch, impostor-commit,
+# known-vulnerable-actions) call the GitHub API, which requires GITHUB_TOKEN.
+ACTION_ZIZMOR_UNSECURED_ENV_VARIABLES:
+  - GITHUB_TOKEN
 SPELL_CSPELL_ANALYZE_FILE_NAMES: false
 # Make sure Vale is setup to run with the styles it needs.
 SPELL_VALE_PRE_COMMANDS:
